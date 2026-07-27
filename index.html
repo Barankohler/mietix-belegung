@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2E2E30">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mietix Belegung">
+<meta name="apple-mobile-web-app-title" content="Mietix Verfügbarkeiten">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>Mietix Belegung</title>
+<title>Mietix Verfügbarkeiten</title>
 <style>
 :root{--red:#C4161C;--dark:#2E2E30;--grey:#6F6F72;--line:#E2E2E4;--bg:#F2F2F4;
       --frei:#1B9E4B;--freibg:#E8F6EE;--belegtbg:#FDEBEC;}
@@ -80,7 +80,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 </head>
 <body>
 <header>
-  <h1>MIETIX <span>BELEGUNG</span></h1>
+  <h1>MIETIX <span>VERFÜGBARKEITEN</span></h1>
   <span id="zahnrad" title="Einstellungen">&#9881;</span>
 </header>
 <main>
@@ -133,7 +133,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 </div></div>
 
 <script>
-const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 2, 2, 2], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450}, {"n": "Audi RS 3", "gp": 199.0, "kaution": 1450}, {"n": "Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950}, {"n": "GLC 63 AMG", "gp": 269.0, "kaution": 1450}, {"n": "C 63 AMG", "gp": 289.0, "kaution": 1450}, {"n": "Audi R8", "gp": 399.0, "kaution": 1950}, {"n": "Mercedes E 400 d", "gp": 149.0, "kaution": 1000}, {"n": "Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000}], "url": ""};
+const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 2, 2, 2], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450}, {"n": "Audi RS 3 Limousine", "gp": 199.0, "kaution": 1450}, {"n": "Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950}, {"n": "GLC 63 S AMG", "gp": 269.0, "kaution": 1450}, {"n": "C 63 S AMG", "gp": 289.0, "kaution": 1450}, {"n": "Audi R8", "gp": 399.0, "kaution": 1950}, {"n": "Mercedes E 400 d", "gp": 149.0, "kaution": 1000}, {"n": "Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000}], "url": ""};
 let BUCHUNGEN=[], URL=D.url||"";
 let AUSWAHL=null;   // Fahrzeuge, die im Kundentext stehen sollen
 const $=id=>document.getElementById(id);
