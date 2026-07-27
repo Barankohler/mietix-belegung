@@ -55,12 +55,9 @@ input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
 #knr{margin-top:11px;}
 #nrinfo{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
 .knopf.aus{background:#C9C9CC;pointer-events:none;box-shadow:none;}
-select{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;
-  padding:14px 15px;font-size:17px;font-weight:700;font-family:inherit;color:var(--dark);
-  min-height:52px;-webkit-appearance:none;appearance:none;}
 .feld2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 .klein{font-size:11px;color:var(--grey);margin:7px 0 0 3px;font-weight:600;}
-#meldung{display:none;font-size:13px;font-weight:700;padding:12px 14px;border-radius:12px;margin-top:11px;}
+#meldung{display:none;margin-top:13px;font-size:13px;font-weight:700;padding:12px 14px;border-radius:12px;margin-top:11px;}
 #meldung.gut{display:block;background:var(--freibg);color:var(--frei);}
 #meldung.schlecht{display:block;background:var(--belegtbg);color:var(--red);}
 .bzeile{display:flex;justify-content:space-between;align-items:center;gap:10px;
@@ -113,29 +110,16 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
   </div>
 
   <div class="block">
-    <p class="feldname">Buchung eintragen</p>
-    <div class="karte">
-      <select id="nfahrzeug"></select>
-      <div style="height:9px;"></div>
-      <input type="text" id="nkunde" placeholder="Kunde (optional)">
-      <div style="height:9px;"></div>
-      <input type="text" id="nnotiz" placeholder="Notiz (optional)">
-      <p class="klein">Zeitraum wird von oben übernommen.</p>
-      <button class="knopf" id="speichern" type="button">Buchung eintragen</button>
-      <div id="meldung"></div>
-    </div>
-  </div>
-
-  <div class="block">
     <p class="feldname">Alle Buchungen</p>
-    <div class="karte"><div id="buchungen"></div><div id="leer"></div></div>
+    <div class="karte"><div id="buchungen"></div><div id="leer"></div>
+      <div id="meldung"></div></div>
     <button class="knopf hell" id="neuladen" type="button">Neu laden</button>
   </div>
 
   <footer>
-    Der Rückgabetag zählt nicht als belegt, an dem Tag kann das Fahrzeug wieder
-    rausgehen. Alle Buchungen liegen in der gemeinsamen Google Tabelle, Sie und
-    Ihr Bruder sehen immer denselben Stand. Stand: 27.07.2026.
+    Buchungen werden direkt in der Google Tabelle gepflegt, diese Seite zeigt
+    sie an. Der Rückgabetag zählt nicht als belegt, an dem Tag kann das Fahrzeug
+    wieder rausgehen. Stand: 27.07.2026.
   </footer>
 </main>
 
@@ -316,22 +300,6 @@ function zeichne(){
   [...document.querySelectorAll(".weg")].forEach(k=>k.onclick=()=>loeschen(k.dataset.id));
 }
 
-async function anlegen(){
-  const von=$("von").value, bis=$("bis").value, fahrzeug=$("nfahrzeug").value;
-  if(tage(von,bis)<1){melde("Rückgabe muss nach der Abholung liegen.",false);return;}
-  const treffer=belegtVon(fahrzeug,von,bis);
-  if(treffer.length){melde(fahrzeug+" ist in dem Zeitraum schon vergeben.",false);return;}
-  $("speichern").classList.add("aus");$("speichern").textContent="Wird gespeichert ...";
-  try{
-    const a=await ruf({aktion:"anlegen",fahrzeug:fahrzeug,von:von,bis:bis,
-                       kunde:$("nkunde").value,notiz:$("nnotiz").value});
-    if(a&&a.ok){$("nkunde").value="";$("nnotiz").value="";
-      melde("Buchung eingetragen.",true);await laden();}
-    else melde((a&&a.fehler)||"Konnte nicht speichern.",false);
-  }catch(e){melde("Konnte nicht speichern: "+e.message,false);}
-  $("speichern").classList.remove("aus");$("speichern").textContent="Buchung eintragen";
-}
-
 async function loeschen(id){
   const b=BUCHUNGEN.find(x=>x.id===id);
   if(!confirm("Buchung "+(b?b.fahrzeug+" "+lang(ausISO(b.von)):"")+" wirklich löschen?"))return;
@@ -343,7 +311,6 @@ async function loeschen(id){
 }
 
 /* --- Start --- */
-$("nfahrzeug").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("");
 const heute=new Date();
 $("von").value=nachISO(heute);
 $("bis").value=nachISO(plusTage(heute,3));
@@ -370,7 +337,6 @@ $("kopieren").onclick=async()=>{
   catch(e){const t=$("vorschau");t.select();document.execCommand("copy");t.blur();}
   rueckmeldung($("kopieren"),"Kopiert");
 };
-$("speichern").onclick=anlegen;
 $("neuladen").onclick=laden;
 $("zahnrad").onclick=()=>{$("urlfeld").value=URL;$("einbg").classList.add("auf");};
 $("urlzu").onclick=()=>$("einbg").classList.remove("auf");
