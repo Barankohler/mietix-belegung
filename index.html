@@ -39,6 +39,11 @@ input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
 .marke{font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;white-space:nowrap;flex:none;}
 .marke.frei{background:var(--freibg);color:var(--frei);}
 .marke.belegt{background:var(--belegtbg);color:var(--red);}
+.marke.drin{background:var(--red);color:#fff;}
+.zeile.waehlbar{cursor:pointer;}
+.zeile.waehlbar:active{transform:scale(.99);}
+.zeile.waehlbar:not(.drin){opacity:.55;}
+.zeile.drin{box-shadow:0 0 0 2px var(--red),0 4px 12px rgba(196,22,28,.16);}
 .knopf{display:block;width:100%;margin-top:11px;border:none;border-radius:15px;padding:17px;
   font-size:16px;font-weight:800;text-align:center;font-family:inherit;cursor:pointer;color:#fff;
   background:var(--red);box-shadow:0 6px 18px rgba(196,22,28,.3);}
@@ -146,6 +151,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 <script>
 const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 2, 2, 2], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450}, {"n": "Audi RS 3", "gp": 199.0, "kaution": 1450}, {"n": "Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950}, {"n": "GLC 63 AMG", "gp": 269.0, "kaution": 1450}, {"n": "C 63 AMG", "gp": 289.0, "kaution": 1450}, {"n": "Audi R8", "gp": 399.0, "kaution": 1950}, {"n": "Mercedes E 400 d", "gp": 149.0, "kaution": 1000}, {"n": "Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000}], "url": ""};
 let BUCHUNGEN=[], URL=D.url||"";
+let AUSWAHL=null;   // Fahrzeuge, die im Kundentext stehen sollen
 const $=id=>document.getElementById(id);
 const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
 
@@ -212,7 +218,7 @@ function nachricht(freieAutos,von,bis,dauer){
   z.push(mitPreis.length===1?"Dieses Fahrzeug ist frei:":"Diese Fahrzeuge sind frei:");
   z.push("");
   mitPreis.forEach(x=>{
-    z.push(x.c.n+": "+EUR.format(x.p)+" ("+EUR.format(x.p/dauer)+" pro Tag)");
+    z.push(x.c.n+": "+EUR.format(x.p));
   });
   z.push("");
   z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
@@ -265,20 +271,35 @@ function zeichne(){
     +"   ("+t+(t===1?" Tag":" Tage")+")";
 
   const frei=[];
+  D.cars.forEach(c=>{if(!belegtVon(c.n,von,bis).length)frei.push(c.n);});
+  if(AUSWAHL===null)AUSWAHL=new Set(frei);
+  else [...AUSWAHL].forEach(n=>{if(!frei.includes(n))AUSWAHL.delete(n);});
+  frei.length=0;
+
   $("liste").innerHTML=D.cars.map(c=>{
     const treffer=belegtVon(c.n,von,bis);
     if(!treffer.length)frei.push(c.n);
+    const drin=!treffer.length&&AUSWAHL.has(c.n);
+    const p=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
     const info=treffer.length
       ? treffer.map(b=>lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?" ("+b.kunde+")":"")).join(", ")
-      : EUR.format(c.gp)+" pro Tag";
-    return '<div class="zeile"><span><span class="name">'+c.n+'</span>'
+      : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum");
+    return '<div class="zeile'+(treffer.length?"":" waehlbar")+(drin?" drin":"")
+      +'" data-auto="'+c.n+'"><span><span class="name">'+c.n+'</span>'
       +'<span class="info">'+info+'</span></span>'
-      +'<span class="marke '+(treffer.length?"belegt":"frei")+'">'
-      +(treffer.length?"belegt":"frei")+'</span></div>';
+      +'<span class="marke '+(treffer.length?"belegt":(drin?"drin":"frei"))+'">'
+      +(treffer.length?"belegt":(drin?"im Text":"frei"))+'</span></div>';
   }).join("");
-  $("ueberschrift").textContent=frei.length+" von "+D.cars.length+" Fahrzeugen frei";
+  [...document.querySelectorAll(".zeile.waehlbar")].forEach(z=>{
+    z.onclick=()=>{const n=z.dataset.auto;
+      if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
+      textAngefasst=false;zeichne();};
+  });
+  const anzFrei=D.cars.filter(c=>!belegtVon(c.n,von,bis).length).length;
+  $("ueberschrift").textContent=anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
 
-  if(!textAngefasst)$("vorschau").value=nachricht(D.cars.filter(c=>frei.includes(c.n)),von,bis,t);
+  const fuerText=D.cars.filter(c=>!belegtVon(c.n,von,bis).length&&AUSWAHL.has(c.n));
+  if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t);
   const nr=nummer($("knr").value);
   $("nrinfo").textContent = nr ? "Geht an +"+nr
     : ($("knr").value.trim() ? "Nummer noch unvollständig"
@@ -326,10 +347,10 @@ $("nfahrzeug").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("");
 const heute=new Date();
 $("von").value=nachISO(heute);
 $("bis").value=nachISO(plusTage(heute,3));
-$("von").addEventListener("change",()=>{textAngefasst=false;
+$("von").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   $("bis").min=nachISO(plusTage(ausISO($("von").value),1));zeichne();});
-$("bis").addEventListener("change",()=>{textAngefasst=false;
+$("bis").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   zeichne();});
 let textAngefasst=false;
