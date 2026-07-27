@@ -44,6 +44,11 @@ input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
   background:var(--red);box-shadow:0 6px 18px rgba(196,22,28,.3);}
 .knopf:active{transform:scale(.985);}
 .knopf.hell{background:#fff;color:var(--dark);border:1.5px solid var(--line);box-shadow:none;}
+.knopf.gruen{background:#25D366;box-shadow:0 6px 18px rgba(37,211,102,.35);}
+#vorschau{width:100%;min-height:230px;font-size:14px;line-height:1.6;border:1px solid var(--line);
+  border-radius:13px;padding:14px;font-family:inherit;color:var(--dark);background:#FAFAFB;resize:vertical;}
+#knr{margin-top:11px;}
+#nrinfo{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
 .knopf.aus{background:#C9C9CC;pointer-events:none;box-shadow:none;}
 select{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;
   padding:14px 15px;font-size:17px;font-weight:700;font-family:inherit;color:var(--dark);
@@ -92,6 +97,17 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
   </div>
 
   <div class="block">
+    <p class="feldname">Antwort an den Kunden</p>
+    <div class="karte">
+      <textarea id="vorschau" rows="11"></textarea>
+      <input type="tel" id="knr" inputmode="tel" autocomplete="off" placeholder="Handynummer des Kunden (optional)">
+      <div id="nrinfo"></div>
+      <button class="knopf gruen" id="senden" type="button">Nachricht teilen</button>
+      <button class="knopf hell" id="kopieren" type="button">Text kopieren</button>
+    </div>
+  </div>
+
+  <div class="block">
     <p class="feldname">Buchung eintragen</p>
     <div class="karte">
       <select id="nfahrzeug"></select>
@@ -128,7 +144,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 </div></div>
 
 <script>
-const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450}, {"n": "Audi RS 3", "gp": 199.0, "kaution": 1450}, {"n": "Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950}, {"n": "GLC 63 AMG", "gp": 269.0, "kaution": 1450}, {"n": "C 63 AMG", "gp": 289.0, "kaution": 1450}, {"n": "Audi R8", "gp": 399.0, "kaution": 1950}, {"n": "Mercedes E 400 d", "gp": 149.0, "kaution": 1000}, {"n": "Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000}], "url": ""};
+const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 2, 2, 2], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450}, {"n": "Audi RS 3", "gp": 199.0, "kaution": 1450}, {"n": "Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950}, {"n": "GLC 63 AMG", "gp": 269.0, "kaution": 1450}, {"n": "C 63 AMG", "gp": 289.0, "kaution": 1450}, {"n": "Audi R8", "gp": 399.0, "kaution": 1950}, {"n": "Mercedes E 400 d", "gp": 149.0, "kaution": 1000}, {"n": "Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000}], "url": ""};
 let BUCHUNGEN=[], URL=D.url||"";
 const $=id=>document.getElementById(id);
 const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
@@ -150,6 +166,60 @@ function belegtVon(fahrzeug,von,bis){
 }
 window.mxBelegtVon=(f,v,b,liste)=>{const alt=BUCHUNGEN;if(liste)BUCHUNGEN=liste;
   const r=belegtVon(f,v,b);BUCHUNGEN=alt;return r;};
+
+/* --- Preis fuer den angefragten Zeitraum, gleiche Logik wie im Preisrechner --- */
+function scaler(start,dauer){const W=D.faktor.reduce((a,b)=>a+b,0);
+  let s=Math.floor(dauer/7)*W;for(let k=0;k<dauer%7;k++)s+=D.faktor[(start+k)%7];return s;}
+function preis(auto,start,dauer){
+  if(dauer<D.mind[start])return null;
+  return auto.gp*scaler(start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+}
+window.mxPreis=preis;
+
+function nummer(roh){
+  let n=(roh||"").replace(/[^0-9+]/g,"");
+  if(!n)return"";
+  if(n.startsWith("+"))n=n.slice(1);
+  else if(n.startsWith("00"))n=n.slice(2);
+  else if(n.startsWith("0"))n="49"+n.slice(1);
+  return n.length>=8?n:"";
+}
+window.mxNummer=nummer;
+
+function kurzD(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
+function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
+
+function nachricht(freieAutos,von,bis,dauer){
+  const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
+  const z=[];
+  z.push("Zeitraum: "+wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+         +", "+dauer+(dauer===1?" Tag":" Tage"));
+  z.push("");
+  if(!freieAutos.length){
+    z.push("In dem Zeitraum sind leider alle Fahrzeuge vergeben.");
+    z.push("");
+    z.push("Sagen Sie mir gerne einen anderen Zeitraum, dann schaue ich noch einmal.");
+    return z.join("\n");
+  }
+  const mitPreis=freieAutos.map(c=>({c:c,p:preis(c,start,dauer)})).filter(x=>x.p!==null);
+  if(!mitPreis.length){
+    z.push("Bei Abholung am "+D.weekdays[start]+" beträgt die Mindestmietdauer "
+           +D.mind[start]+" Tage.");
+    z.push("");
+    z.push("Sagen Sie mir gerne einen passenden Zeitraum, dann rechne ich Ihnen das aus.");
+    return z.join("\n");
+  }
+  z.push(mitPreis.length===1?"Dieses Fahrzeug ist frei:":"Diese Fahrzeuge sind frei:");
+  z.push("");
+  mitPreis.forEach(x=>{
+    z.push(x.c.n+": "+EUR.format(x.p)+" ("+EUR.format(x.p/dauer)+" pro Tag)");
+  });
+  z.push("");
+  z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
+  z.push("");
+  z.push("Welches Fahrzeug darf ich für Sie reservieren?");
+  return z.join("\n");
+}
 
 /* --- Serverzugriff per JSONP, damit es ohne CORS laeuft --- */
 let zaehler=0;
@@ -208,6 +278,13 @@ function zeichne(){
   }).join("");
   $("ueberschrift").textContent=frei.length+" von "+D.cars.length+" Fahrzeugen frei";
 
+  if(!textAngefasst)$("vorschau").value=nachricht(D.cars.filter(c=>frei.includes(c.n)),von,bis,t);
+  const nr=nummer($("knr").value);
+  $("nrinfo").textContent = nr ? "Geht an +"+nr
+    : ($("knr").value.trim() ? "Nummer noch unvollständig"
+                             : "Ohne Nummer: Nachricht teilen und den Chat auswählen");
+  $("senden").textContent = nr ? "Per WhatsApp senden" : "Nachricht teilen";
+
   const sortiert=BUCHUNGEN.slice().sort((a,b)=>a.von<b.von?-1:a.von>b.von?1:0);
   $("buchungen").innerHTML=sortiert.map(b=>
     '<div class="bzeile"><span><span class="bname">'+b.fahrzeug+'</span>'
@@ -249,12 +326,29 @@ $("nfahrzeug").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("");
 const heute=new Date();
 $("von").value=nachISO(heute);
 $("bis").value=nachISO(plusTage(heute,3));
-$("von").addEventListener("change",()=>{
+$("von").addEventListener("change",()=>{textAngefasst=false;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   $("bis").min=nachISO(plusTage(ausISO($("von").value),1));zeichne();});
-$("bis").addEventListener("change",()=>{
+$("bis").addEventListener("change",()=>{textAngefasst=false;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   zeichne();});
+let textAngefasst=false;
+$("vorschau").addEventListener("input",()=>{textAngefasst=true;});
+["input","change"].forEach(ev=>$("knr").addEventListener(ev,zeichne));
+function rueckmeldung(k,t){const a=k.textContent;k.textContent=t;setTimeout(()=>{k.textContent=a;},1600);}
+$("senden").onclick=async()=>{
+  const text=$("vorschau").value, nr=nummer($("knr").value);
+  if(nr){window.open("https://wa.me/"+nr+"?text="+encodeURIComponent(text),"_blank");return;}
+  if(navigator.share){try{await navigator.share({text:text});}catch(e){}return;}
+  try{await navigator.clipboard.writeText(text);rueckmeldung($("senden"),"Text kopiert");}
+  catch(e){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");}
+};
+$("kopieren").onclick=async()=>{
+  const text=$("vorschau").value;
+  try{await navigator.clipboard.writeText(text);}
+  catch(e){const t=$("vorschau");t.select();document.execCommand("copy");t.blur();}
+  rueckmeldung($("kopieren"),"Kopiert");
+};
 $("speichern").onclick=anlegen;
 $("neuladen").onclick=laden;
 $("zahnrad").onclick=()=>{$("urlfeld").value=URL;$("einbg").classList.add("auf");};
