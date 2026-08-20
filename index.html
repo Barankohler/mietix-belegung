@@ -199,10 +199,17 @@ function nachricht(freieAutos,von,bis,dauer){
     z.push("Sagen Sie mir gerne einen passenden Zeitraum, dann rechne ich Ihnen das aus.");
     return z.join("\n");
   }
+  const proz=Math.round(D.rabatt[Math.min(dauer,D.days)-1]*100);
+  if(proz>0){
+    z.push("*Ihr Rabatt: "+proz+" %*");
+    z.push("Bereits in allen Preisen enthalten.");
+    z.push("");
+  }
   z.push(mitPreis.length===1?"Dieses Fahrzeug ist frei:":"Diese Fahrzeuge sind frei:");
   z.push("");
   mitPreis.forEach(x=>{
-    z.push(x.c.n+": "+EUR.format(x.p));
+    const liste=x.c.gp*scaler(start,dauer);
+    z.push(x.c.n+": "+EUR.format(x.p)+(proz>0?" statt "+EUR.format(liste):""));
   });
   z.push("");
   z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
