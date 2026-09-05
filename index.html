@@ -205,8 +205,13 @@ window.mxNummer=nummer;
 function kurzD(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
 function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
 
-function nachricht(freieAutos,von,bis,dauer){
+function nachricht(freieAutos,von,bis,dauer,anzFrei){
   const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
+  if(!freieAutos.length && anzFrei>0){
+    return "Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n"
+         + "Im Zeitraum " + wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+         + " sind " + anzFrei + (anzFrei===1?" Fahrzeug":" Fahrzeuge") + " frei.";
+  }
   const z=[];
   const zeitraum = wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
                  +", "+dauer+(dauer===1?" Tag":" Tage");
@@ -334,7 +339,7 @@ function zeichne(){
   $("ueberschrift").textContent=anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
 
   const fuerText=D.cars.filter(c=>!belegtVon(c.n,von,bis).length&&AUSWAHL.has(c.n));
-  if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t);
+  if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t,anzFrei);
   const nr=nummer($("knr").value);
   $("nrinfo").textContent = nr ? "Geht an +"+nr
     : ($("knr").value.trim() ? "Nummer noch unvollständig"
@@ -385,8 +390,14 @@ let textAngefasst=false;
     c.onclick=()=>{ $("rab").value=c.dataset.p; textAngefasst=false; markieren(); zeichne(); };
   });
   ["input","change"].forEach(ev=>$("rab").addEventListener(ev,()=>{
+    const w=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
+    if(String(w)!==$("rab").value && document.activeElement!==$("rab")) $("rab").value=w;
     textAngefasst=false; markieren(); zeichne();
   }));
+  $("rab").addEventListener("blur",()=>{
+    $("rab").value=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
+    markieren(); zeichne();
+  });
   markieren();
 })();
 $("vorschau").addEventListener("input",()=>{textAngefasst=true;});
