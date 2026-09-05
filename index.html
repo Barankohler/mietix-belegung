@@ -161,6 +161,24 @@ window.mxBelegtVon=(f,v,b,liste)=>{const alt=BUCHUNGEN;if(liste)BUCHUNGEN=liste;
 function scaler(start,dauer){const W=D.faktor.reduce((a,b)=>a+b,0);
   let s=Math.floor(dauer/7)*W;for(let k=0;k<dauer%7;k++)s+=D.faktor[(start+k)%7];return s;}
 
+/* Preisregel wie in der Excel:
+   Ein Wochenendtag (Fr, Sa, So) kostet den festen Wochenendpreis des Fahrzeugs.
+   Kein Wochentagsfaktor, kein Mengenrabatt.
+   Werktage laufen ueber den Faktor, der Mengenrabatt gilt nur auf diesen Teil. */
+function teile(a,start,dauer){
+  let we=0, wt=0;
+  for(let k=0;k<dauer;k++){
+    const t=(start+k)%7;
+    if(t>=4) we += (a.frSa || a.gp*D.faktor[t]);
+    else     wt += a.gp*D.faktor[t];
+  }
+  return {we:we, wt:wt, liste:we+wt};
+}
+function wochenmiete(a,start,dauer){
+  const p=teile(a,start,dauer);
+  return p.we + p.wt*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+}
+
 /* Wochenendpreis ist die Obergrenze: faellt ein Miettag auf Fr, Sa oder So,
    kostet dieser Tag hoechstens den Wochenendpreis des Fahrzeugs. Die
    Ein-Tages-Miete am Wochenende behaelt ihren eigenen Sonderpreis. */
@@ -175,11 +193,11 @@ function wochenmiete(a,start,dauer){
   return s;
 }
 function grundmiete(auto,start,dauer){
-  return wochenmiete(auto,start,dauer);
+  return teile(auto,start,dauer).liste;
 }
 function preis(auto,start,dauer){
   if(dauer<D.mind[start])return null;
-  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+  return wochenmiete(auto,start,dauer);
 }
 window.mxPreis=preis;
 
