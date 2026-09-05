@@ -208,8 +208,10 @@ function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
 function nachricht(freieAutos,von,bis,dauer){
   const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
   const z=[];
-  z.push("Zeitraum: "+wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
-         +", "+dauer+(dauer===1?" Tag":" Tage"));
+  const zeitraum = wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+                 +", "+dauer+(dauer===1?" Tag":" Tage");
+  z.push("*Freie Fahrzeuge*");
+  z.push(zeitraum);
   z.push("");
   if(!freieAutos.length){
     z.push("In dem Zeitraum sind leider alle Fahrzeuge vergeben.");
@@ -239,17 +241,18 @@ function nachricht(freieAutos,von,bis,dauer){
                    : "Bereits in allen Preisen enthalten.");
     z.push("");
   }
-  z.push(mitPreis.length===1?"Dieses Fahrzeug ist frei:":"Diese Fahrzeuge sind frei:");
+  z.push(mitPreis.length===1?"*Dieses Fahrzeug ist frei*":"*Diese Fahrzeuge sind frei*");
   z.push("");
   mitPreis.forEach(x=>{
-    z.push(x.c.n+": "+EUR.format(x.end)+(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
+    z.push("- "+x.c.n+": "+EUR.format(x.end)
+           +(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
   });
   z.push("");
-  z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
+  z.push("Alle Preise für den kompletten Zeitraum, inklusive "
+    +(D.freiKm*dauer).toLocaleString("de-DE")+" km. Weitere Kilometer sind zubuchbar.");
   if(dauer>1){
     z.push("");
-    z.push("Diese Preise gelten nur für den kompletten Zeitraum "
-      +wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+    z.push("Gilt nur für den kompletten Zeitraum "+zeitraum
       +" am Stück. Für einzelne Tage daraus gilt der reguläre Tagespreis.");
   }
   z.push("");
