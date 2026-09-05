@@ -160,8 +160,22 @@ window.mxBelegtVon=(f,v,b,liste)=>{const alt=BUCHUNGEN;if(liste)BUCHUNGEN=liste;
 /* --- Preis fuer den angefragten Zeitraum, gleiche Logik wie im Preisrechner --- */
 function scaler(start,dauer){const W=D.faktor.reduce((a,b)=>a+b,0);
   let s=Math.floor(dauer/7)*W;for(let k=0;k<dauer%7;k++)s+=D.faktor[(start+k)%7];return s;}
+
+/* Wochenendpreis ist die Obergrenze: faellt ein Miettag auf Fr, Sa oder So,
+   kostet dieser Tag hoechstens den Wochenendpreis des Fahrzeugs. Die
+   Ein-Tages-Miete am Wochenende behaelt ihren eigenen Sonderpreis. */
+function tagespreis(a,wt){
+  const f=a.gp*D.faktor[wt];
+  return (wt>=4 && a.frSa>0) ? Math.min(f,a.frSa) : f;
+}
+function wochenmiete(a,start,dauer){
+  if(dauer===1 && start>=4) return a.frSa || a.gp*D.faktor[start];
+  let s=0;
+  for(let k=0;k<dauer;k++) s+=tagespreis(a,(start+k)%7);
+  return s;
+}
 function grundmiete(auto,start,dauer){
-  return (dauer===1&&start>=4)?(auto.frSa||auto.gp*1.35):auto.gp*scaler(start,dauer);
+  return wochenmiete(auto,start,dauer);
 }
 function preis(auto,start,dauer){
   if(dauer<D.mind[start])return null;
@@ -216,6 +230,12 @@ function nachricht(freieAutos,von,bis,dauer){
   });
   z.push("");
   z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
+  if(dauer>1){
+    z.push("");
+    z.push("Diese Preise gelten nur für den kompletten Zeitraum "
+      +wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+      +" am Stück. Für einzelne Tage daraus gilt der reguläre Tagespreis.");
+  }
   z.push("");
   z.push("Welches Fahrzeug darf ich für Sie reservieren?");
   return z.join("\n");
