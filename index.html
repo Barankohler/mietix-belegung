@@ -170,15 +170,12 @@ function wochenmiete(a,start,dauer){
   return a.gp*scaler(start,dauer);
 }
 
-/* Wochenendpreis ist die Obergrenze: faellt ein Miettag auf Fr, Sa oder So,
-   kostet dieser Tag hoechstens den Wochenendpreis des Fahrzeugs. Die
-   Ein-Tages-Miete am Wochenende behaelt ihren eigenen Sonderpreis. */
 function grundmiete(auto,start,dauer){
-  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+  return wochenmiete(auto,start,dauer);
 }
 function preis(auto,start,dauer){
   if(dauer<D.mind[start])return null;
-  return wochenmiete(auto,start,dauer);
+  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
 }
 window.mxPreis=preis;
 
