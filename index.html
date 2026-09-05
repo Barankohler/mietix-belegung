@@ -30,6 +30,13 @@ input[type=date],input[type=text],input[type=url]{width:100%;background:#fff;bor
   color:var(--dark);min-height:56px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
 input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
 .karte input{box-shadow:none;border:1px solid var(--line);font-size:17px;min-height:52px;}
+input[type=number]{width:100%;background:#fff;border:none;border-radius:16px;padding:16px 17px;
+  font-size:18px;font-weight:700;font-family:inherit;color:var(--dark);min-height:56px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+#rabchips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.rchip{background:#fff;border-radius:14px;padding:13px 4px;text-align:center;font-weight:800;
+  font-size:16px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+.rchip.an{background:var(--red);color:#fff;}
 #zeitraumtext{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
 .zeile{display:flex;justify-content:space-between;align-items:center;gap:12px;
   background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;
@@ -91,6 +98,12 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
       <input type="date" id="bis" min="2026-01-02" max="2028-12-31">
     </div>
     <p id="zeitraumtext"></p>
+    <p class="feldname" style="margin-top:16px">Rabatt für den Kunden</p>
+    <div id="rabchips"></div>
+    <div class="feld2" style="margin-top:8px;align-items:center">
+      <input type="number" id="rab" min="0" max="90" step="1" value="0" inputmode="numeric">
+      <span id="rabinfo" style="font-size:13px;color:var(--grey);font-weight:600"></span>
+    </div>
   </div>
 
   <div class="block">
@@ -212,17 +225,24 @@ function nachricht(freieAutos,von,bis,dauer){
     z.push("Sagen Sie mir gerne einen passenden Zeitraum, dann rechne ich Ihnen das aus.");
     return z.join("\n");
   }
-  const proz=Math.round(D.rabatt[Math.min(dauer,D.days)-1]*100);
+  const extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
+  let sListe=0, sEnd=0;
+  mitPreis.forEach(x=>{
+    x.liste=grundmiete(x.c,start,dauer);
+    x.end=x.p*(1-extra);
+    sListe+=x.liste; sEnd+=x.end;
+  });
+  const proz=sListe>0?Math.round((sListe-sEnd)/sListe*100):0;
   if(proz>0){
     z.push("*Ihr Rabatt: "+proz+" %*");
-    z.push("Bereits in allen Preisen enthalten.");
+    z.push(extra>0 ? "Mengenrabatt und Sonderrabatt sind in allen Preisen enthalten."
+                   : "Bereits in allen Preisen enthalten.");
     z.push("");
   }
   z.push(mitPreis.length===1?"Dieses Fahrzeug ist frei:":"Diese Fahrzeuge sind frei:");
   z.push("");
   mitPreis.forEach(x=>{
-    const liste=grundmiete(x.c,start,dauer);
-    z.push(x.c.n+": "+EUR.format(x.p)+(proz>0?" statt "+EUR.format(liste):""));
+    z.push(x.c.n+": "+EUR.format(x.end)+(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
   });
   z.push("");
   z.push("Inklusive "+(D.freiKm*dauer).toLocaleString("de-DE")+" km, weitere Kilometer sind zubuchbar.");
@@ -290,7 +310,9 @@ function zeichne(){
     const treffer=belegtVon(c.n,von,bis);
     if(!treffer.length)frei.push(c.n);
     const drin=!treffer.length&&AUSWAHL.has(c.n);
-    const p=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
+    const roh=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
+    const nach=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
+    const p=roh===null?null:roh*(1-nach);
     const info=treffer.length
       ? treffer.map(b=>lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?" ("+b.kunde+")":"")).join(", ")
       : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum");
@@ -347,6 +369,23 @@ $("bis").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   zeichne();});
 let textAngefasst=false;
+(function(){
+  const stufen=[0,10,15,20];
+  $("rabchips").innerHTML=stufen.map(p=>
+    '<div class="rchip" data-p="'+p+'">'+(p===0?"kein":"-"+p+" %")+'</div>').join("");
+  function markieren(){
+    const w=+($("rab").value)||0;
+    [...document.querySelectorAll(".rchip")].forEach(c=>c.classList.toggle("an",+c.dataset.p===w));
+    $("rabinfo").textContent = w>0 ? "Prozent zusätzlich auf den Gesamtpreis" : "kein Sonderrabatt";
+  }
+  [...document.querySelectorAll(".rchip")].forEach(c=>{
+    c.onclick=()=>{ $("rab").value=c.dataset.p; textAngefasst=false; markieren(); zeichne(); };
+  });
+  ["input","change"].forEach(ev=>$("rab").addEventListener(ev,()=>{
+    textAngefasst=false; markieren(); zeichne();
+  }));
+  markieren();
+})();
 $("vorschau").addEventListener("input",()=>{textAngefasst=true;});
 ["input","change"].forEach(ev=>$("knr").addEventListener(ev,zeichne));
 function rueckmeldung(k,t){const a=k.textContent;k.textContent=t;setTimeout(()=>{k.textContent=a;},1600);}
