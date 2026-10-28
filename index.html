@@ -98,6 +98,14 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
       <input type="date" id="bis" min="2026-01-02" max="2028-12-31">
     </div>
     <p id="zeitraumtext"></p>
+    <div id="streifen" style="overflow-x:auto;margin-top:10px"></div>
+    <style>
+    #streifen table{border-collapse:separate;border-spacing:3px;font-size:11px}
+    #streifen td{width:26px;height:26px;border-radius:6px;text-align:center;cursor:pointer;background:#E8F6EE;color:#1B9E4B;font-weight:700}
+    #streifen td.belegt{background:#FDEBEC;color:#C4161C}#streifen td.sperre{background:#E4E4E7;color:#6F6F72}
+    #streifen td.gewaehlt{outline:2px solid #2E2E30}#streifen th{text-align:left;font-size:11px;padding-right:6px;white-space:nowrap;font-weight:700}
+    #streifen th.tag{text-align:center;color:#6F6F72;font-weight:600;padding:0}
+    </style>
     <p class="feldname" style="margin-top:16px">Rabatt für den Kunden</p>
     <div id="rabchips"></div>
     <div class="feld2" style="margin-top:8px;align-items:center">
@@ -282,8 +290,20 @@ function laden(){
   BUCHUNGEN=b;zeichne();
 }
 
+function zeichneStreifen(){
+  const start=ausISO($("von").value),von=$("von").value,bis=$("bis").value,tage=[];
+  for(let i=-1;i<13;i++)tage.push(nachISO(plusTage(start,i)));
+  const kurzT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+  let h='<table><tr><th></th>'+tage.map(t=>{const d=ausISO(t);return'<th class="tag">'+kurzT[d.getDay()]+'<br>'+d.getDate()+'</th>'}).join("")+'</tr>';
+  D.cars.forEach(c=>{h+='<tr><th>'+c.n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","")+'</th>'+tage.map(t=>{
+    const tr=belegtVon(c.n,t,nachISO(plusTage(ausISO(t),1)));const k=tr.length?(tr.some(b=>b.notiz==="Sperre")?"sperre":"belegt"):"";
+    const g=t>=von&&t<bis?" gewaehlt":"";return'<td class="'+k+g+'" data-t="'+t+'" title="'+(tr.map(b=>b.kunde).join(", ")||"frei")+'"></td>'}).join("")+'</tr>'});
+  $("streifen").innerHTML=h+'</table>';
+  [...$("streifen").querySelectorAll("td[data-t]")].forEach(td=>td.onclick=()=>{$("von").value=td.dataset.t;$("bis").value=nachISO(plusTage(ausISO(td.dataset.t),1));textAngefasst=false;AUSWAHL=null;zeichne()});
+}
 function zeichne(){
   const von=$("von").value, bis=$("bis").value;
+  zeichneStreifen();
   const t=tage(von,bis);
   $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))
     +" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))
@@ -470,7 +490,8 @@ const URL_="https://zbeqrwvlmiulxvhryiku.supabase.co";
 const KEY="sb_publishable_LVkvpgXMpBbq_OXgwOfTqg_ZRcRkFyQ";   // öffentlich gedacht, Schutz über Anmeldung und Regeln in der Datenbank
 const SPEICHER={mietixVorgaenge:{tab:"vorgaenge",pk:"nr",liste:true},mietixAnfragen:{tab:"anfragen",pk:"id",liste:true},
   mietixKunden:{tab:"kunden",pk:"name",liste:false},mietixFahrzeuge:{tab:"fahrzeuge",pk:"name",liste:false},
-  mietixAusgaben:{tab:"ausgaben",pk:"id",liste:true},mietixSperren:{tab:"sperren",pk:"id",liste:true}};
+  mietixAusgaben:{tab:"ausgaben",pk:"id",liste:true},mietixSperren:{tab:"sperren",pk:"id",liste:true},
+  mietixAufgaben:{tab:"aufgaben",pk:"id",liste:true},mietixZustand:{tab:"zustand",pk:"id",liste:true},mietixAutos:{tab:"autos",pk:"name",liste:false},mietixStand:{tab:"stand",pk:"id",liste:false}};
 const roh=Storage.prototype.setItem;
 const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
 const merk=(k,v)=>{try{roh.call(localStorage,k,JSON.stringify(v))}catch(e){}};
