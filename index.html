@@ -99,10 +99,10 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #tafel th.tag.we{color:var(--dark)}#tafel th.tag.heute b{background:var(--red);color:#fff;border-radius:7px;padding:1px 5px}
 #tafel th.tag b{display:block;font-size:13px}
 #tafel td{width:34px;min-width:34px;position:relative;cursor:pointer}
-#tafel td i{position:absolute;inset:3px 1px;border-radius:8px;background:#E8F6EE}
-#tafel td.we i{background:#DDF1E5}
-#tafel td.belegt i{background:#F7C5C8}#tafel td.belegt.lauf i{border-radius:0;inset:3px 0}#tafel td.belegt.start i{border-radius:8px 0 0 8px;inset:3px 0 3px 1px}#tafel td.belegt.ende i{border-radius:0 8px 8px 0;inset:3px 1px 3px 0}#tafel td.belegt.start.ende i{border-radius:8px;inset:3px 1px}
-#tafel td.sperre i{background:#DADADF}
+#tafel td i{position:absolute;top:3px;bottom:3px;left:1px;right:1px;border-radius:8px}
+#tafel td i.frei{background:#E8F6EE}#tafel td.we i.frei{background:#DDF1E5}
+#tafel td i.belegt{background:#F7C5C8;border-radius:0}#tafel td i.belegt.start{border-radius:8px 0 0 8px}#tafel td i.belegt.ende{border-radius:0 8px 8px 0}#tafel td i.belegt.start.ende{border-radius:8px}
+#tafel td i.sperre{background:#DADADF;border-radius:0}#tafel td i.sperre.start{border-radius:8px 0 0 8px}#tafel td i.sperre.ende{border-radius:0 8px 8px 0}
 #tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
 .feld2 input,input[type=date]{min-width:0}main{overflow-x:hidden}
 #tafel td.heute{background:#FFF8F8}
@@ -112,6 +112,14 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
 .tChips div.an{background:var(--red);color:#fff}
 .tLegende{display:flex;gap:14px;padding:8px 14px 0;font-size:11px;color:var(--grey);font-weight:700}
+.tPruef{margin:12px 14px 0;border-top:1px solid #F0F0F2;padding-top:12px}
+.tZeile{display:flex;align-items:center;gap:8px;margin-bottom:8px}.tZeile span{width:30px;font-size:13px;font-weight:800;color:var(--grey)}
+.tZeile input[type=date]{flex:1;min-width:0;box-shadow:none;border:1px solid var(--line);font-size:16px;min-height:46px;padding:10px 12px;border-radius:12px}
+.tZeile select{width:92px;border:1px solid var(--line);border-radius:12px;padding:10px 8px;font:700 16px inherit;color:var(--dark);background:#fff;min-height:46px}
+#tagInfo{font-size:13px;font-weight:700;margin-top:6px;line-height:1.5}#tagInfo span{display:block;color:var(--dark)}#tagInfo span::before{content:"→ ";color:var(--red)}
+#tafel td em{position:absolute;right:2px;top:4px;font-style:normal;font-size:9px;font-weight:800;color:#8A1014;line-height:1.1;text-align:right;pointer-events:none;z-index:1}
+#tafel td em.ab{right:auto;left:2px}
+.zeile .info.ab{color:#9A6700}
 .tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
 .tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
 #blattBg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:none}#blattBg.auf{display:block}
@@ -135,16 +143,16 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
       <div id="tafelRoll"><table id="tafel"></table></div>
       <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
       <div class="tChips" id="tChips"><div data-z="heute">Heute</div><div data-z="morgen">Morgen</div><div data-z="frso">Fr bis So</div><div data-z="samo">Sa bis Mo</div><div data-z="woche">Nächste Woche</div></div>
+      <div class="tPruef">
+        <div class="tZeile"><span>von</span><input type="date" id="von" min="2026-01-01" max="2028-12-31"><select id="vonU"></select></div>
+        <div class="tZeile"><span>bis</span><input type="date" id="bis" min="2026-01-02" max="2028-12-31"><select id="bisU"></select></div>
+        <p id="zeitraumtext"></p>
+        <div id="tagInfo"></div>
+      </div>
     </div>
   </div>
   <div class="block">
-    <p class="feldname">Zeitraum prüfen</p>
-    <div class="feld2">
-      <input type="date" id="von" min="2026-01-01" max="2028-12-31">
-      <input type="date" id="bis" min="2026-01-02" max="2028-12-31">
-    </div>
-    <p id="zeitraumtext"></p>
-    <p class="feldname" style="margin-top:16px">Rabatt für den Kunden</p>
+    <p class="feldname">Rabatt für den Kunden</p>
     <div id="rabchips"></div>
     <div class="feld2" style="margin-top:8px;align-items:center">
       <input type="number" id="rab" min="0" max="90" step="1" value="0" inputmode="numeric">
@@ -323,10 +331,10 @@ function melde(text,gut){
 function laden(){
   const b=[];
   lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
-    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,kunde:v.name,telefon:v.telefon||"",notiz:"Vertrag "+v.nr,fest:true})});
+    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Vertrag "+v.nr,fest:true})});
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>x.kunde===a.name&&x.von===a.von&&x.fahrzeug===a.auto))
-    b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
-  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,kunde:x.grund||"gesperrt",notiz:"Sperre"})});
+    b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:"10:00",bisU:"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
+  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
   BUCHUNGEN=b;zeichne();
 }
 
@@ -334,29 +342,32 @@ function zeichne(){
   const von=$("von").value, bis=$("bis").value;
   if(typeof zeichneTafel==="function")zeichneTafel();
   const t=tage(von,bis);
-  $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))
-    +" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))
-    +"   ("+t+(t===1?" Tag":" Tage")+")";
-
+  const vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
+  $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))+" "+uhr($("vonU").value)+" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))+" "+uhr($("bisU").value)+"   ("+t+(t===1?" Tag":" Tage")+")";
+  const rueck=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.bis===von),abh=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.von===bis);
+  $("tagInfo").innerHTML=rueck.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' kommt am '+kurzD(ausISO(b.bis))+' um '+uhr(b.bisU)+' zurück ('+esc(vorname(b.kunde))+')</span>').join("")
+    +abh.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</span>').join("");
   const frei=[];
-  D.cars.forEach(c=>{if(!belegtVon(c.n,von,bis).length)frei.push(c.n);});
+  D.cars.forEach(c=>{if(!belegtZeit(c.n,vonZ,bisZ).length)frei.push(c.n);});
   if(AUSWAHL===null)AUSWAHL=new Set(frei);
   else [...AUSWAHL].forEach(n=>{if(!frei.includes(n))AUSWAHL.delete(n);});
   frei.length=0;
 
-  $("liste").innerHTML=D.cars.map(c=>{
-    const treffer=belegtVon(c.n,von,bis);
+  const sortiert2=D.cars.slice().sort((a,b)=>(belegtZeit(a.n,vonZ,bisZ).length?1:0)-(belegtZeit(b.n,vonZ,bisZ).length?1:0));
+  $("liste").innerHTML=sortiert2.map(c=>{
+    const treffer=belegtZeit(c.n,vonZ,bisZ),amTag=belegtVon(c.n,von,bis).filter(b=>!treffer.includes(b));
     if(!treffer.length)frei.push(c.n);
     const drin=!treffer.length&&AUSWAHL.has(c.n);
     const roh=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
     const nach=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
     const p=roh===null?null:roh*(1-nach);
+    const knapp=amTag.map(b=>b.bis===von?"frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt um "+uhr(b.bisU)+" zurück":"bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab").join(". ");
     const info=treffer.length
-      ? treffer.map(b=>lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?" ("+b.kunde+")":"")).join(", ")
-      : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum");
+      ? "belegt: "+treffer.map(b=>(b.kunde?b.kunde+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; ")
+      : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum")+(knapp?". "+knapp:"");
     return '<div class="zeile'+(treffer.length?"":" waehlbar")+(drin?" drin":"")
       +'" data-auto="'+c.n+'"><span><span class="name">'+c.n+'</span>'
-      +'<span class="info">'+info+'</span></span>'
+      +'<span class="info'+(knapp?" ab":"")+'">'+info+'</span></span>'
       +'<span class="marke '+(treffer.length?"belegt":(drin?"drin":"frei"))+'">'
       +(treffer.length?"belegt":(drin?"im Text":"frei"))+'</span></div>';
   }).join("");
@@ -365,10 +376,10 @@ function zeichne(){
       if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
       textAngefasst=false;zeichne();};
   });
-  const anzFrei=D.cars.filter(c=>!belegtVon(c.n,von,bis).length).length;
+  const anzFrei=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length).length;
   $("ueberschrift").textContent=anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
 
-  const fuerText=D.cars.filter(c=>!belegtVon(c.n,von,bis).length&&AUSWAHL.has(c.n));
+  const fuerText=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL.has(c.n));
   if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t,anzFrei);
   const nr=nummer($("knr").value);
   $("nrinfo").textContent = nr ? "Geht an +"+nr
@@ -456,18 +467,30 @@ const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
 function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
   $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
+const ZEIT=(t,u)=>t+"T"+(u||"10:00");
+const bZ=b=>({von:ZEIT(b.von,b.vonU),bis:ZEIT(b.bis,b.bisU)});
+function belegtZeit(f,vonZ,bisZ){return BUCHUNGEN.filter(b=>{if(b.fahrzeug!==f)return false;const z=bZ(b);return vonZ<z.bis&&bisZ>z.von})}
+window.mxBelegtZeit=belegtZeit;
+const uhr=u=>{if(!u)return"";const [h,m]=u.split(":");return m==="00"?(+h)+" Uhr":(+h)+":"+m+" Uhr"};
+const stunden=u=>{const [h,m]=(u||"10:00").split(":").map(Number);return h+m/60};
 function zeichneTafel(){if(!D.cars||!D.cars.length)return;
   const von=$("von").value,bis=$("bis").value,h=nachISO(heute),tage=[];
   for(let i=0;i<TAGE;i++)tage.push(plusTage(TSTART,i));
   let html='<tr><th class="auto"></th>'+tage.map(d=>'<th class="tag'+(wtIndex(d)>=5?" we":"")+(nachISO(d)===h?" heute":"")+(nachISO(d)>=von&&nachISO(d)<bis?" gewaehlt":"")+'">'+wtKurz(d)+'<b>'+d.getDate()+'</b></th>').join("")+'</tr>';
   D.cars.forEach(c=>{html+='<tr><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+'</th>';
-    tage.forEach((d,i)=>{const t=nachISO(d),t2=nachISO(plusTage(d,1));const tr=belegtVon(c.n,t,t2);
-      const b=tr[0],sp=b&&b.notiz==="Sperre";
-      let k=b?(sp?"sperre":"belegt"):"";if(b){const vorher=belegtVon(c.n,nachISO(plusTage(d,-1)),t).some(x=>x.id===b.id),nachher=belegtVon(c.n,t2,nachISO(plusTage(d,2))).some(x=>x.id===b.id);
-        if(!vorher)k+=" start";if(!nachher)k+=" ende";if(vorher&&nachher)k+=" lauf"}
+    tage.forEach((d,i)=>{const t=nachISO(d);
+      // alle Buchungen, die diesen Tag berühren; am Rückgabetag ist nur bis zur Uhrzeit belegt, danach frei
+      const tr=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.von<=t&&b.bis>=t&&!(b.bis===t&&b.von!==t&&stunden(b.bisU)===0));
+      let k="",inner='<i class="frei"></i>',label="";
       if(wtIndex(d)>=5)k+=" we";if(t===h)k+=" heute";if(t>=von&&t<bis)k+=" gewaehlt";
-      const name=b&&(i===0||!belegtVon(c.n,nachISO(plusTage(d,-1)),t).some(x=>x.id===b.id))?'<b>'+(sp?(b.kunde||"gesperrt"):vorname(b.kunde))+'</b>':"";
-      html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b?' data-b="'+b.id+'"':"")+'><i></i>'+name+'</td>'});
+      tr.forEach(b=>{const sp=b.notiz==="Sperre";const a=b.von===t?stunden(b.vonU)/24:0,e=b.bis===t?stunden(b.bisU)/24:1;if(e<=a)return;
+        const start=b.von===t,ende=b.bis===t;
+        inner+='<i class="'+(sp?"sperre":"belegt")+(start?" start":"")+(ende?" ende":"")+'" style="left:'+(a*100).toFixed(1)+'%;right:'+((1-e)*100).toFixed(1)+'%"></i>';
+        if(start||i===0)label+='<b>'+(sp?(b.kunde||"gesperrt"):vorname(b.kunde))+'</b>';
+        else if(ende&&!sp&&e<1)label+='<em>bis<br>'+(+b.bisU.split(":")[0])+'</em>';
+        k+=sp?" hatSperre":" hatBelegt"});
+      const b0=tr[0];
+      html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
     html+='</tr>'});
   $("tafel").innerHTML=html;tafelTitel();
   [...$("tafel").querySelectorAll("td")].forEach(td=>td.onclick=()=>zelle(td.dataset.auto,td.dataset.t,td.dataset.b));
@@ -495,12 +518,16 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
   if(von&&t>von&&t<=nachISO(plusTage(ausISO(von),30))&&bisAlt<=t&&LETZTE_ZELLE===auto){nv=von;nb=t}
   LETZTE_ZELLE=auto;
   $("von").value=nv;$("bis").value=nb;textAngefasst=false;AUSWAHL=null;zeichne();
-  const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null,frei=!belegtVon(auto,nv,nb).length;
-  blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht ganz frei"),lang(ausISO(nv))+" bis "+lang(ausISO(nb))+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+". Ein späterer Tag in derselben Zeile verlängert.",[
+  const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null;
+  const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
+  const knapp=belegtVon(auto,nv,nb).filter(b=>!belegtZeit(auto,vonZ,bisZ).includes(b)).map(b=>b.bis===nv?" Frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt zurück.":" Bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab.").join("");
+  blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
       {t:"Vertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb},
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb},
       {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}])}
 let LETZTE_ZELLE=null;
+(function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
+  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>'<option'+(x==="10:00"?" selected":"")+'>'+x+'</option>').join("");$(id).addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;zeichne()})})})();
 $("tZurueck").onclick=()=>{TSTART=plusTage(TSTART,-7);zeichneTafel()};
 $("tVor").onclick=()=>{TSTART=plusTage(TSTART,7);zeichneTafel()};
 $("tHeute").onclick=()=>{TSTART=plusTage(heute,-1);zeichneTafel()};
