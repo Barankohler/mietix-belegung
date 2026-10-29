@@ -112,6 +112,14 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
 .tChips div.an{background:var(--red);color:#fff}
 .tLegende{display:flex;gap:14px;padding:8px 14px 0;font-size:11px;color:var(--grey);font-weight:700}
+.versteckt{display:none!important}
+#knr{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;font:600 16px inherit;min-height:50px}
+.reiter2{display:flex;gap:8px;margin:0 0 16px}
+.reiter2 div{flex:1;text-align:center;padding:13px;border-radius:14px;background:#fff;font-weight:800;font-size:16px;color:var(--grey);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045)}
+.reiter2 div.an{background:var(--red);color:#fff}
+#kmchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#angZeitraum{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;font-size:15px}
+#angZeitraum .aend{background:var(--bg);border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;white-space:nowrap}
 .tPruef{margin:12px 14px 0;border-top:1px solid #F0F0F2;padding-top:12px}
 .tZeile{display:flex;align-items:center;gap:8px;margin-bottom:8px}.tZeile span{width:30px;font-size:13px;font-weight:800;color:var(--grey)}
 .tZeile input[type=date]{flex:1;min-width:0;box-shadow:none;border:1px solid var(--line);font-size:16px;min-height:46px;padding:10px 12px;border-radius:12px}
@@ -134,6 +142,8 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 </header>
 <main>
   <div id="abgleich" style="margin-top:14px"></div>
+  <div class="reiter2" id="reiter2"><div data-r="kal" class="an">Kalender</div><div data-r="ang">Angebot</div></div>
+  <section id="sKal">
   <div class="block">
     <p class="feldname">Belegung</p>
     <div id="tafelKarte">
@@ -148,6 +158,17 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
         <div id="tagInfo"></div>
       </div>
     </div>
+  </div>
+  </section>
+  <section id="sAng" class="versteckt">
+  <div class="block">
+    <p class="feldname">Zeitraum</p>
+    <div class="karte" id="angZeitraum"></div>
+  </div>
+  <div class="block">
+    <p class="feldname">Kilometer dazu (pro Tag)</p>
+    <div id="kmchips"></div>
+    <p class="klein" id="kminfo"></p>
   </div>
   <div class="block">
     <p class="feldname">Rabatt für den Kunden</p>
@@ -175,6 +196,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
   </div>
 
   <div class="block">
+    </section><section id="sKal2">
     <p class="feldname">Belegt und gesperrt</p>
     <div class="karte"><div id="buchungen"></div><div id="leer"></div>
       <div id="meldung"></div></div>
@@ -185,6 +207,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
       <input type="text" id="spGrund" placeholder="Grund, z. B. Werkstatt" style="margin-top:8px">
       <button class="knopf" id="sperren" type="button">Sperren</button>
     </div>
+    </section>
   </div>
 
   <footer>
@@ -290,8 +313,9 @@ function nachricht(freieAutos,von,bis,dauer,anzFrei){
   const extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
   let sListe=0, sEnd=0;
   mitPreis.forEach(x=>{
-    x.liste=grundmiete(x.c,start,dauer);
-    x.end=x.p*(1-extra);
+    const kmZ=(typeof kmZusatz==="function")?kmZusatz(x.c,dauer):0;   // Kilometer dazu (pro Tag), gleicher Preis wie im Preisrechner
+    x.liste=grundmiete(x.c,start,dauer)+kmZ;
+    x.end=x.p*(1-extra)+kmZ;
     sListe+=x.liste; sEnd+=x.end;
   });
   const proz=sListe>0?Math.round((sListe-sEnd)/sListe*100):0;
@@ -309,7 +333,7 @@ function nachricht(freieAutos,von,bis,dauer,anzFrei){
   });
   z.push("");
   z.push("Alle Preise für den kompletten Zeitraum, inklusive "
-    +(D.freiKm*dauer).toLocaleString("de-DE")+" km. Weitere Kilometer sind zubuchbar.");
+    +((D.freiKm+(typeof KM==="number"?KM:0))*dauer).toLocaleString("de-DE")+" km. Weitere Kilometer sind zubuchbar.");
   if(dauer>1){
     z.push("");
     z.push("Gilt nur für den kompletten Zeitraum "+zeitraum
@@ -339,6 +363,7 @@ function laden(){
 function zeichne(){
   const von=$("von").value, bis=$("bis").value;
   if(typeof zeichneTafel==="function")zeichneTafel();
+  if(typeof angZeitraum==="function"&&!$("sAng").classList.contains("versteckt")){angZeitraum();kmChips()}
   const t=tage(von,bis);
   const vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
   $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))+" "+uhr($("vonU").value)+" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))+" "+uhr($("bisU").value)+"   ("+t+(t===1?" Tag":" Tage")+")";
@@ -358,7 +383,7 @@ function zeichne(){
     const drin=!treffer.length&&AUSWAHL.has(c.n);
     const roh=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
     const nach=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
-    const p=roh===null?null:roh*(1-nach);
+    const p=roh===null?null:roh*(1-nach)+kmZusatz(c,t);
     const knapp=amTag.map(b=>b.bis===von?"frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt um "+uhr(b.bisU)+" zurück":"bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab").join(". ");
     const info=treffer.length
       ? "belegt: "+treffer.map(b=>(b.kunde?b.kunde+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; ")
@@ -526,6 +551,24 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb},
       {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}])}
 let LETZTE_ZELLE=null;
+/* Kilometer dazu: Staffel je Auto aus der Preisdatei, pro Tag, genau wie im Preisrechner */
+let KM=0;
+function kmPreis(car,km){km=Math.max(0,Math.round(km)||0);if(!km||!car.km||car.km.length<2)return 0;
+  const preise=car.km.slice(1),stufen=D.kmStufen||[50,100,150,200,300];const maxKm=stufen[stufen.length-1],maxPreis=preise[preise.length-1];
+  if(km>=maxKm)return Math.round(km*maxPreis/maxKm);let x0=0,y0=0;
+  for(let i=0;i<stufen.length;i++){if(km<=stufen[i])return Math.round(y0+(preise[i]-y0)*(km-x0)/(stufen[i]-x0));x0=stufen[i];y0=preise[i]}return 0}
+function kmZusatz(car,dauer){return KM?dauer*kmPreis(car,KM):0}
+function kmChips(){const st=[0].concat(D.kmStufen||[50,100,150,200,300]);
+  $("kmchips").innerHTML=st.map(k=>'<div class="rchip'+(k===KM?" an":"")+'" data-km="'+k+'">'+(k?"+"+k+" km":"inklusive")+'</div>').join("");
+  [...$("kmchips").children].forEach(c=>c.onclick=()=>{KM=+c.dataset.km;textAngefasst=false;zeichne()});
+  const t=tage($("von").value,$("bis").value);
+  $("kminfo").textContent=KM?"+"+KM+" km pro Tag, macht "+((D.freiKm+KM)*t).toLocaleString("de-DE")+" km gesamt. Preis je Auto steht in der Liste.":D.freiKm+" km pro Tag sind inklusive, macht "+(D.freiKm*t).toLocaleString("de-DE")+" km."}
+function angZeitraum(){const von=$("von").value,bis=$("bis").value,t=tage(von,bis);
+  $("angZeitraum").innerHTML='<span>'+wtKurz(ausISO(von))+" "+kurzD(ausISO(von))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(bis))+" "+kurzD(ausISO(bis))+" "+uhr($("bisU").value)+", "+t+(t===1?" Tag":" Tage")+'</span><span class="aend" id="angAend">ändern</span>';
+  $("angAend").onclick=()=>{reiter("kal");$("tafelKarte").scrollIntoView({behavior:"smooth"})}}
+function reiter(r){["sKal","sKal2"].forEach(id=>$(id).classList.toggle("versteckt",r!=="kal"));$("sAng").classList.toggle("versteckt",r!=="ang");
+  [...$("reiter2").children].forEach(c=>c.classList.toggle("an",c.dataset.r===r));if(r==="ang"){angZeitraum();kmChips()}window.scrollTo(0,0)}
+[...$("reiter2").children].forEach(c=>c.onclick=()=>reiter(c.dataset.r));
 (function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
   ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>'<option'+(x==="10:00"?" selected":"")+'>'+x+'</option>').join("");$(id).addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;zeichne()})})})();
 $("tZurueck").onclick=()=>{TSTART=plusTage(TSTART,-7);zeichneTafel()};
@@ -550,7 +593,8 @@ function __uebernehmen(p){
   D.stand=p.stand||D.stand; standAnzeigen();
   D.weekdays=p.weekdays; D.faktor=p.faktor; D.mind=p.mind; D.days=p.days;
   D.rabatt=p.rabatt; D.freiKm=p.freiKm;
-  D.cars=p.cars.map(function(c){return {n:c.anzeige,gp:c.gp,kaution:c.kaution,frSa:c.frSa};});
+  D.kmStufen=p.kmStufen||[50,100,150,200,300];
+  D.cars=p.cars.map(function(c){return {n:c.anzeige,gp:c.gp,kaution:c.kaution,frSa:c.frSa,km:c.km||[]};});
 }
 
 /* --- Gemeinsame Preisdatei: eine Aenderung wirkt in allen Werkzeugen --- */
