@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><style>input,select,textarea{font-size:16px;font-family:inherit}</style>
+<head><style>input,select,textarea{font-size:16px;font-family:inherit;max-width:100%;box-sizing:border-box}input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px}select{min-width:0}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2E2E30">
@@ -57,7 +57,7 @@ input[type=number]{width:100%;background:#fff;border:none;border-radius:16px;pad
 .knopf:active{transform:scale(.985);}
 .knopf.hell{background:#fff;color:var(--dark);border:1.5px solid var(--line);box-shadow:none;}
 .knopf.gruen{background:#25D366;box-shadow:0 6px 18px rgba(37,211,102,.35);}
-#vorschau{width:100%;min-height:230px;font-size:14px;line-height:1.6;border:1px solid var(--line);
+#vorschau{width:100%;min-height:230px;font-size:16px;line-height:1.6;border:1px solid var(--line);
   border-radius:13px;padding:14px;font-family:inherit;color:var(--dark);background:#FAFAFB;resize:vertical;}
 #knr{margin-top:11px;}
 #nrinfo{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
@@ -94,7 +94,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #tafelRoll::-webkit-scrollbar{display:none}
 #tafel{border-collapse:separate;border-spacing:0;table-layout:fixed}
 #tafel th,#tafel td{height:36px;padding:0;border-bottom:1px solid #F0F0F2}
-#tafel th.auto{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-size:13px;font-weight:800;padding:0 10px 0 14px;white-space:nowrap;width:96px;min-width:96px;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:2px 0 0 #F0F0F2}
+#tafel th.auto{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-size:12px;line-height:1.15;font-weight:800;padding:0 6px 0 12px;white-space:normal;width:96px;min-width:96px;max-width:96px;overflow:hidden;box-shadow:2px 0 0 #F0F0F2}
 #tafel th.tag{width:34px;min-width:34px;font-size:11px;font-weight:700;color:var(--grey);text-align:center;line-height:1.15;padding-bottom:4px;height:40px;vertical-align:bottom}
 #tafel th.tag.we{color:var(--dark)}#tafel th.tag.heute b{background:var(--red);color:#fff;border-radius:7px;padding:1px 5px}
 #tafel th.tag b{display:block;font-size:13px}
@@ -104,9 +104,12 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #tafel td i.belegt{background:#F7C5C8;border-radius:0}#tafel td i.belegt.start{border-radius:8px 0 0 8px}#tafel td i.belegt.ende{border-radius:0 8px 8px 0}#tafel td i.belegt.start.ende{border-radius:8px}
 #tafel td i.sperre{background:#DADADF;border-radius:0}#tafel td i.sperre.start{border-radius:8px 0 0 8px}#tafel td i.sperre.ende{border-radius:0 8px 8px 0}
 #tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
-.feld2 input,input[type=date]{min-width:0}main{overflow-x:hidden}
+.feld2 input,input[type=date]{min-width:0}
+.feld2 input{padding:10px 8px;text-align:center;font-size:16px}
+.feld2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#spAuto{display:block;width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 36px 12px 14px;font-weight:700;font-size:16px;font-family:inherit;color:var(--dark);min-height:48px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238A8A8E' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center}main{overflow-x:hidden}
 #tafel td.heute{background:#FFF8F8}
-#tafel td b{position:absolute;top:3px;bottom:3px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;width:calc(var(--l) * 34px);font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;pointer-events:none}
+#tafel td b{position:absolute;top:3px;bottom:3px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;width:calc(var(--l) * 34px);min-width:44px;font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;pointer-events:none}
 #tafel td.sperre b{color:#4A4A4F}
 .tChips{display:flex;gap:7px;flex-wrap:wrap;padding:8px 14px 0}
 .tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
@@ -188,7 +191,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
     <p class="feldname">Antwort an den Kunden</p>
     <div class="karte">
       <textarea id="vorschau" rows="11"></textarea>
-      <input type="tel" id="knr" inputmode="tel" autocomplete="off" placeholder="Handynummer des Kunden (optional)">
+      <input type="tel" id="knr" inputmode="tel" autocomplete="off" placeholder="Handynummer (optional)">
       <div id="nrinfo"></div>
       <button class="knopf gruen" id="senden" type="button">Nachricht teilen</button>
       <button class="knopf hell" id="kopieren" type="button">Text kopieren</button>
@@ -486,7 +489,7 @@ $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
 /* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
 let TSTART=plusTage(heute,-1);
 const TAGE=30;
-const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","");
+const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","").replace("VW ","").replace(" Clubsport","").replace(" 2.0 Diesel"," Diesel");
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
 function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
   $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
