@@ -83,6 +83,43 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #einkarte h3{font-size:17px;font-weight:800;margin-bottom:10px;}
 #einkarte p{font-size:13px;line-height:1.6;color:var(--grey);margin-bottom:12px;}
 #einkarte ol{font-size:13px;line-height:1.7;color:var(--dark);margin:0 0 14px 18px;}
+
+/* Tafel (29.10.2026) */
+#tafelKarte{background:#fff;border-radius:16px;padding:12px 0 10px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:10px}
+.tKopf{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px}
+.tKopf b{font-size:15px}.tKopf .tNav{display:flex;gap:6px}
+.tKopf .tNav div{padding:7px 11px;border-radius:999px;background:var(--bg);font-weight:800;font-size:13px;cursor:pointer;user-select:none}
+.tKopf .tNav div.an{background:var(--dark);color:#fff}
+#tafelRoll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+#tafelRoll::-webkit-scrollbar{display:none}
+#tafel{border-collapse:separate;border-spacing:0;table-layout:fixed}
+#tafel th,#tafel td{height:36px;padding:0;border-bottom:1px solid #F0F0F2}
+#tafel th.auto{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-size:13px;font-weight:800;padding:0 10px 0 14px;white-space:nowrap;width:96px;min-width:96px;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:2px 0 0 #F0F0F2}
+#tafel th.tag{width:34px;min-width:34px;font-size:11px;font-weight:700;color:var(--grey);text-align:center;line-height:1.15;padding-bottom:4px;height:40px;vertical-align:bottom}
+#tafel th.tag.we{color:var(--dark)}#tafel th.tag.heute b{background:var(--red);color:#fff;border-radius:7px;padding:1px 5px}
+#tafel th.tag b{display:block;font-size:13px}
+#tafel td{width:34px;min-width:34px;position:relative;cursor:pointer}
+#tafel td i{position:absolute;inset:3px 1px;border-radius:8px;background:#E8F6EE}
+#tafel td.we i{background:#DDF1E5}
+#tafel td.belegt i{background:#F7C5C8}#tafel td.belegt.lauf i{border-radius:0;inset:3px 0}#tafel td.belegt.start i{border-radius:8px 0 0 8px;inset:3px 0 3px 1px}#tafel td.belegt.ende i{border-radius:0 8px 8px 0;inset:3px 1px 3px 0}#tafel td.belegt.start.ende i{border-radius:8px;inset:3px 1px}
+#tafel td.sperre i{background:#DADADF}
+#tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
+.feld2 input,input[type=date]{min-width:0}main{overflow-x:hidden}
+#tafel td.heute{background:#FFF8F8}
+#tafel td b{position:absolute;left:5px;top:7px;font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;z-index:1;pointer-events:none;line-height:1.2}
+#tafel td.sperre b{color:#4A4A4F}
+.tChips{display:flex;gap:7px;flex-wrap:wrap;padding:8px 14px 0}
+.tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
+.tChips div.an{background:var(--red);color:#fff}
+.tLegende{display:flex;gap:14px;padding:8px 14px 0;font-size:11px;color:var(--grey);font-weight:700}
+.tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
+.tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
+#blattBg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:none}#blattBg.auf{display:block}
+#blatt{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:41;max-width:640px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.15);display:none}
+#blatt.auf{display:block}#blatt h3{font-size:18px;font-weight:900;margin-bottom:2px}#blatt .unter{font-size:14px;color:var(--grey);margin-bottom:10px;font-weight:600}
+#blatt .knopf{margin-top:8px;text-decoration:none}#blatt .knopf.voll{background:var(--red);color:#fff}
+#blatt .zu{display:block;text-align:center;font-size:13px;color:var(--grey);margin-top:12px;font-weight:700}
+@media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}}
 </style>
 </head>
 <body>
@@ -92,20 +129,21 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 <main>
   <div id="abgleich" style="margin-top:14px"></div>
   <div class="block">
+    <p class="feldname">Belegung</p>
+    <div id="tafelKarte">
+      <div class="tKopf"><b id="tTitel"></b><div class="tNav"><div id="tZurueck">‹</div><div id="tHeute" class="an">Heute</div><div id="tVor">›</div></div></div>
+      <div id="tafelRoll"><table id="tafel"></table></div>
+      <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
+      <div class="tChips" id="tChips"><div data-z="heute">Heute</div><div data-z="morgen">Morgen</div><div data-z="frso">Fr bis So</div><div data-z="samo">Sa bis Mo</div><div data-z="woche">Nächste Woche</div></div>
+    </div>
+  </div>
+  <div class="block">
     <p class="feldname">Zeitraum prüfen</p>
     <div class="feld2">
       <input type="date" id="von" min="2026-01-01" max="2028-12-31">
       <input type="date" id="bis" min="2026-01-02" max="2028-12-31">
     </div>
     <p id="zeitraumtext"></p>
-    <div id="streifen" style="overflow-x:auto;margin-top:10px"></div>
-    <style>
-    #streifen table{border-collapse:separate;border-spacing:3px;font-size:11px}
-    #streifen td{width:26px;height:26px;border-radius:6px;text-align:center;cursor:pointer;background:#E8F6EE;color:#1B9E4B;font-weight:700}
-    #streifen td.belegt{background:#FDEBEC;color:#C4161C}#streifen td.sperre{background:#E4E4E7;color:#6F6F72}
-    #streifen td.gewaehlt{outline:2px solid #2E2E30}#streifen th{text-align:left;font-size:11px;padding-right:6px;white-space:nowrap;font-weight:700}
-    #streifen th.tag{text-align:center;color:#6F6F72;font-weight:600;padding:0}
-    </style>
     <p class="feldname" style="margin-top:16px">Rabatt für den Kunden</p>
     <div id="rabchips"></div>
     <div class="feld2" style="margin-top:8px;align-items:center">
@@ -149,6 +187,8 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
     Fahrzeug wieder rausgehen. Preisstand: <span id="preisstand">21.08.2026</span>.
   </footer>
 </main>
+<div id="blattBg"></div><div id="blatt"></div>
+
 
 
 
@@ -283,27 +323,16 @@ function melde(text,gut){
 function laden(){
   const b=[];
   lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
-    b.push({id:"v"+v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,kunde:v.name,notiz:"Vertrag "+v.nr,fest:true})});
+    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,kunde:v.name,telefon:v.telefon||"",notiz:"Vertrag "+v.nr,fest:true})});
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>x.kunde===a.name&&x.von===a.von&&x.fahrzeug===a.auto))
-    b.push({id:"a"+a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,kunde:a.name,notiz:"gebucht, Anfragen-Buch",fest:true})});
+    b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,kunde:x.grund||"gesperrt",notiz:"Sperre"})});
   BUCHUNGEN=b;zeichne();
 }
 
-function zeichneStreifen(){
-  const start=ausISO($("von").value),von=$("von").value,bis=$("bis").value,tage=[];
-  for(let i=-1;i<13;i++)tage.push(nachISO(plusTage(start,i)));
-  const kurzT=["So","Mo","Di","Mi","Do","Fr","Sa"];
-  let h='<table><tr><th></th>'+tage.map(t=>{const d=ausISO(t);return'<th class="tag">'+kurzT[d.getDay()]+'<br>'+d.getDate()+'</th>'}).join("")+'</tr>';
-  D.cars.forEach(c=>{h+='<tr><th>'+c.n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","")+'</th>'+tage.map(t=>{
-    const tr=belegtVon(c.n,t,nachISO(plusTage(ausISO(t),1)));const k=tr.length?(tr.some(b=>b.notiz==="Sperre")?"sperre":"belegt"):"";
-    const g=t>=von&&t<bis?" gewaehlt":"";return'<td class="'+k+g+'" data-t="'+t+'" title="'+(tr.map(b=>b.kunde).join(", ")||"frei")+'"></td>'}).join("")+'</tr>'});
-  $("streifen").innerHTML=h+'</table>';
-  [...$("streifen").querySelectorAll("td[data-t]")].forEach(td=>td.onclick=()=>{$("von").value=td.dataset.t;$("bis").value=nachISO(plusTage(ausISO(td.dataset.t),1));textAngefasst=false;AUSWAHL=null;zeichne()});
-}
 function zeichne(){
   const von=$("von").value, bis=$("bis").value;
-  zeichneStreifen();
+  if(typeof zeichneTafel==="function")zeichneTafel();
   const t=tage(von,bis);
   $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))
     +" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))
@@ -419,6 +448,72 @@ $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
   if(!von||!bis||tage(von,bis)<1){melde("Bitte Von und Bis eintragen (Bis nach Von).",false);return}
   const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
   schreib("mietixSperren",l);$("spGrund").value="";laden();melde("Gesperrt.",true)};
+
+/* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
+let TSTART=plusTage(heute,-1);
+const TAGE=30;
+const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","");
+const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
+function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
+  $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
+function zeichneTafel(){if(!D.cars||!D.cars.length)return;
+  const von=$("von").value,bis=$("bis").value,h=nachISO(heute),tage=[];
+  for(let i=0;i<TAGE;i++)tage.push(plusTage(TSTART,i));
+  let html='<tr><th class="auto"></th>'+tage.map(d=>'<th class="tag'+(wtIndex(d)>=5?" we":"")+(nachISO(d)===h?" heute":"")+(nachISO(d)>=von&&nachISO(d)<bis?" gewaehlt":"")+'">'+wtKurz(d)+'<b>'+d.getDate()+'</b></th>').join("")+'</tr>';
+  D.cars.forEach(c=>{html+='<tr><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+'</th>';
+    tage.forEach((d,i)=>{const t=nachISO(d),t2=nachISO(plusTage(d,1));const tr=belegtVon(c.n,t,t2);
+      const b=tr[0],sp=b&&b.notiz==="Sperre";
+      let k=b?(sp?"sperre":"belegt"):"";if(b){const vorher=belegtVon(c.n,nachISO(plusTage(d,-1)),t).some(x=>x.id===b.id),nachher=belegtVon(c.n,t2,nachISO(plusTage(d,2))).some(x=>x.id===b.id);
+        if(!vorher)k+=" start";if(!nachher)k+=" ende";if(vorher&&nachher)k+=" lauf"}
+      if(wtIndex(d)>=5)k+=" we";if(t===h)k+=" heute";if(t>=von&&t<bis)k+=" gewaehlt";
+      const name=b&&(i===0||!belegtVon(c.n,nachISO(plusTage(d,-1)),t).some(x=>x.id===b.id))?'<b>'+(sp?(b.kunde||"gesperrt"):vorname(b.kunde))+'</b>':"";
+      html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b?' data-b="'+b.id+'"':"")+'><i></i>'+name+'</td>'});
+    html+='</tr>'});
+  $("tafel").innerHTML=html;tafelTitel();
+  [...$("tafel").querySelectorAll("td")].forEach(td=>td.onclick=()=>zelle(td.dataset.auto,td.dataset.t,td.dataset.b));
+  // den gewählten Zeitraum sichtbar halten
+  const idx=Math.max(0,Math.round((ausISO(von)-TSTART)/86400000)-1);const z=$("tafel").querySelector("th.tag");
+  if(z)$("tafelRoll").scrollLeft=Math.max(0,idx*z.offsetWidth-8)}
+function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><div class="unter">'+unter+'</div>'+
+    aktionen.map((a,i)=>'<'+(a.href?'a href="'+a.href+'"':'div')+' class="knopf'+(a.voll?" voll":" hell")+'" data-i="'+i+'">'+a.t+'</'+(a.href?'a':'div')+'>').join("")+'<a href="#" class="zu" id="blattZu">Schließen</a>';
+  $("blatt").classList.add("auf");$("blattBg").classList.add("auf");
+  const zu=()=>{$("blatt").classList.remove("auf");$("blattBg").classList.remove("auf")};
+  [...$("blatt").querySelectorAll("[data-i]")].forEach(k=>{const a=aktionen[+k.dataset.i];if(a.f)k.onclick=()=>{zu();a.f()}});
+  $("blattZu").onclick=e=>{e.preventDefault();zu()};$("blattBg").onclick=zu}
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
+  const A="https://barankohler.github.io/";
+  if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
+      {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
+  if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+", "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?", "+esc(b.telefon):""),[
+      b.nr?{t:"Vertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
+      b.aid?{t:"Anfrage im Anfragen-Buch",voll:true,href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
+      b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
+      {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
+  // frei: erster Tipp = dieser Tag, zweiter Tipp auf einen späteren Tag = bis dahin
+  const von=$("von").value,bisAlt=$("bis").value;let nv=t,nb=nachISO(plusTage(d,1));
+  if(von&&t>von&&t<=nachISO(plusTage(ausISO(von),30))&&bisAlt<=t&&LETZTE_ZELLE===auto){nv=von;nb=t}
+  LETZTE_ZELLE=auto;
+  $("von").value=nv;$("bis").value=nb;textAngefasst=false;AUSWAHL=null;zeichne();
+  const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null,frei=!belegtVon(auto,nv,nb).length;
+  blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht ganz frei"),lang(ausISO(nv))+" bis "+lang(ausISO(nb))+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+". Ein späterer Tag in derselben Zeile verlängert.",[
+      {t:"Vertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb},
+      {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb},
+      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}])}
+let LETZTE_ZELLE=null;
+$("tZurueck").onclick=()=>{TSTART=plusTage(TSTART,-7);zeichneTafel()};
+$("tVor").onclick=()=>{TSTART=plusTage(TSTART,7);zeichneTafel()};
+$("tHeute").onclick=()=>{TSTART=plusTage(heute,-1);zeichneTafel()};
+// Chips für den Anruf: setzen den Zeitraum, darunter steht sofort, was frei ist und was es kostet
+function chipZeitraum(z){const h=heute,w=h.getDay();let v,b;
+  if(z==="heute"){v=h;b=plusTage(h,1)}else if(z==="morgen"){v=plusTage(h,1);b=plusTage(h,2)}
+  else if(z==="frso"){v=plusTage(h,(5-w+7)%7);b=plusTage(v,2)}else if(z==="samo"){v=plusTage(h,(6-w+7)%7);b=plusTage(v,2)}
+  else{v=plusTage(h,((1-w+7)%7)||7);b=plusTage(v,7)}
+  $("von").value=nachISO(v);$("bis").value=nachISO(b);textAngefasst=false;AUSWAHL=null;
+  if(nachISO(v)<nachISO(TSTART)||nachISO(b)>nachISO(plusTage(TSTART,TAGE-1)))TSTART=plusTage(v,-1);
+  zeichne();[...$("tChips").children].forEach(c=>c.classList.toggle("an",c.dataset.z===z))}
+[...$("tChips").children].forEach(c=>c.onclick=()=>chipZeitraum(c.dataset.z));
+
 laden();
 window.addEventListener("mietix-abgleich",laden);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)laden()});
