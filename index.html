@@ -106,7 +106,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
 .feld2 input,input[type=date]{min-width:0}main{overflow-x:hidden}
 #tafel td.heute{background:#FFF8F8}
-#tafel td b{position:absolute;left:5px;top:7px;font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;z-index:1;pointer-events:none;line-height:1.2}
+#tafel td b{position:absolute;top:3px;bottom:3px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;width:calc(var(--l) * 34px);font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;pointer-events:none}
 #tafel td.sperre b{color:#4A4A4F}
 .tChips{display:flex;gap:7px;flex-wrap:wrap;padding:8px 14px 0}
 .tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
@@ -117,8 +117,6 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .tZeile input[type=date]{flex:1;min-width:0;box-shadow:none;border:1px solid var(--line);font-size:16px;min-height:46px;padding:10px 12px;border-radius:12px}
 .tZeile select{width:92px;border:1px solid var(--line);border-radius:12px;padding:10px 8px;font:700 16px inherit;color:var(--dark);background:#fff;min-height:46px}
 #tagInfo{font-size:13px;font-weight:700;margin-top:6px;line-height:1.5}#tagInfo span{display:block;color:var(--dark)}#tagInfo span::before{content:"→ ";color:var(--red)}
-#tafel td em{position:absolute;right:2px;top:4px;font-style:normal;font-size:9px;font-weight:800;color:#8A1014;line-height:1.1;text-align:right;pointer-events:none;z-index:1}
-#tafel td em.ab{right:auto;left:2px}
 .zeile .info.ab{color:#9A6700}
 .tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
 .tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
@@ -127,7 +125,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #blatt.auf{display:block}#blatt h3{font-size:18px;font-weight:900;margin-bottom:2px}#blatt .unter{font-size:14px;color:var(--grey);margin-bottom:10px;font-weight:600}
 #blatt .knopf{margin-top:8px;text-decoration:none}#blatt .knopf.voll{background:var(--red);color:#fff}
 #blatt .zu{display:block;text-align:center;font-size:13px;color:var(--grey);margin-top:12px;font-weight:700}
-@media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}}
+@media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}#tafel td b{width:calc(var(--l) * 40px);font-size:13px}}
 </style>
 </head>
 <body>
@@ -486,8 +484,10 @@ function zeichneTafel(){if(!D.cars||!D.cars.length)return;
       tr.forEach(b=>{const sp=b.notiz==="Sperre";const a=b.von===t?stunden(b.vonU)/24:0,e=b.bis===t?stunden(b.bisU)/24:1;if(e<=a)return;
         const start=b.von===t,ende=b.bis===t;
         inner+='<i class="'+(sp?"sperre":"belegt")+(start?" start":"")+(ende?" ende":"")+'" style="left:'+(a*100).toFixed(1)+'%;right:'+((1-e)*100).toFixed(1)+'%"></i>';
-        if(start||i===0)label+='<b>'+(sp?(b.kunde||"gesperrt"):vorname(b.kunde))+'</b>';
-        else if(ende&&!sp&&e<1)label+='<em>bis<br>'+(+b.bisU.split(":")[0])+'</em>';
+        // Name einmal, am Anfang des Bandes (oder am linken Rand, wenn die Miete vor der Tafel begann), so lang wie das Band
+        if(start||i===0){const endeTag=ausISO(b.bis),zellen=Math.min(TAGE-i,Math.round((endeTag-d)/86400000)+1);
+          const laenge=Math.max(0.6,(zellen-1)+(b.bis<=nachISO(plusTage(d,zellen-1))?stunden(b.bisU)/24:1)-a);
+          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?(b.kunde||"gesperrt"):vorname(b.kunde)||"belegt")+'</b>'}
         k+=sp?" hatSperre":" hatBelegt"});
       const b0=tr[0];
       html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
@@ -508,7 +508,7 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
   const A="https://barankohler.github.io/";
   if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
-  if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+", "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?", "+esc(b.telefon):""),[
+  if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
       b.nr?{t:"Vertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
       b.aid?{t:"Anfrage im Anfragen-Buch",voll:true,href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
       b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
