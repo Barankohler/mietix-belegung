@@ -140,7 +140,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
       <div class="tKopf"><b id="tTitel"></b><div class="tNav"><div id="tZurueck">‹</div><div id="tHeute" class="an">Heute</div><div id="tVor">›</div></div></div>
       <div id="tafelRoll"><table id="tafel"></table></div>
       <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
-      <div class="tChips" id="tChips"><div data-z="heute">Heute</div><div data-z="morgen">Morgen</div><div data-z="frso">Fr bis So</div><div data-z="samo">Sa bis Mo</div><div data-z="woche">Nächste Woche</div></div>
+      <div class="tChips" id="tChips"><div data-z="heute">Heute</div><div data-z="morgen">Morgen</div><div data-z="frsa">Fr bis Sa</div><div data-z="frso">Fr bis So</div><div data-z="samo">Sa bis Mo</div><div data-z="woche">Nächste Woche</div></div>
       <div class="tPruef">
         <div class="tZeile"><span>von</span><input type="date" id="von" min="2026-01-01" max="2028-12-31"><select id="vonU"></select></div>
         <div class="tZeile"><span>bis</span><input type="date" id="bis" min="2026-01-02" max="2028-12-31"><select id="bisU"></select></div>
@@ -534,6 +534,7 @@ $("tHeute").onclick=()=>{TSTART=plusTage(heute,-1);zeichneTafel()};
 // Chips für den Anruf: setzen den Zeitraum, darunter steht sofort, was frei ist und was es kostet
 function chipZeitraum(z){const h=heute,w=h.getDay();let v,b;
   if(z==="heute"){v=h;b=plusTage(h,1)}else if(z==="morgen"){v=plusTage(h,1);b=plusTage(h,2)}
+  else if(z==="frsa"){v=plusTage(h,(5-w+7)%7);b=plusTage(v,1)}
   else if(z==="frso"){v=plusTage(h,(5-w+7)%7);b=plusTage(v,2)}else if(z==="samo"){v=plusTage(h,(6-w+7)%7);b=plusTage(v,2)}
   else{v=plusTage(h,((1-w+7)%7)||7);b=plusTage(v,7)}
   $("von").value=nachISO(v);$("bis").value=nachISO(b);textAngefasst=false;AUSWAHL=null;
