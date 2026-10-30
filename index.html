@@ -146,7 +146,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .kmf input{font-size:22px;font-weight:800;border:1.5px solid #E4E4E7;border-radius:10px;padding:8px 10px;width:100%;min-height:48px}
 .kmf b{font-size:13px;color:var(--grey)}
 </style>
-</head>
+<style>#wahlArt{margin:0 0 12px}#wahlArt div{padding:11px 8px;font-size:15px;background:#F2F2F4;box-shadow:none}#wahlArt div.an{background:var(--red);color:#fff}</style></head>
 <body>
 <header>
   <h1>MIETIX <span>VERFÜGBARKEITEN</span> <i id="abgleichPunkt" title="Abgleich aller Geräte" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#B0B0B3;vertical-align:middle;margin-left:4px"></i></h1>
@@ -191,6 +191,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
   </div>
 
   <div class="block">
+    <div class="reiter2" id="wahlArt"><div data-w="1">Ein Auto</div><div data-w="0">Alle freien</div></div>
     <p class="feldname" id="ueberschrift">Fahrzeuge</p>
     <div id="liste"></div>
   </div>
@@ -235,7 +236,7 @@ const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag",
 let BUCHUNGEN=[];
 const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
 const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let AUSWAHL=null;   // Fahrzeuge, die im Kundentext stehen sollen
+let AUSWAHL=null,EIN_AUTO="",EINZEL=true;try{EINZEL=localStorage.getItem("mietixAngebotArt")!=="alle"}catch(e){}   // Fahrzeuge, die im Kundentext stehen sollen
 const $=id=>document.getElementById(id);
 const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
 
@@ -295,14 +296,14 @@ function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
 function nachricht(freieAutos,von,bis,dauer,anzFrei){
   const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
   if(!freieAutos.length && anzFrei>0){
-    return "Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n"
+    return (EINZEL?"Bitte oben das Auto antippen, das Sie anbieten wollen.\n":"Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n")
          + "Im Zeitraum " + wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
          + " sind " + anzFrei + (anzFrei===1?" Fahrzeug":" Fahrzeuge") + " frei.";
   }
   const z=[];
   const zeitraum = wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
                  +", "+dauer+(dauer===1?" Tag":" Tage");
-  z.push("*Freie Fahrzeuge*");
+  z.push(freieAutos.length===1?"*Freies Fahrzeug*":"*Freie Fahrzeuge*");
   z.push(zeitraum);
   z.push("");
   if(!freieAutos.length){
@@ -349,7 +350,7 @@ function nachricht(freieAutos,von,bis,dauer,anzFrei){
       +" am Stück. Für einzelne Tage daraus gilt der reguläre Tagespreis.");
   }
   z.push("");
-  z.push("Welches Fahrzeug darf ich für Sie reservieren?");
+  z.push(mitPreis.length===1?"Darf ich das Fahrzeug für Sie reservieren?":"Welches Fahrzeug darf ich für Sie reservieren?");
   return z.join("\n");
 }
 
@@ -381,7 +382,7 @@ function zeichne(){
     +abh.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</span>').join("");
   const frei=[];
   D.cars.forEach(c=>{if(!belegtZeit(c.n,vonZ,bisZ).length)frei.push(c.n);});
-  if(AUSWAHL===null)AUSWAHL=new Set(frei);
+  if(AUSWAHL===null)AUSWAHL=EINZEL?new Set(EIN_AUTO&&frei.includes(EIN_AUTO)?[EIN_AUTO]:[]):new Set(frei);
   else [...AUSWAHL].forEach(n=>{if(!frei.includes(n))AUSWAHL.delete(n);});
   frei.length=0;
 
@@ -405,11 +406,11 @@ function zeichne(){
   }).join("");
   [...document.querySelectorAll(".zeile.waehlbar")].forEach(z=>{
     z.onclick=()=>{const n=z.dataset.auto;
-      if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
+      if(EINZEL){AUSWAHL=new Set([n]);EIN_AUTO=n}else if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
       textAngefasst=false;zeichne();};
   });
   const anzFrei=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length).length;
-  $("ueberschrift").textContent=anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
+  $("ueberschrift").textContent=EINZEL?anzFrei+" frei, "+(AUSWAHL.size?"anderes Auto antippen zum Wechseln":"Auto antippen"):anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
 
   const fuerText=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL.has(c.n));
   if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t,anzFrei);
@@ -558,7 +559,8 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
   blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
       {t:"Vertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
-      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}])}
+      frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
+      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}].filter(Boolean))}
 let LETZTE_ZELLE=null;
 // Gewählte Uhrzeit läuft mit in Vertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
 const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
@@ -921,6 +923,12 @@ function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)r
   localStorage.setItem("mietixAnfragen",JSON.stringify(l));
   let m=document.getElementById("angGespeichert");if(!m){m=document.createElement("p");m.id="angGespeichert";m.className="klein";m.style.cssText="text-align:center;color:#1E9E5A;font-weight:800;margin-top:8px";$("kopieren").after(m)}
   m.innerHTML='In Anfragen gespeichert: '+d.auto+', '+EUR.format(d.preis)+'. <a href="https://barankohler.github.io/mietix-anfragen/?zeige=alle" style="color:inherit">ansehen</a>'}
+function artZeigen(){[...$("wahlArt").children].forEach(c=>c.classList.toggle("an",(c.dataset.w==="1")===EINZEL))}
+[...$("wahlArt").children].forEach(c=>c.onclick=()=>{EINZEL=c.dataset.w==="1";try{localStorage.setItem("mietixAngebotArt",EINZEL?"ein":"alle")}catch(e){}
+  if(EINZEL){const eins=EIN_AUTO&&AUSWAHL&&AUSWAHL.has(EIN_AUTO)?EIN_AUTO:(AUSWAHL&&AUSWAHL.size===1?[...AUSWAHL][0]:"");EIN_AUTO=eins;AUSWAHL=new Set(eins?[eins]:[])}else AUSWAHL=null;
+  artZeigen();textAngefasst=false;zeichne()});
+artZeigen();
+function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=false;reiter("ang");AUSWAHL=new Set([auto]);zeichne()}
 (function(){const s=$("senden").onclick,k=$("kopieren").onclick;
   $("senden").onclick=async()=>{angebotMerken();await s()};$("kopieren").onclick=async()=>{angebotMerken();await k()}})();
 // ?zeige=angebot&anfrage=ID&auto=&von=&bis=&vonU=&bisU=&knr= öffnet das Angebot schon ausgefüllt
@@ -932,7 +940,7 @@ function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)r
     ["vonU","bisU"].forEach(id=>{const u=q.get(id)||(x&&(x[id]||(x.angebot&&x.angebot[id])));if(u&&[...$(id).options].some(o=>o.value===u||o.textContent===u))$(id).value=u});
     const nr=q.get("knr")||(x&&x.nummer)||"";if(nr)$("knr").value=nr;
     if(x&&x.angebot){KM_EXTRA=+x.angebot.kmExtra||0;if(x.angebot.kmInkl!=null){KM_INKL=+x.angebot.kmInkl;KM_TAGE=tage(g("von"),g("bis"))}if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
-    const a=g("auto");AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
+    const a=g("auto");if(a){EINZEL=true;EIN_AUTO=a;artZeigen()}AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
   setzen()})();
 </script></body>
 </html>
