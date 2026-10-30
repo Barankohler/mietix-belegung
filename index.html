@@ -540,7 +540,15 @@ function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><di
   [...$("blatt").querySelectorAll("[data-i]")].forEach(k=>{const a=aktionen[+k.dataset.i];if(a.f)k.onclick=()=>{zu();a.f()}});
   $("blattZu").onclick=e=>{e.preventDefault();zu()};$("blattBg").onclick=zu}
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
+function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
+  // Rückgabe- und Abholtag (30.10.2026, Baran): Bringt der Kunde den RS Q8 Sonntag um 16:30 zurück, ist er danach frei.
+  // Antippen startet die neue Miete ab dieser Uhrzeit. Holt jemand um 17 Uhr ab, endet eine Verlängerung bis dahin.
+  let abUhr=null,bisUhr=null,rueck=null;const vonAlt0=$("von").value;
+  if(b&&b.notiz!=="Sperre"){const tr=BUCHUNGEN.filter(x=>x.fahrzeug===auto&&x.von<=t&&x.bis>=t);
+    const r=tr.find(x=>x.bis===t&&x.von!==t),a=tr.find(x=>x.von===t&&x.bis!==t),mitte=tr.find(x=>x.von<t&&x.bis>t);
+    const verl=LETZTE_ZELLE===auto&&vonAlt0&&t>vonAlt0&&t<=nachISO(plusTage(ausISO(vonAlt0),30));
+    if(!mitte&&a&&!r&&verl){bisUhr=a.vonU||"10:00";b=null}
+    else if(!mitte&&r&&stunden(r.bisU)<22){abUhr=r.bisU||"10:00";rueck=r;b=null}}
   const A="https://barankohler.github.io/";
   if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
@@ -553,6 +561,9 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
   const von=$("von").value,bisAlt=$("bis").value;let nv=t,nb=nachISO(plusTage(d,1));
   if(von&&t>von&&t<=nachISO(plusTage(ausISO(von),30))&&bisAlt<=t&&LETZTE_ZELLE===auto){nv=von;nb=t}
   LETZTE_ZELLE=auto;
+  const naechste=(u,hoch)=>{const o=[...$("vonU").options].map(x=>x.value||x.textContent);const m=stunden(u);const f=hoch?o.find(x=>stunden(x)>=m):o.slice().reverse().find(x=>stunden(x)<=m);return f||(hoch?o[o.length-1]:o[0])};
+  if(abUhr&&nv===t){$("vonU").value=naechste(abUhr,true);VON_AUTO=true}else if(nv===t&&VON_AUTO){$("vonU").value="10:00";VON_AUTO=false}
+  if(bisUhr&&nb===t){$("bisU").value=naechste(bisUhr,false);BIS_AUTO=true}else if(nv===t&&BIS_AUTO){$("bisU").value="10:00";BIS_AUTO=false}
   $("von").value=nv;$("bis").value=nb;textAngefasst=false;AUSWAHL=null;zeichne();
   const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null;
   const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
@@ -561,8 +572,9 @@ function zelle(auto,t,bid){const d=ausISO(t),b=bid?BUCHUNGEN.find(x=>x.id===bid)
       {t:"Vertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
+      rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
       {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}].filter(Boolean))}
-let LETZTE_ZELLE=null;
+let LETZTE_ZELLE=null,VON_AUTO=false,BIS_AUTO=false;
 // Gewählte Uhrzeit läuft mit in Vertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
 const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
 /* Kilometer dazu: Staffel je Auto aus der Preisdatei, pro Tag, genau wie im Preisrechner */
