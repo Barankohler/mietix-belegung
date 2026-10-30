@@ -1008,7 +1008,8 @@ function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=f
 #freiKopf{font-weight:800;margin:12px 0 6px;font-size:15px}
 .fZeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #EFEFF1}
 .fZeile b{display:block;font-size:15px}.fZeile i{display:block;font-style:normal;font-size:12px;color:#6F6F72;margin-top:2px}
-.fZeile.belegt{opacity:.45}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
+.fZeile.belegt>div:first-child{opacity:.45}.fZeile .fRot{flex:0 0 auto;max-width:55%;text-align:right;color:var(--red);font-weight:800;font-size:14px}
+.fZeile i.fRaus{color:var(--red);font-weight:700}#werFrei #tagInfo{display:none}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
 .bInfo{background:#F6F6F7;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
 .bZr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bZr>div{min-width:0}
 #fBuchen .bZr select{margin-top:6px}
@@ -1027,19 +1028,22 @@ function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=f
   const sk=$("sKal");if(!sk)return;
   const box=document.createElement("div");box.id="werFrei";
   box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><h2>Wer ist frei?</h2><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
-  sk.insertBefore(box,sk.firstChild);
+  const kal=$("tafelKarte")&&$("tafelKarte").closest(".block");if(kal&&kal.parentNode===sk)sk.insertBefore(box,kal.nextSibling);else sk.insertBefore(box,sk.firstChild);
   const z=$("werZeit");const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)z.appendChild(tc);if(tp)z.appendChild(tp);
 })();
 const bTage=()=>tage($("von").value,$("bis").value);
 function bZeitText(){const v=$("von").value,b=$("bis").value,t=bTage();if(!v||!b||t<1)return"";
   return wtKurz(ausISO(v))+" "+kurzD(ausISO(v))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(b))+" "+kurzD(ausISO(b))+" "+uhr($("bisU").value)+" ("+t+(t===1?" Tag":" Tage")+")"}
 function bPreis(n){const c=D.cars.find(x=>x.n===n);const v=$("von").value,t=bTage();if(!c||!v||t<1)return null;const p=preis(c,wtIndex(ausISO(v)),t);return p===null?null:Math.round(p)}
-function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,t=bTage();
+function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,b0=b,t=bTage();
   if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
   const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
-  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl[0];
-      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>belegt'+(x.notiz==="Sperre"?" (gesperrt)":x.kunde?" von "+esc(vorname(x.kunde)):"")+' bis '+kurzD(ausISO(x.bis))+'</i></div></div>'}
-    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i></div><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div>'});
+  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl.slice().sort((a,b)=>bZ(a).bis-bZ(b).bis)[bl.length-1];
+      const rot=x.notiz==="Sperre"?"gesperrt bis "+kurzD(ausISO(x.bis)):"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
+      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
+    // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
+    const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
+    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div>'});
   $("freiKopf").textContent=bZeitText()+": "+n+" von "+D.cars.length+" frei";
   $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
   $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch))}
