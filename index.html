@@ -1047,7 +1047,14 @@ function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.d
 [...$("bArt").children].forEach(c=>c.onclick=()=>[...$("bArt").children].forEach(x=>x.classList.toggle("an",x===c)));
 $("bAuto").onchange=()=>{const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()};
 $("nBuch").onclick=()=>buchenAuf("");
-$("bOk").onclick=()=>{const name=$("bName").value.trim();if(!name){alert("Bitte den Namen eintragen.");$("bName").focus();return}
+// Doppeltippen legt keine zweite Buchung an (30.10.2026)
+let B_SPERRE=0;
+$("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").value.trim();if(!name){alert("Bitte den Namen eintragen.");$("bName").focus();return}
+  // Doppel-Schutz: derselbe Kunde, dasselbe Auto, überlappender Zeitraum schon als Buchung oder Mietvertrag da
+  {const nG=t=>String(t||"").toLowerCase().replace(/\s+/g,""),au=$("bAuto").value,v0=$("von").value,b0=$("bis").value,ueber=(a1,b1,a2,b2)=>a1<b2&&b1>a2;
+   const da=lies("mietixAnfragen",[]).find(x=>x.status==="gebucht"&&nG(x.name)===nG(name)&&x.auto===au&&x.von&&x.bis&&ueber(v0,b0,x.von,x.bis))
+     ||lies("mietixVorgaenge",[]).find(x=>x.status!=="zurück"&&nG(x.name)===nG(name)&&x.auto===au&&x.vonD&&x.bisD&&ueber(v0,b0,x.vonD,x.bisD));
+   if(da){alert(name+" hat für "+kurzAuto(au)+" in diesem Zeitraum schon "+(da.nr?"den Mietvertrag "+da.nr:"eine Buchung")+". Es wird keine zweite angelegt.");return}}
   if($("bWarn").textContent&&!confirm($("bWarn").textContent+"\n\nTrotzdem buchen?"))return;
   const zahl=x=>parseFloat(String(x||"").replace(/\./g,"").replace(",","."))||0;const v=$("von").value,b=$("bis").value,t=bTage(),h=new Date();
   const anzJa=[...$("bAnzJn").children].some(c=>c.dataset.jn==="ja"&&c.classList.contains("an"))&&zahl($("bAnz").value)>0;
@@ -1057,7 +1064,7 @@ $("bOk").onclick=()=>{const name=$("bName").value.trim();if(!name){alert("Bitte 
     notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",
     angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:(D.freiKm||150)*t,freikm:(D.freiKm||150)*t,kmExtra:0,rabatt:0,am:h.toISOString()}};
   if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:nachISO(h)};
-  const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
+  B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
   const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
 </script>
 </body>
