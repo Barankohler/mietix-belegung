@@ -131,6 +131,17 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .zeile .info.ab{color:#9A6700}
 .tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
 .tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
+.fKnoepfe{display:grid;gap:10px;margin-top:18px}
+.fKnopf{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;text-align:left;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);min-height:60px}
+.fKnopf b{display:block;font-size:16px;font-weight:800;color:var(--dark)}.fKnopf i{display:block;font-style:normal;font-size:13px;color:var(--grey);margin-top:2px;font-weight:600}
+.fKnopf em{font-style:normal;font-size:28px;color:var(--red);font-weight:700;line-height:1}.fKnopf:active{background:#F6F6F7}
+.fBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}.fBg.auf{display:block}
+.fenster{position:fixed;left:0;right:0;bottom:0;z-index:51;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:none;box-shadow:0 -10px 30px rgba(0,0,0,.18);margin:0 auto;max-width:560px}
+.fenster.auf{display:block}
+@media(min-width:700px){.fenster{top:50%;bottom:auto;transform:translateY(-50%);border-radius:22px;width:calc(100% - 48px);padding:20px}}
+.fKopf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.fKopf h3{font-size:19px;font-weight:900;margin:0}
+.fZu{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:#F2F2F4;font-size:17px;font-weight:800;cursor:pointer;color:var(--dark)}
+.fText{font-size:14px;color:var(--grey);font-weight:600;margin:0 0 10px}
 #blattBg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:none}#blattBg.auf{display:block}
 #blatt{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:41;max-width:640px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.15);display:none}
 #blatt.auf{display:block}#blatt h3{font-size:18px;font-weight:900;margin-bottom:2px}#blatt .unter{font-size:14px;color:var(--grey);margin-bottom:10px;font-weight:600}
@@ -209,17 +220,22 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 
   <div class="block">
     </section><section id="sKal2">
-    <details id="listeAuf"><summary class="feldname" style="cursor:pointer;list-style:none">Belegt und gesperrt als Liste ›</summary>
-    <div class="karte"><div id="buchungen"></div><div id="leer"></div>
-      <div id="meldung"></div></div></details>
-    <p class="feldname" style="margin-top:16px">Fahrzeug sperren (Werkstatt, privat)</p>
-    <div class="karte">
+    <!-- Selten gebraucht: Knopf, dann Fenster (30.10.2026, Baran: Übersicht ist wichtig) -->
+    <div class="fKnoepfe">
+      <button class="fKnopf" id="oListe" type="button"><span><b>Belegt und gesperrt</b><i>Alle Mieten und Sperren als Liste</i></span><em>›</em></button>
+      <button class="fKnopf" id="oSperren" type="button"><span><b>Fahrzeug sperren</b><i>Werkstatt, privat</i></span><em>›</em></button>
+    </div>
+    </section>
+    <div class="fBg" id="fBg"></div>
+    <div class="fenster" id="fListe" role="dialog" aria-label="Belegt und gesperrt"><div class="fKopf"><h3>Belegt und gesperrt</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+      <div id="buchungen"></div><div id="leer"></div><div id="meldung"></div></div>
+    <div class="fenster" id="fSperren" role="dialog" aria-label="Fahrzeug sperren"><div class="fKopf"><h3>Fahrzeug sperren</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+      <p class="fText">Das Auto gilt in der Zeit als belegt, zum Beispiel Werkstatt oder privat.</p>
       <select id="spAuto"></select>
       <div class="feld2" style="margin-top:8px"><input type="date" id="spVon"><input type="date" id="spBis"></div>
       <input type="text" id="spGrund" placeholder="Grund, z. B. Werkstatt" style="margin-top:8px">
       <button class="knopf" id="sperren" type="button">Sperren</button>
     </div>
-    </section>
   </div>
 
   <footer>
@@ -492,7 +508,11 @@ spAutos();$("spVon").value=nachISO(heute);$("spBis").value=nachISO(plusTage(heut
 $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
   if(!von||!bis||tage(von,bis)<1){melde("Bitte Von und Bis eintragen (Bis nach Von).",false);return}
   const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
-  schreib("mietixSperren",l);$("spGrund").value="";laden();melde("Gesperrt.",true)};
+  schreib("mietixSperren",l);$("spGrund").value="";laden();fZu()};
+function fAuf(id){$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
+function fZu(){document.querySelectorAll(".fenster.auf").forEach(f=>f.classList.remove("auf"));$("fBg").classList.remove("auf");document.documentElement.style.overflow="";document.body.style.overflow=""}
+$("oListe").onclick=()=>fAuf("fListe");$("oSperren").onclick=()=>fAuf("fSperren");$("fBg").onclick=fZu;
+document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape")fZu()});
 
 /* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
 let TSTART=plusTage(heute,-1);
@@ -573,7 +593,7 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
       rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
-      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;$("spGrund").focus();$("spGrund").scrollIntoView({block:"center",behavior:"smooth"})}}].filter(Boolean))}
+      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;fAuf("fSperren")}}].filter(Boolean))}
 let LETZTE_ZELLE=null,VON_AUTO=false,BIS_AUTO=false;
 // Gewählte Uhrzeit läuft mit in Vertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
 const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
