@@ -577,7 +577,8 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
   if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
       b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
-      b.aid?{t:"Anfrage im Anfragen-Buch",voll:true,href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
+      b.aid?{t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?anfrage="+encodeURIComponent(b.aid)}:null,   // Liste Punkt 18
+      b.aid?{t:"Anfrage im Anfragen-Buch",href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
       b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
       {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
   // frei: erster Tipp = dieser Tag, zweiter Tipp auf einen späteren Tag = bis dahin
@@ -680,7 +681,7 @@ function __uebernehmen(p){
   try{
     var f=document.getElementById("knr")||document.getElementById("nummer")||document.getElementById("tel");
     if(!f)return;
-    var roh=localStorage.getItem("mietixNummer");
+    var roh=null;   // nicht mehr vorbelegen: das Angebot landete sonst beim vorigen Kunden (Liste Punkt 2, 30.10.2026)
     if(roh&&!f.value.trim()){
       var w=JSON.parse(roh);
       if(w&&w.nr&&(Date.now()-w.zeit)<2*60*60*1000){
@@ -863,6 +864,9 @@ window.mietixWiederherstellen=function(id){const pk=lies("mietixPapierkorb",[]),
   if(e.ablage==="mietixEntwurfVertrag"){merk("mietixPapierkorb",pk.filter(x=>x.id!==id));   // angefangener Mietvertrag: liegt nur auf dem Gerät, frisch für 48 Stunden
     roh.call(localStorage,"mietixEntwurfVertrag",JSON.stringify(Object.assign({},e.eintrag,{zeit:new Date().toISOString()})));
     window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:["mietixPapierkorb"]}));clearTimeout(warte);warte=setTimeout(abgleichen,800);return true}
+  if(e.ablage==="schadensbelege"){const st=lies("mietixStand",{}),r=Object.assign({liste:[],max:{}},st.schadensbelege||{});   // Schadensbeleg (30.10.2026)
+    if(!r.liste.some(x=>x.nr===e.eintrag.nr))r.liste=r.liste.concat([e.eintrag]);st.schadensbelege=r;merk("mietixPapierkorb",pk.filter(x=>x.id!==id));
+    localStorage.setItem("mietixStand",JSON.stringify(st));window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:["mietixStand","mietixPapierkorb"]}));return true}
   const c=SPEICHER[e.ablage];if(!c)return false;const m=alsMap(e.ablage,lies(e.ablage,c.liste?[]:{}));m[e.schluessel]=e.eintrag;
   merk("mietixPapierkorb",pk.filter(x=>x.id!==id));localStorage.setItem(e.ablage,JSON.stringify(ausMap(e.ablage,m)));
   window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:[e.ablage,"mietixPapierkorb"]}));return true};
@@ -950,6 +954,9 @@ function angebotDaten(){const von=$("von").value,bis=$("bis").value,dauer=tage(v
 function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)return;
   let l=[];try{l=JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")}catch(e){}
   let x=ANG_ANFRAGE?l.find(a=>a.id===ANG_ANFRAGE):null;
+  // andere Nummer als in der Anfrage = anderer Kunde: neue Anfrage statt die des vorigen Kunden überschreiben (Liste Punkt 2)
+  const zif=t=>String(t||"").replace(/\D/g,"").replace(/^(00)?49/,"0");
+  if(x&&nr&&x.nummer&&zif(x.nummer)!==zif(nr)){x=null;ANG_ANFRAGE=null}
   if(!x&&!nr)return;
   if(!x){const j=new Date();x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(j),uhr:String(j.getHours()).padStart(2,"0")+":"+String(j.getMinutes()).padStart(2,"0"),
     name:"",alter:"",ort:"",nummer:nr,notiz:"Angebot aus dem Kalender",status:"angebot"};l.push(x);ANG_ANFRAGE=x.id}
@@ -963,6 +970,30 @@ function artZeigen(){[...$("wahlArt").children].forEach(c=>c.classList.toggle("a
   artZeigen();textAngefasst=false;zeichne()});
 artZeigen();
 function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=false;reiter("ang");AUSWAHL=new Set([auto]);zeichne()}
+/* Angebot als Bild (aus dem alten Preisrechner, Liste Punkt 9): nur bei einem Auto */
+function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.find(x=>x.n===d.auto);if(!c)return null;
+  const dauer=tage(d.von,d.bis),liste=preis(c,wtIndex(ausISO(d.von)),dauer)||d.preis,B=1080,H=1350,k=document.createElement("canvas");k.width=B;k.height=H;
+  const g=k.getContext("2d"),S=(gr,w)=>{g.font=(w||800)+" "+gr+"px -apple-system,Helvetica,Arial,sans-serif"},HELL="#F4F1EC",LEISE="rgba(244,241,236,.45)",E0=n=>Math.round(n).toLocaleString("de-DE")+" €";
+  const WT=["SO","MO","DI","MI","DO","FR","SA"],dd=t=>{const x=ausISO(t);return WT[x.getDay()]+" "+String(x.getDate()).padStart(2,"0")+"."+String(x.getMonth()+1).padStart(2,"0")+"."};
+  const gr=g.createLinearGradient(0,0,B*.35,H);gr.addColorStop(0,"#1C1C20");gr.addColorStop(.55,"#131316");gr.addColorStop(1,"#0A0A0C");g.fillStyle=gr;g.fillRect(0,0,B,H);
+  const li=g.createRadialGradient(B*.86,-140,60,B*.86,-140,980);li.addColorStop(0,"rgba(255,240,220,.15)");li.addColorStop(1,"rgba(255,236,212,0)");g.fillStyle=li;g.fillRect(0,0,B,1000);
+  g.textAlign="center";S(30,700);g.fillStyle=LEISE;g.fillText("MIETIX SPORTWAGENVERMIETUNG",B/2,120);
+  g.font="300 74px -apple-system,Helvetica,Arial,sans-serif";g.fillStyle=HELL;g.fillText(c.n.toUpperCase(),B/2,226);
+  g.fillStyle="rgba(196,22,28,.85)";g.fillRect(B/2-52,264,104,3);
+  S(34,500);g.fillStyle=LEISE;g.fillText(dd(d.von)+" "+d.vonU+"   BIS   "+dd(d.bis)+" "+d.bisU,B/2,340);g.fillText(dauer+(dauer===1?" TAG":" TAGE"),B/2,392);
+  let y=520;const proz=liste>d.preis+0.5?Math.round((1-d.preis/liste)*100):0;
+  if(proz>0){S(46,700);g.fillStyle="#C4161C";g.fillText(proz+" % RABATT",B/2,y);S(40,600);g.fillStyle=LEISE;const alt="statt "+E0(liste);g.fillText(alt,B/2,y+72);
+    const aw=g.measureText(alt).width,zb=g.measureText("statt ").width;g.strokeStyle=LEISE;g.lineWidth=3;g.beginPath();g.moveTo(B/2-aw/2+zb-2,y+58);g.lineTo(B/2+aw/2+2,y+58);g.stroke();y+=140}else y+=40;
+  S(140,800);g.fillStyle=HELL;g.fillText(E0(d.preis),B/2,y+90);S(34,500);g.fillStyle=LEISE;g.fillText("für den kompletten Zeitraum",B/2,y+146);y+=230;
+  [["Kilometer",(+d.freikm||0).toLocaleString("de-DE")+" km inklusive"],["Kaution",+c.kaution>0?E0(+c.kaution)+", kommt zurück":"auf Anfrage"]].forEach(([a,b])=>{
+    g.textAlign="left";g.fillStyle="rgba(244,241,236,.14)";g.fillRect(96,y-34,B-192,1);S(30,600);g.fillStyle=LEISE;g.fillText(a.toUpperCase(),96,y+10);
+    g.textAlign="right";S(34,700);g.fillStyle=HELL;g.fillText(b,B-96,y+10);y+=76});
+  g.textAlign="center";S(30,500);g.fillStyle=LEISE;g.fillText(dauer>1?"Preis gilt nur für den kompletten Zeitraum am Stück":"Preis gilt für den genannten Tag",B/2,H-92);return k}
+(function(){const kn=document.createElement("button");kn.className="knopf hell";kn.type="button";kn.id="bildKnopf";kn.textContent="Angebot als Bild";$("kopieren").after(kn);
+  kn.onclick=()=>{const k=angebotBild();if(!k){alert("Für ein Bild bitte genau ein freies Auto und den Zeitraum wählen.");return}angebotMerken();
+    const name="Mietix_Angebot_"+angebotDaten().auto.replace(/[^A-Za-z0-9]+/g,"_")+".jpg";
+    k.toBlob(async b=>{const f=new File([b],name,{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){}}
+      const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},"image/jpeg",.92)}})();
 (function(){const s=$("senden").onclick,k=$("kopieren").onclick;
   $("senden").onclick=async()=>{angebotMerken();await s()};$("kopieren").onclick=async()=>{angebotMerken();await k()}})();
 // ?zeige=angebot&anfrage=ID&auto=&von=&bis=&vonU=&bisU=&knr= öffnet das Angebot schon ausgefüllt
@@ -1089,7 +1120,90 @@ $("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").v
   B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
   const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
 </script>
-<script>
+<script>/* Mietix Kundenstamm (seit 28.10.2026): ein Kunde, einmal gespeichert, überall gefunden.
+   Quelle: mietixKunden (Name -> Daten, abgeglichen über alle Geräte), dazu alles, was in Mietverträgen (mietixVorgaenge)
+   und Anfragen (mietixAnfragen) steht. Nichts wird doppelt eingetippt: Suche nach Name, Telefon, Geburtsdatum, Ort.
+   window.mietixKunden.alle()               alle Kunden mit Verlauf (Mietverträge, Anfragen, Schäden)
+   window.mietixKunden.finde(text)          Treffer zu einem Suchtext
+   window.mietixKunden.anhaengen(feld, auf)  Trefferliste unter einem Eingabefeld, antippen ruft auf(kunde)
+   window.mietixKunden.merken(name, werte)  Felder eines Kunden im gemeinsamen Speicher ändern */
+(function(){
+const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
+const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const norm=s=>String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();   // Çelik findet man auch als celik
+const ziffern=n=>String(n||"").replace(/\D/g,"").replace(/^0049/,"0").replace(/^49/,"0");
+const de=s=>s&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s.split("-").reverse().join("."):String(s||"");
+const heute=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const zahl=s=>{if(typeof s==="number")return s;s=String(s||"").replace(/[^\d,.-]/g,"");if(!s)return 0;
+  if(s.includes(",")){s=s.replace(/\./g,"").replace(",",".")}else if((s.match(/\./g)||[]).length>1||/\.\d{3}$/.test(s))s=s.replace(/\./g,"");return +s||0};
+const leer=n=>({name:n,telefon:"",anschrift:"",geb:"",gebort:"",email:"",ort:"",notiz:"",keineAngebote:false,gesperrt:false,angeschrieben:"",
+  rechtsstreit:false,schadenOffen:0,schadenFaelle:0,schaeden:[],vertraege:[],anfragen:[],quelle:""});
+function alle(){
+  const K=lies("mietixKunden",{}),V=lies("mietixVorgaenge",[]),A=lies("mietixAnfragen",[]),m={},h=heute();
+  const hol=(name,quelle)=>{const k=norm(name);if(!k)return null;if(!m[k]){m[k]=leer(String(name).trim());m[k].quelle=quelle}return m[k]};
+  Object.keys(K).forEach(n=>{const d=K[n];if(!d||d._weg)return;const e=hol(n,"kunden");if(!e)return;
+    ["telefon","anschrift","geb","gebort","email","ort","notiz","angeschrieben"].forEach(f=>{if(d[f])e[f]=String(d[f])});
+    e.keineAngebote=!!d.keineAngebote;e.gesperrt=!!d.gesperrt;e.rechtsstreit=!!d.rechtsstreit;
+    e.schadenOffen=+d.schadenOffen||0;e.schadenFaelle=+d.schadenFaelle||0;if(Array.isArray(d.schaeden))e.schaeden=d.schaeden});
+  V.forEach(v=>{if(!v||!v.name)return;const e=hol(v.name,"vertrag");if(!e)return;
+    if(!e.gesperrt)["telefon","anschrift","geb","gebort","email"].forEach(f=>{if(!e[f]&&v[f])e[f]=String(v[f])});
+    const z=v.zahlung||{},rest=z.rest||{};
+    e.vertraege.push({nr:v.nr,auto:v.auto||"",von:v.vonD||"",bis:v.bisD||"",preis:zahl(v.gesamt||v.preis1),status:v.status||"",
+      mieteOffen:!!(v.vonD&&v.vonD<h&&!rest.am&&zahl(rest.betrag))})});
+  A.forEach(a=>{if(!a||!a.name)return;const e=hol(a.name,"anfrage");if(!e)return;
+    if(!e.gesperrt){if(!e.telefon&&a.nummer)e.telefon=String(a.nummer);if(!e.ort&&a.ort)e.ort=String(a.ort)}
+    e.anfragen.push({tag:a.tag||"",auto:a.auto||"",von:a.von||"",bis:a.bis||"",status:a.status||""})});
+  return Object.values(m).map(e=>{
+    e.vertraege.sort((a,b)=>(a.von||"")<(b.von||"")?-1:1);e.anfragen.sort((a,b)=>(a.tag||"")<(b.tag||"")?-1:1);
+    e.mieten=e.vertraege.length;e.zuletzt=e.mieten?e.vertraege[e.mieten-1].von:"";e.letztesAuto=e.mieten?e.vertraege[e.mieten-1].auto:"";
+    e.umsatz=e.vertraege.reduce((s,v)=>s+(v.preis||0),0);
+    if(!e.ort&&e.anschrift){const t=e.anschrift.match(/\b\d{5}\s+(.+)$/);if(t)e.ort=t[1].trim()}
+    const w=[];if(e.rechtsstreit)w.push("Rechtsstreit");if(e.schadenOffen)w.push("Schaden offen "+e.schadenOffen.toLocaleString("de-DE",{style:"currency",currency:"EUR"}));
+    const mo=e.vertraege.filter(v=>v.mieteOffen);if(mo.length)w.push("Miete nicht bezahlt ("+mo.map(v=>v.auto).join(", ")+")");
+    e.warn=w;e.alter=alter(e.geb);return e})}
+function alter(geb){if(!/^\d{4}-\d{2}-\d{2}$/.test(geb||""))return null;const g=new Date(geb),h=new Date();
+  let a=h.getFullYear()-g.getFullYear();if(h.getMonth()<g.getMonth()||(h.getMonth()===g.getMonth()&&h.getDate()<g.getDate()))a--;return a>0&&a<120?a:null}
+function passt(e,tok){const t=norm(tok),z=ziffern(tok);
+  if(t&&(norm(e.name).includes(t)||norm(e.ort).includes(t)||norm(e.anschrift).includes(t)||norm(e.email).includes(t)||norm(e.gebort).includes(t)))return true;
+  if(z.length>=3&&ziffern(e.telefon).includes(z))return true;
+  if(e.geb&&(de(e.geb).includes(tok.trim())||e.geb.includes(tok.trim())))return true;
+  if(/^\d{1,2}\.\d{1,2}\.?$/.test(tok.trim())&&e.geb){const p=tok.trim().replace(/\.$/,"").split(".");if(e.geb.slice(5)===p[1].padStart(2,"0")+"-"+p[0].padStart(2,"0"))return true}
+  return false}
+function finde(text,liste){const tok=String(text||"").trim().split(/\s+/).filter(Boolean);if(!tok.length)return[];
+  return (liste||alle()).filter(e=>tok.every(t=>passt(e,t))).sort((a,b)=>b.mieten-a.mieten||norm(a.name).localeCompare(norm(b.name)))}
+function merken(name,werte){const K=lies("mietixKunden",{});const alt=Object.keys(K).find(n=>norm(n)===norm(name))||String(name).trim();
+  const d=Object.assign({},K[alt]||{});Object.keys(werte).forEach(k=>{if(werte[k]===null||werte[k]===undefined||werte[k]==="")delete d[k];else d[k]=werte[k]});
+  K[alt]=d;schreib("mietixKunden",K);return d}
+function zeile(e){const info=[e.geb?"geb. "+de(e.geb):"",e.telefon,e.ort,e.mieten?e.mieten+(e.mieten===1?" Miete":" Mieten"):"noch kein Mietvertrag"].filter(Boolean).join("  |  ");
+  return'<div class="ksT"><b>'+esc(e.name)+(e.warn.length?' <i class="ksWarn">ACHTUNG</i>':"")+'</b><span>'+esc(info)+'</span></div>'}
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+let cssDa=false;
+function css(){if(cssDa)return;cssDa=true;const c=document.createElement("style");
+  c.textContent=".ksL{border:1px solid #E4E4E7;border-radius:12px;background:#fff;margin-top:4px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.08)}"+
+    ".ksT{padding:10px 12px;border-bottom:1px solid #F0F0F2;cursor:pointer}.ksT:last-child{border-bottom:0}.ksT:active{background:#FDECEC}"+
+    ".ksT b{display:block;font-size:15px;color:#2E2E30}.ksT span{display:block;font-size:12px;color:#6F6F72;margin-top:2px}"+
+    ".ksWarn{font-style:normal;color:#C4161C;font-size:11px;margin-left:6px}.ksTipp{padding:9px 12px;font-size:12px;color:#6F6F72}";document.head.appendChild(c)}
+function anhaengen(feld,auf,opt){opt=opt||{};css();const box=document.createElement("div");box.className="ksL";box.style.display="none";
+  feld.insertAdjacentElement("afterend",box);let zu=null;
+  const zeichne=()=>{const q=feld.value;if(norm(q).length<2&&ziffern(q).length<3){box.style.display="none";return}
+    const tr=finde(q).slice(0,opt.max||6);
+    if(!tr.length){box.style.display="none";return}
+    box.innerHTML=tr.map(zeile).join("")+'<div class="ksTipp">Antippen: alle Daten werden eingetragen</div>';box.style.display="block";
+    [...box.querySelectorAll(".ksT")].forEach((el,i)=>{el.onmousedown=ev=>ev.preventDefault();el.onclick=()=>{box.style.display="none";auf(tr[i])}})};
+  feld.addEventListener("input",zeichne);feld.addEventListener("focus",zeichne);
+  feld.addEventListener("blur",()=>{zu=setTimeout(()=>box.style.display="none",250)});
+  return{neu:zeichne}}
+window.mietixKunden={alle,finde,anhaengen,merken,norm,ziffern,de,alter,heute};
+window.dispatchEvent(new Event("mietix-kunden-bereit"));
+})();
+</script><script>
+(function(){const f=document.getElementById("bName");if(!f||!window.mietixKunden)return;
+  mietixKunden.anhaengen(f,k=>{f.value=k.name;const g=(id,w)=>{const e=document.getElementById(id);if(e&&w&&!e.value.trim())e.value=w};
+    g("bTel",k.telefon);const a=String(k.anschrift||""),m=a.match(/^(.*?),?\s*(\d{5}\s+.+)$/);
+    if(m){g("bStr",m[1].trim());g("bOrt",m[2].trim())}else g("bStr",a);if(!m&&k.ort)g("bOrt",k.ort);
+    g("bGeb",k.geb);g("bGebOrt",k.gebort);
+    if(k.warn&&k.warn.length)setTimeout(()=>alert("Achtung bei "+k.name+": "+k.warn.join(", ")),50)})})();
+</script><script>
 /* Zwei Seiten aus einem Bauplan (30.10.2026, Baran): index.html = Kalender, angebot.html = Angebot.
    Gleiche Preisrechnung, gleiche Daten, nur anders aufgeteilt. */
 (function(){const SEITE="kal";
