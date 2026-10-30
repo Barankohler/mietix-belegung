@@ -239,7 +239,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
   </div>
 
   <footer>
-    Belegt: Verträge, gebuchte Anfragen und Sperren. Preisstand: <span id="preisstand">21.08.2026</span>.
+    Belegt: Mietverträge, gebuchte Anfragen und Sperren. Preisstand: <span id="preisstand">21.08.2026</span>.
   </footer>
 </main>
 <div id="blattBg"></div><div id="blatt"></div>
@@ -380,7 +380,7 @@ function melde(text,gut){
 function laden(){
   const b=[];
   lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
-    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Vertrag "+v.nr,fest:true})});
+    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>x.kunde===a.name&&x.von===a.von&&x.fahrzeug===a.auto))
     b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
@@ -443,7 +443,7 @@ function zeichne(){
     +'<span class="bzeit">'+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))
     +(b.kunde?" | "+b.kunde:"")+(b.notiz?" | "+b.notiz:"")+'</span></span>'
     +(b.fest?'':'<button class="weg" data-id="'+b.id+'">Löschen</button>')+'</div>').join("");
-  $("leer").textContent=sortiert.length?"":"Nichts belegt. Verträge und gebuchte Anfragen erscheinen hier von selbst.";
+  $("leer").textContent=sortiert.length?"":"Nichts belegt. Mietverträge und gebuchte Anfragen erscheinen hier von selbst.";
   [...document.querySelectorAll(".weg")].forEach(k=>k.onclick=()=>loeschen(k.dataset.id));
 }
 
@@ -573,7 +573,7 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
   if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
   if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
-      b.nr?{t:"Vertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
+      b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
       b.aid?{t:"Anfrage im Anfragen-Buch",voll:true,href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
       b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
       {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
@@ -589,13 +589,13 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
   const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
   const knapp=belegtVon(auto,nv,nb).filter(b=>!belegtZeit(auto,vonZ,bisZ).includes(b)).map(b=>b.bis===nv?" Frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt zurück.":" Bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab.").join("");
   blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
-      {t:"Vertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
+      {t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
       rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
       {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;fAuf("fSperren")}}].filter(Boolean))}
 let LETZTE_ZELLE=null,VON_AUTO=false,BIS_AUTO=false;
-// Gewählte Uhrzeit läuft mit in Vertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
+// Gewählte Uhrzeit läuft mit in Mietvertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
 const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
 /* Kilometer dazu: Staffel je Auto aus der Preisdatei, pro Tag, genau wie im Preisrechner */
 let KM=0;
@@ -704,7 +704,7 @@ function standAnzeigen(){
 }
 standAnzeigen();
 </script>
-<script>/* Mietix Abgleich: Verträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
+<script>/* Mietix Abgleich: Mietverträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
    Wird von tools/vertrag/build_html.py und tools/anfragen/build_html.py in die Seite eingebaut.
    - Die Werkzeuge arbeiten weiter nur mit localStorage. Dieser Baustein merkt jede Änderung an den vier Speichern,
      schickt sie hoch und holt neue Stände der anderen Geräte (beim Start, beim Zurückkehren zur Seite, jede Minute).
@@ -828,9 +828,9 @@ Storage.prototype.setItem=function(k,v){const alt=(this===localStorage&&SPEICHER
    2. Papierkorb: was aus einer Liste verschwindet, landet in mietixPapierkorb (Tabelle papierkorb, 90 Tage) und
       kann in der Zentrale wiederhergestellt werden (window.mietixWiederherstellen).
    3. Die Datenbank schreibt dazu jede Änderung in die Tabelle verlauf (SQL in tools/vertrag/speicher.sql). */
-const NAMEN={mietixVorgaenge:"Vertrag",mietixAnfragen:"Anfrage",mietixKunden:"Kunde",mietixFahrzeuge:"Fahrzeug",mietixAusgaben:"Ausgabe",
+const NAMEN={mietixVorgaenge:"Mietvertrag",mietixAnfragen:"Anfrage",mietixKunden:"Kunde",mietixFahrzeuge:"Fahrzeug",mietixAusgaben:"Ausgabe",
   mietixSperren:"Sperre",mietixAufgaben:"Aufgabe",mietixZustand:"Zustand",mietixAutos:"Auto"};
-const BESCHRIFTUNG={mietixVorgaenge:x=>"Vertrag "+(x.nr||"")+" "+(x.name||""),mietixAnfragen:x=>"Anfrage "+(x.name||"")+(x.auto?", "+x.auto:""),
+const BESCHRIFTUNG={mietixVorgaenge:x=>"Mietvertrag "+(x.nr||"")+" "+(x.name||""),mietixAnfragen:x=>"Anfrage "+(x.name||"")+(x.auto?", "+x.auto:""),
   mietixAusgaben:x=>"Ausgabe "+(x.betrag!=null?String(x.betrag).replace(".",",")+" €":"")+(x.art?", "+String(x.art).trim():"")+(x.auto?", "+x.auto:""),
   mietixSperren:x=>"Sperre "+(x.auto||"")+(x.von?" ab "+x.von.split("-").reverse().join("."):""),mietixAufgaben:x=>"Aufgabe "+(x.aufgabe||""),
   mietixZustand:x=>"Zustand "+(x.auto||"")+": "+(x.text||"")};
@@ -844,7 +844,7 @@ function sicherheitsnetz(k,alt,neu){
       const grenze=new Date(Date.now()-90*864e5).toISOString();merk("mietixPapierkorb",pk.filter(x=>x.zeit>grenze));
       if(sitzung){clearTimeout(warte);warte=setTimeout(abgleichen,800)}}}catch(e){}}
   if(rueckLaeuft)return;
-  // Rückgängig: Änderungen innerhalb von 0,7 Sekunden gehören zusammen (z. B. Vertrag + Kunde + Fahrzeug)
+  // Rückgängig: Änderungen innerhalb von 0,7 Sekunden gehören zusammen (z. B. Mietvertrag + Kunde + Fahrzeug)
   const jetzt=Date.now();if(!burst||jetzt-burstZeit>700)burst={};burstZeit=jetzt;if(!(k in burst))burst[k]=alt;
   rueckZeigen(Object.keys(burst).map(x=>NAMEN[x]||x).filter((x,i,a)=>a.indexOf(x)===i).join(", "))}
 let rueckLaeuft=false,rueckTimer=null;
@@ -853,13 +853,13 @@ function rueckZeigen(text){let el=document.getElementById("mietixRueck");
     el.querySelector("button").onclick=rueckgaengig}
   el.querySelector("span").textContent="Gespeichert: "+text;el.classList.add("an");clearTimeout(rueckTimer);rueckTimer=setTimeout(()=>el.classList.remove("an"),8000)}
 function rueckgaengig(){if(!burst)return;
-  if("mietixVorgaenge" in burst&&!confirm("Die letzte Änderung am Vertrag wird zurückgenommen (zum Beispiel das Speichern). Was im Formular steht, bleibt stehen. Weiter?"))return;
+  if("mietixVorgaenge" in burst&&!confirm("Die letzte Änderung am Mietvertrag wird zurückgenommen (zum Beispiel das Speichern). Was im Formular steht, bleibt stehen. Weiter?"))return;
   const b=burst;burst=null;rueckLaeuft=true;
   try{Object.keys(b).forEach(k=>{if(b[k]===null)localStorage.removeItem(k);else roh.call(localStorage,k,b[k])})}finally{rueckLaeuft=false}
   const el=document.getElementById("mietixRueck");if(el){el.querySelector("span").textContent="Zurückgeholt.";clearTimeout(rueckTimer);rueckTimer=setTimeout(()=>el.classList.remove("an"),1500)}
   window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:Object.keys(b)}));clearTimeout(warte);warte=setTimeout(abgleichen,800)}
 window.mietixWiederherstellen=function(id){const pk=lies("mietixPapierkorb",[]),e=pk.find(x=>x.id===id);if(!e)return false;
-  if(e.ablage==="mietixEntwurfVertrag"){merk("mietixPapierkorb",pk.filter(x=>x.id!==id));   // angefangener Vertrag: liegt nur auf dem Gerät, frisch für 48 Stunden
+  if(e.ablage==="mietixEntwurfVertrag"){merk("mietixPapierkorb",pk.filter(x=>x.id!==id));   // angefangener Mietvertrag: liegt nur auf dem Gerät, frisch für 48 Stunden
     roh.call(localStorage,"mietixEntwurfVertrag",JSON.stringify(Object.assign({},e.eintrag,{zeit:new Date().toISOString()})));
     window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:["mietixPapierkorb"]}));clearTimeout(warte);warte=setTimeout(abgleichen,800);return true}
   const c=SPEICHER[e.ablage];if(!c)return false;const m=alsMap(e.ablage,lies(e.ablage,c.liste?[]:{}));m[e.schluessel]=e.eintrag;
