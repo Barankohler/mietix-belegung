@@ -381,7 +381,9 @@ function laden(){
   const b=[];
   lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
     b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
-  lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>x.kunde===a.name&&x.von===a.von&&x.fahrzeug===a.auto))
+  // Anfrage mit Mietvertrag nicht doppelt zeigen: über die Nummer (a.vertrag) oder den Namen ohne Leerzeichen und Groß/klein (30.10.2026)
+  const nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
+  lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>(a.vertrag&&x.nr===a.vertrag)||(nG(x.kunde)===nG(a.name)&&x.fahrzeug===a.auto&&x.von<a.bis&&x.bis>a.von)))
     b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
   BUCHUNGEN=b;zeichne();
