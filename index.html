@@ -977,5 +977,88 @@ function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=f
     if(x&&x.angebot){KM_EXTRA=+x.angebot.kmExtra||0;if(x.angebot.kmInkl!=null){KM_INKL=+x.angebot.kmInkl;KM_TAGE=tage(g("von"),g("bis"))}if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
     const a=g("auto");if(a){EINZEL=true;EIN_AUTO=a;artZeigen()}AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
   setzen()})();
-</script></body>
+</script>
+<div class="fenster" id="fBuchen" role="dialog" aria-label="Neue Buchung"><div class="fKopf"><h3>Neue Buchung</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+  <div class="bInfo" id="bZeit"></div>
+  <label class="bL">Fahrzeug</label><select id="bAuto"></select>
+  <div class="bWarn" id="bWarn"></div>
+  <label class="bL">Vor- und Nachname *</label><input id="bName" autocomplete="off">
+  <label class="bL">Telefon</label><input id="bTel" inputmode="tel">
+  <label class="bL">Mietpreis für den ganzen Zeitraum €</label><input id="bPreis" inputmode="decimal">
+  <div class="bFrage"><b>Anzahlung erhalten?</b><div class="bJn" id="bAnzJn"><div data-jn="nein" class="an">Nein</div><div data-jn="ja">Ja</div></div></div>
+  <div id="bAnzW" class="versteckt"><label class="bL">Betrag €</label><input id="bAnz" inputmode="decimal">
+    <div class="bJn" id="bArt"><div data-art="bar" class="an">Bar</div><div data-art="ec">EC-Karte</div><div data-art="kredit">Kreditkarte</div><div data-art="ueberweisung">Überweisung</div></div></div>
+  <label class="bL">Notiz (nur für uns)</label><input id="bNotiz">
+  <button class="bOk" id="bOk" type="button">Buchung speichern</button>
+  <div class="bTipp">Die Buchung steht danach im Kalender, unter „Gebucht“ in den Anfragen und füllt später den Mietvertrag aus.</div>
+</div>
+<style>
+#werFrei{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:12px}
+#werFrei h2{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+#werFrei .tPruef{padding:0;margin-top:8px}#werFrei .tChips{padding:0}
+.nBuch{display:block;width:100%;margin:0 0 12px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:14px;font:800 16px Inter,system-ui,sans-serif;cursor:pointer}
+#freiKopf{font-weight:800;margin:12px 0 6px;font-size:15px}
+.fZeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #EFEFF1}
+.fZeile b{display:block;font-size:15px}.fZeile i{display:block;font-style:normal;font-size:12px;color:#6F6F72;margin-top:2px}
+.fZeile.belegt{opacity:.45}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
+.bInfo{background:#F6F6F7;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px}
+.bL{display:block;font-size:13px;font-weight:700;color:#6F6F72;margin:12px 0 4px}
+#fBuchen input,#fBuchen select{width:100%;border:1.5px solid #E4E4E7;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit;background:#fff}
+.bFrage{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.bJn{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.bJn div{border:1.5px solid #E4E4E7;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer}.bJn div.an{background:var(--red);border-color:var(--red);color:#fff}
+.bWarn{color:var(--red);font-weight:800;font-size:13px;margin-top:6px}
+.bOk{display:block;width:100%;margin-top:16px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:15px;font:800 17px Inter,system-ui,sans-serif;cursor:pointer}
+.bTipp{font-size:12px;color:#6F6F72;margin-top:10px}
+.bMeld{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1B8A4B;color:#fff;padding:12px 18px;border-radius:999px;font-weight:800;z-index:60}
+</style>
+<script>
+/* Wer ist frei? und Neue Buchung (30.10.2026, Baran: am Telefon sofort sehen, was frei ist, und gleich buchen) */
+(function(){
+  const sk=$("sKal");if(!sk)return;
+  const box=document.createElement("div");box.id="werFrei";
+  box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><h2>Wer ist frei?</h2><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
+  sk.insertBefore(box,sk.firstChild);
+  const z=$("werZeit");const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)z.appendChild(tc);if(tp)z.appendChild(tp);
+})();
+const bTage=()=>tage($("von").value,$("bis").value);
+function bZeitText(){const v=$("von").value,b=$("bis").value,t=bTage();if(!v||!b||t<1)return"";
+  return wtKurz(ausISO(v))+" "+kurzD(ausISO(v))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(b))+" "+kurzD(ausISO(b))+" "+uhr($("bisU").value)+" ("+t+(t===1?" Tag":" Tage")+")"}
+function bPreis(n){const c=D.cars.find(x=>x.n===n);const v=$("von").value,t=bTage();if(!c||!v||t<1)return null;const p=preis(c,wtIndex(ausISO(v)),t);return p===null?null:Math.round(p)}
+function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,t=bTage();
+  if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
+  const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
+  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl[0];
+      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>belegt'+(x.notiz==="Sperre"?" (gesperrt)":x.kunde?" von "+esc(vorname(x.kunde)):"")+' bis '+kurzD(ausISO(x.bis))+'</i></div></div>'}
+    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i></div><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div>'});
+  $("freiKopf").textContent=bZeitText()+": "+n+" von "+D.cars.length+" frei";
+  $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
+  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch))}
+{const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
+function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
+  $("bWarn").textContent=bl.length?"Achtung: in dem Zeitraum schon belegt"+(bl[0].kunde?" ("+vorname(bl[0].kunde)+")":"")+".":""}
+function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
+  $("bZeit").textContent=bZeitText();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
+  $("bAuto").value=auto||D.cars[0].n;$("bName").value="";$("bTel").value="";$("bNotiz").value="";$("bAnz").value="";
+  const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";
+  bJn("nein");bWarnen();fAuf("fBuchen");setTimeout(()=>$("bName").focus(),250)}
+function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.dataset.jn===w));$("bAnzW").classList.toggle("versteckt",w!=="ja");
+  if(w==="ja"&&!$("bAnz").value){const p=parseFloat(String($("bPreis").value).replace(/\./g,"").replace(",","."));if(p)$("bAnz").value=String(Math.round(p*0.3))}}
+[...$("bAnzJn").children].forEach(c=>c.onclick=()=>bJn(c.dataset.jn));
+[...$("bArt").children].forEach(c=>c.onclick=()=>[...$("bArt").children].forEach(x=>x.classList.toggle("an",x===c)));
+$("bAuto").onchange=()=>{const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()};
+$("nBuch").onclick=()=>buchenAuf("");
+$("bOk").onclick=()=>{const name=$("bName").value.trim();if(!name){alert("Bitte den Namen eintragen.");$("bName").focus();return}
+  if($("bWarn").textContent&&!confirm($("bWarn").textContent+"\n\nTrotzdem buchen?"))return;
+  const zahl=x=>parseFloat(String(x||"").replace(/\./g,"").replace(",","."))||0;const v=$("von").value,b=$("bis").value,t=bTage(),h=new Date();
+  const anzJa=[...$("bAnzJn").children].some(c=>c.dataset.jn==="ja"&&c.classList.contains("an"))&&zahl($("bAnz").value)>0;
+  const art=([...$("bArt").children].find(c=>c.classList.contains("an"))||{dataset:{}}).dataset.art||"bar";
+  const x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(h),uhr:String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0"),
+    name,alter:"",ort:"",nummer:$("bTel").value.trim(),auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,
+    notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",
+    angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:(D.freiKm||150)*t,freikm:(D.freiKm||150)*t,kmExtra:0,rabatt:0,am:h.toISOString()}};
+  if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:nachISO(h)};
+  const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
+  const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
+</script>
+</body>
 </html>
