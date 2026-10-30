@@ -341,6 +341,7 @@ function nachricht(freieAutos,von,bis,dauer,anzFrei){
     z.push("- "+x.c.n+": "+EUR.format(x.end)
            +(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
   });
+  if(mitPreis.length===1&&+mitPreis[0].c.kaution>0)z.push("Kaution: "+(+mitPreis[0].c.kaution).toLocaleString("de-DE")+" €");
   z.push("");
   z.push("Alle Preise für den kompletten Zeitraum, "
     +kmSatz(dauer)+". Weitere Kilometer sind zubuchbar.");
