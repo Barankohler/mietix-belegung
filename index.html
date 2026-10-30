@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
-<head><style>input,select,textarea{font-size:16px;font-family:inherit;max-width:100%;box-sizing:border-box}input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px}select{min-width:0}</style>
+<head><script>if(new URLSearchParams(location.search).get("zeige")==="angebot")location.replace("angebot.html"+location.search)</script><style>input,select,textarea{font-size:16px;font-family:inherit;max-width:100%;box-sizing:border-box}input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px}select{min-width:0}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2E2E30">
@@ -1007,7 +1007,8 @@ function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=f
 #freiKopf{font-weight:800;margin:12px 0 6px;font-size:15px}
 .fZeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #EFEFF1}
 .fZeile b{display:block;font-size:15px}.fZeile i{display:block;font-style:normal;font-size:12px;color:#6F6F72;margin-top:2px}
-.fZeile.belegt>div:first-child{opacity:.45}.fZeile .fRot{flex:0 0 auto;max-width:55%;text-align:right;color:var(--red);font-weight:800;font-size:14px}
+.fZeile.belegt>div:first-child{opacity:.45}.fKn{display:flex;gap:6px;flex:0 0 auto}
+.fZeile button.hellK{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}.fZeile .fRot{flex:0 0 auto;max-width:55%;text-align:right;color:var(--red);font-weight:800;font-size:14px}
 .fZeile i.fRaus{color:var(--red);font-weight:700}#werFrei #tagInfo{display:none}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
 .bInfo{background:#F6F6F7;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
 .bZr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bZr>div{min-width:0}
@@ -1042,10 +1043,11 @@ function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=
       return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
     // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
     const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
-    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div>'});
+    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
   $("freiKopf").textContent=bZeitText()+": "+n+" von "+D.cars.length+" frei";
   $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
-  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch))}
+  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch));
+  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>angebotFuer(x.dataset.ang))}
 {const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
 function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
   $("bWarn").textContent=bl.length?"Achtung: in dem Zeitraum schon belegt"+(bl[0].kunde?" ("+vorname(bl[0].kunde)+")":"")+".":""}
@@ -1087,5 +1089,27 @@ $("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").v
   B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
   const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
 </script>
-</body>
+<script>
+/* Zwei Seiten aus einem Bauplan (30.10.2026, Baran): index.html = Kalender, angebot.html = Angebot.
+   Gleiche Preisrechnung, gleiche Daten, nur anders aufgeteilt. */
+(function(){const SEITE="kal";
+  const r0=reiter;reiter=function(){return r0(SEITE)};
+  $("reiter2").classList.add("versteckt");
+  const titel=document.querySelector("h1 span");
+  if(SEITE==="kal"){if(titel)titel.textContent="KALENDER";document.title="Mietix Kalender";
+    // Angebot für ein Auto: auf die Angebot-Seite, Auto und Zeitraum schon ausgefüllt
+    angebotFuer=function(auto){const q=new URLSearchParams({zeige:"angebot",auto,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value});location.href="angebot.html?"+q};
+    return}
+  if(titel)titel.textContent="ANGEBOT";document.title="Mietix Angebot";
+  // Reihenfolge: Zeitraum, Auto, Kilometer, Rabatt, Nachricht
+  const blk=id=>$(id)&&$(id).closest(".block");const zb=blk("angZeitraum"),fz=blk("liste");
+  $("angZeitraum").classList.add("versteckt");
+  const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)zb.appendChild(tc);if(tp)zb.appendChild(tp);
+  if(fz&&zb)zb.after(fz);
+  const k=document.createElement("a");k.href="./";k.className="zumKal";k.textContent="Zum Kalender ›";$("sAng").appendChild(k);
+  try{reiter("ang")}catch(e){}
+})();
+</script>
+<style>.zumKal{display:block;text-align:center;margin:18px 0 6px;color:var(--grey);font-weight:700}
+#sAng .tChips{padding:0}#sAng .tChips div{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 10px rgba(0,0,0,.05)}#sAng .tChips div.an{background:var(--red)}#sAng .tPruef{margin:10px 0 0;padding-top:10px}#sAng #tagInfo{display:none}</style></body>
 </html>

@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><style>input,select,textarea{font-size:16px;font-family:inherit;max-width:100%;box-sizing:border-box}input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px}select{min-width:0}</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2E2E30">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mietix Verfügbarkeiten">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Mietix Verfügbarkeiten</title>
+<style>
+:root{--red:#C4161C;--dark:#2E2E30;--grey:#6F6F72;--line:#E2E2E4;--bg:#F2F2F4;
+      --frei:#1B9E4B;--freibg:#E8F6EE;--belegtbg:#FDEBEC;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+     background:var(--bg);color:var(--dark);-webkit-text-size-adjust:100%;padding-bottom:34px;}
+header{background:var(--dark);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;
+       border-bottom:3px solid var(--red);display:flex;justify-content:space-between;align-items:center;}
+header h1{font-size:15px;letter-spacing:1.2px;font-weight:800;}
+header h1 span{color:var(--red);}
+#zahnrad{font-size:18px;cursor:pointer;padding:2px 4px;}
+main{padding:18px 18px 0;}
+.feldname{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--grey);
+          margin:0 0 8px 3px;font-weight:800;}
+.block{margin-bottom:20px;}
+.karte{background:#fff;border-radius:16px;padding:17px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+input[type=date],input[type=text],input[type=url]{width:100%;background:#fff;border:none;
+  border-radius:16px;padding:16px 17px;font-size:18px;font-weight:700;font-family:inherit;
+  color:var(--dark);min-height:56px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
+.karte input{box-shadow:none;border:1px solid var(--line);font-size:17px;min-height:52px;}
+input[type=number]{width:100%;background:#fff;border:none;border-radius:16px;padding:16px 17px;
+  font-size:18px;font-weight:700;font-family:inherit;color:var(--dark);min-height:56px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+#rabchips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.rchip{background:#fff;border-radius:14px;padding:13px 4px;text-align:center;font-weight:800;
+  font-size:16px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
+.rchip.an{background:var(--red);color:#fff;}
+#zeitraumtext{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
+.zeile{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);}
+.zeile .name{font-size:16px;font-weight:800;}
+.zeile .info{display:block;font-size:12px;color:var(--grey);margin-top:3px;font-weight:600;}
+.marke{font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;white-space:nowrap;flex:none;}
+.marke.frei{background:var(--freibg);color:var(--frei);}
+.marke.belegt{background:var(--belegtbg);color:var(--red);}
+.marke.drin{background:var(--red);color:#fff;}
+.zeile.waehlbar{cursor:pointer;}
+.zeile.waehlbar:active{transform:scale(.99);}
+.zeile.waehlbar:not(.drin){opacity:.55;}
+.zeile.drin{box-shadow:0 0 0 2px var(--red),0 4px 12px rgba(196,22,28,.16);}
+.knopf{display:block;width:100%;margin-top:11px;border:none;border-radius:15px;padding:17px;
+  font-size:16px;font-weight:800;text-align:center;font-family:inherit;cursor:pointer;color:#fff;
+  background:var(--red);box-shadow:0 6px 18px rgba(196,22,28,.3);}
+.knopf:active{transform:scale(.985);}
+.knopf.hell{background:#fff;color:var(--dark);border:1.5px solid var(--line);box-shadow:none;}
+.knopf.gruen{background:#25D366;box-shadow:0 6px 18px rgba(37,211,102,.35);}
+#vorschau{width:100%;min-height:230px;font-size:16px;line-height:1.6;border:1px solid var(--line);
+  border-radius:13px;padding:14px;font-family:inherit;color:var(--dark);background:#FAFAFB;resize:vertical;}
+#knr{margin-top:11px;}
+#nrinfo{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
+.knopf.aus{background:#C9C9CC;pointer-events:none;box-shadow:none;}
+.feld2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.klein{font-size:11px;color:var(--grey);margin:7px 0 0 3px;font-weight:600;}
+#meldung{display:none;margin-top:13px;font-size:13px;font-weight:700;padding:12px 14px;border-radius:12px;margin-top:11px;}
+#meldung.gut{display:block;background:var(--freibg);color:var(--frei);}
+#meldung.schlecht{display:block;background:var(--belegtbg);color:var(--red);}
+.bzeile{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:12px 0;border-bottom:1px solid var(--line);}
+.bzeile:last-child{border-bottom:none;}
+.bzeile .bname{font-size:15px;font-weight:800;}
+.bzeile .bzeit{display:block;font-size:12px;color:var(--grey);margin-top:2px;font-weight:600;}
+.weg{background:none;border:none;color:var(--red);font-size:13px;font-weight:800;
+  cursor:pointer;font-family:inherit;padding:6px 4px;flex:none;}
+#leer{font-size:13px;color:var(--grey);font-weight:600;}
+footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
+#einbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:none;padding:24px 18px;
+  overflow-y:auto;}
+#einbg.auf{display:block;}
+#einkarte{background:#fff;border-radius:18px;padding:20px;max-width:520px;margin:0 auto;}
+#einkarte h3{font-size:17px;font-weight:800;margin-bottom:10px;}
+#einkarte p{font-size:13px;line-height:1.6;color:var(--grey);margin-bottom:12px;}
+#einkarte ol{font-size:13px;line-height:1.7;color:var(--dark);margin:0 0 14px 18px;}
+
+/* Tafel (29.10.2026) */
+#tafelKarte{background:#fff;border-radius:16px;padding:12px 0 10px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:10px}
+.tKopf{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px}
+.tKopf b{font-size:15px}.tKopf .tNav{display:flex;gap:6px}
+.tKopf .tNav div{padding:7px 11px;border-radius:999px;background:var(--bg);font-weight:800;font-size:13px;cursor:pointer;user-select:none}
+.tKopf .tNav div.an{background:var(--dark);color:#fff}
+#tafelRoll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+#tafelRoll::-webkit-scrollbar{display:none}
+#tafel{border-collapse:separate;border-spacing:0;table-layout:fixed}
+#tafel th,#tafel td{height:36px;padding:0;border-bottom:1px solid #F0F0F2}
+#tafel th.auto{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-size:12px;line-height:1.15;font-weight:800;padding:0 6px 0 12px;white-space:normal;width:96px;min-width:96px;max-width:96px;overflow:hidden;box-shadow:2px 0 0 #F0F0F2}
+#tafel th.tag{width:34px;min-width:34px;font-size:11px;font-weight:700;color:var(--grey);text-align:center;line-height:1.15;padding-bottom:4px;height:40px;vertical-align:bottom}
+#tafel th.tag.we{color:var(--dark)}#tafel th.tag.heute b{background:var(--red);color:#fff;border-radius:7px;padding:1px 5px}
+#tafel th.tag b{display:block;font-size:13px}
+#tafel td{width:34px;min-width:34px;position:relative;cursor:pointer}
+#tafel td i{position:absolute;top:3px;bottom:3px;left:1px;right:1px;border-radius:8px}
+#tafel td i.frei{background:#E8F6EE}#tafel td.we i.frei{background:#DDF1E5}
+#tafel td i.belegt{background:#F7C5C8;border-radius:0}#tafel td i.belegt.start{border-radius:8px 0 0 8px}#tafel td i.belegt.ende{border-radius:0 8px 8px 0}#tafel td i.belegt.start.ende{border-radius:8px}
+#tafel td i.sperre{background:#DADADF;border-radius:0}#tafel td i.sperre.start{border-radius:8px 0 0 8px}#tafel td i.sperre.ende{border-radius:0 8px 8px 0}
+#tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
+.feld2 input,input[type=date]{min-width:0}
+.feld2 input{padding:10px 8px;text-align:center;font-size:16px}
+.feld2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#spAuto{display:block;width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 36px 12px 14px;font-weight:700;font-size:16px;font-family:inherit;color:var(--dark);min-height:48px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238A8A8E' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center}main{overflow-x:hidden}
+#tafel td.heute{background:#FFF8F8}
+#tafel td b{position:absolute;top:3px;bottom:3px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;width:calc(var(--l) * 34px);min-width:44px;font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;pointer-events:none}
+#tafel td.sperre b{color:#4A4A4F}
+.tChips{display:flex;gap:7px;flex-wrap:wrap;padding:8px 14px 0}
+.tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
+.tChips div.an{background:var(--red);color:#fff}
+.tChips .tLab{flex-basis:100%;font-size:13px;color:#6F6F72;font-weight:600;margin-top:2px}
+.tLegende{display:flex;gap:14px;padding:8px 14px 0;font-size:11px;color:var(--grey);font-weight:700}
+.versteckt{display:none!important}
+#knr{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;font-weight:600;font-size:16px;font-family:inherit;min-height:50px}
+.reiter2{display:flex;gap:8px;margin:0 0 16px}
+.reiter2 div{flex:1;text-align:center;padding:13px;border-radius:14px;background:#fff;font-weight:800;font-size:16px;color:var(--grey);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045)}
+.reiter2 div.an{background:var(--red);color:#fff}
+#kmchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#angZeitraum{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;font-size:15px}
+#angZeitraum .aend{background:var(--bg);border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;white-space:nowrap}
+.tPruef{margin:12px 14px 0;border-top:1px solid #F0F0F2;padding-top:12px}
+.tZeile{display:flex;align-items:center;gap:8px;margin-bottom:8px}.tZeile span{width:30px;font-size:13px;font-weight:800;color:var(--grey)}
+.tZeile input[type=date]{flex:1;min-width:0;box-shadow:none;border:1px solid var(--line);font-size:16px;min-height:46px;padding:10px 12px;border-radius:12px}
+.tZeile select{width:92px;border:1px solid var(--line);border-radius:12px;padding:10px 8px;font-weight:700;font-size:16px;font-family:inherit;color:var(--dark);background:#fff;min-height:46px}
+#tagInfo{font-size:13px;font-weight:700;margin-top:6px;line-height:1.5}#tagInfo span{display:block;color:var(--dark)}#tagInfo span::before{content:"→ ";color:var(--red)}
+.zeile .info.ab{color:#9A6700}
+.tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
+.tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
+.fKnoepfe{display:grid;gap:10px;margin-top:18px}
+.fKnopf{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;text-align:left;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);min-height:60px}
+.fKnopf b{display:block;font-size:16px;font-weight:800;color:var(--dark)}.fKnopf i{display:block;font-style:normal;font-size:13px;color:var(--grey);margin-top:2px;font-weight:600}
+.fKnopf em{font-style:normal;font-size:28px;color:var(--red);font-weight:700;line-height:1}.fKnopf:active{background:#F6F6F7}
+.fBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}.fBg.auf{display:block}
+.fenster{position:fixed;left:0;right:0;bottom:0;z-index:51;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:none;box-shadow:0 -10px 30px rgba(0,0,0,.18);margin:0 auto;max-width:560px}
+.fenster.auf{display:block}
+@media(min-width:700px){.fenster{top:50%;bottom:auto;transform:translateY(-50%);border-radius:22px;width:calc(100% - 48px);padding:20px}}
+.fKopf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.fKopf h3{font-size:19px;font-weight:900;margin:0}
+.fZu{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:#F2F2F4;font-size:17px;font-weight:800;cursor:pointer;color:var(--dark)}
+.fText{font-size:14px;color:var(--grey);font-weight:600;margin:0 0 10px}
+#blattBg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:none}#blattBg.auf{display:block}
+#blatt{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:41;max-width:640px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.15);display:none}
+#blatt.auf{display:block}#blatt h3{font-size:18px;font-weight:900;margin-bottom:2px}#blatt .unter{font-size:14px;color:var(--grey);margin-bottom:10px;font-weight:600}
+#blatt .knopf{margin-top:8px;text-decoration:none}#blatt .knopf.voll{background:var(--red);color:#fff}
+#blatt .zu{display:block;text-align:center;font-size:13px;color:var(--grey);margin-top:12px;font-weight:700}
+@media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}#tafel td b{width:calc(var(--l) * 40px);font-size:13px}}
+
+#rabchips{display:none!important}
+#rab{font-size:22px;font-weight:800;text-align:center}
+#kmchips{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kmf{display:flex;flex-direction:column;gap:6px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.06)}
+.kmf span{font-size:13px;font-weight:700;color:var(--grey)}
+.kmf input{font-size:22px;font-weight:800;border:1.5px solid #E4E4E7;border-radius:10px;padding:8px 10px;width:100%;min-height:48px}
+.kmf b{font-size:13px;color:var(--grey)}
+</style>
+<style>#wahlArt{margin:0 0 12px}#wahlArt div{padding:11px 8px;font-size:15px;background:#F2F2F4;box-shadow:none}#wahlArt div.an{background:var(--red);color:#fff}</style></head>
+<body>
+<header>
+  <h1>MIETIX <span>VERFÜGBARKEITEN</span> <i id="abgleichPunkt" title="Abgleich aller Geräte" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#B0B0B3;vertical-align:middle;margin-left:4px"></i></h1>
+</header>
+<main>
+  <div id="abgleich" style="margin-top:14px"></div>
+  <div class="reiter2" id="reiter2"><div data-r="kal" class="an">Kalender</div><div data-r="ang">Angebot</div></div>
+  <section id="sKal">
+  <div class="block">
+    <p class="feldname">Belegung</p>
+    <div id="tafelKarte">
+      <div class="tKopf"><b id="tTitel"></b><div class="tNav"><div id="tZurueck">‹</div><div id="tHeute" class="an">Heute</div><div id="tVor">›</div></div></div>
+      <div id="tafelRoll"><table id="tafel"></table></div>
+      <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
+      <div class="tChips" id="tChips"><span class="tLab">Ab heute:</span><div data-z="d1">1 Tag</div><div data-z="d2">2 Tage</div><div data-z="d3">3 Tage</div><div data-z="d7">1 Woche</div><span class="tLab">Wochenende (nächstes):</span><div data-z="we5,1">Fr bis Sa</div><div data-z="we5,2">Fr bis So</div><div data-z="we6,2">Sa bis Mo</div><div data-z="we5,3">Fr bis Mo</div></div>
+      <div class="tPruef">
+        <div class="tZeile"><span>von</span><input type="date" id="von" min="2026-01-01" max="2028-12-31"><select id="vonU"></select></div>
+        <div class="tZeile"><span>bis</span><input type="date" id="bis" min="2026-01-02" max="2028-12-31"><select id="bisU"></select></div>
+        <p id="zeitraumtext"></p>
+        <div id="tagInfo"></div>
+      </div>
+    </div>
+  </div>
+  </section>
+  <section id="sAng" class="versteckt">
+  <div class="block">
+    <p class="feldname">Zeitraum</p>
+    <div class="karte" id="angZeitraum"></div>
+  </div>
+  <div class="block">
+    <p class="feldname">Kilometer</p>
+    <div id="kmchips"></div>
+    <p class="klein" id="kminfo"></p>
+  </div>
+  <div class="block">
+    <p class="feldname">Rabatt für den Kunden</p>
+    <div id="rabchips"></div>
+    <div class="feld2" style="margin-top:8px;align-items:center">
+      <input type="number" id="rab" min="0" max="90" step="1" value="0" inputmode="numeric">
+      <span id="rabinfo" style="font-size:13px;color:var(--grey);font-weight:600"></span>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="reiter2" id="wahlArt"><div data-w="1">Ein Auto</div><div data-w="0">Alle freien</div></div>
+    <p class="feldname" id="ueberschrift">Fahrzeuge</p>
+    <div id="liste"></div>
+  </div>
+
+  <div class="block">
+    <p class="feldname">Antwort an den Kunden</p>
+    <div class="karte">
+      <textarea id="vorschau" rows="11"></textarea>
+      <input type="tel" id="knr" inputmode="tel" autocomplete="off" placeholder="Handynummer (optional)">
+      <div id="nrinfo"></div>
+      <button class="knopf gruen" id="senden" type="button">Nachricht teilen</button>
+      <button class="knopf hell" id="kopieren" type="button">Text kopieren</button>
+    </div>
+  </div>
+
+  <div class="block">
+    </section><section id="sKal2">
+    <!-- Selten gebraucht: Knopf, dann Fenster (30.10.2026, Baran: Übersicht ist wichtig) -->
+    <div class="fKnoepfe">
+      <button class="fKnopf" id="oListe" type="button"><span><b>Belegt und gesperrt</b><i>Alle Mieten und Sperren als Liste</i></span><em>›</em></button>
+      <button class="fKnopf" id="oSperren" type="button"><span><b>Fahrzeug sperren</b><i>Werkstatt, privat</i></span><em>›</em></button>
+    </div>
+    </section>
+    <div class="fBg" id="fBg"></div>
+    <div class="fenster" id="fListe" role="dialog" aria-label="Belegt und gesperrt"><div class="fKopf"><h3>Belegt und gesperrt</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+      <div id="buchungen"></div><div id="leer"></div><div id="meldung"></div></div>
+    <div class="fenster" id="fSperren" role="dialog" aria-label="Fahrzeug sperren"><div class="fKopf"><h3>Fahrzeug sperren</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+      <p class="fText">Das Auto gilt in der Zeit als belegt, zum Beispiel Werkstatt oder privat.</p>
+      <select id="spAuto"></select>
+      <div class="feld2" style="margin-top:8px"><input type="date" id="spVon"><input type="date" id="spBis"></div>
+      <input type="text" id="spGrund" placeholder="Grund, z. B. Werkstatt" style="margin-top:8px">
+      <button class="knopf" id="sperren" type="button">Sperren</button>
+    </div>
+  </div>
+
+  <footer>
+    Belegt: Mietverträge, gebuchte Anfragen und Sperren. Preisstand: <span id="preisstand">21.08.2026</span>.
+  </footer>
+</main>
+<div id="blattBg"></div><div id="blatt"></div>
+
+
+
+
+<script>
+const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 1, 1, 1], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450, "frSa": 349}, {"n": "Audi RS 3 Limousine", "gp": 199.0, "kaution": 1450, "frSa": 249}, {"n": "VW Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000, "frSa": 199}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Mercedes GLC 63 S AMG", "gp": 269.0, "kaution": 1450, "frSa": 349}, {"n": "Mercedes C 63 S AMG", "gp": 289.0, "kaution": 1450, "frSa": 349}, {"n": "Audi R8 performance", "gp": 399.0, "kaution": 2500, "frSa": 499}, {"n": "VW Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000, "frSa": 129}, {"n": "Mercedes-Benz S580L AMG Chauffeur-Paket", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "BMW M 850i", "gp": 249.0, "kaution": 1450, "frSa": 349}], "url": "", "stand": "2026-10-19"};
+let BUCHUNGEN=[];
+const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
+const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let AUSWAHL=null,EIN_AUTO="",EINZEL=true;try{EINZEL=localStorage.getItem("mietixAngebotArt")!=="alle"}catch(e){}   // Fahrzeuge, die im Kundentext stehen sollen
+const $=id=>document.getElementById(id);
+const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
+
+function ausISO(s){const[j,m,t]=s.split("-").map(Number);return new Date(j,m-1,t);}
+function nachISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function wtIndex(d){return (d.getDay()+6)%7;}
+function lang(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
+function plusTage(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function tage(v,b){return Math.round((ausISO(b)-ausISO(v))/86400000);}
+
+/* Zwei Zeitraeume ueberschneiden sich, wenn Start des einen vor Ende des anderen liegt.
+   Der Rueckgabetag zaehlt nicht mit, deshalb echtes Kleiner. */
+function ueberschneidet(v1,b1,v2,b2){return v1<b2 && b1>v2;}
+window.mxUeberschneidet=ueberschneidet;
+
+function belegtVon(fahrzeug,von,bis){
+  return BUCHUNGEN.filter(b=>b.fahrzeug===fahrzeug&&ueberschneidet(von,bis,b.von,b.bis));
+}
+window.mxBelegtVon=(f,v,b,liste)=>{const alt=BUCHUNGEN;if(liste)BUCHUNGEN=liste;
+  const r=belegtVon(f,v,b);BUCHUNGEN=alt;return r;};
+
+/* --- Preis fuer den angefragten Zeitraum, gleiche Logik wie im Preisrechner --- */
+function scaler(start,dauer){const W=D.faktor.reduce((a,b)=>a+b,0);
+  let s=Math.floor(dauer/7)*W;for(let k=0;k<dauer%7;k++)s+=D.faktor[(start+k)%7];return s;}
+
+
+/* Preisregel wie in der Excel: alles laeuft ueber die Wochentagsfaktoren und den
+   Mengenrabatt. Einzige Ausnahme ist die Ein-Tages-Miete am Wochenende, die den
+   festen Sonderpreis des Fahrzeugs kostet (Fr auf Sa, Sa auf So, So auf Mo). */
+function wochenmiete(a,start,dauer){
+  if(dauer===1 && start>=4) return a.frSa || a.gp*D.faktor[start];
+  return a.gp*scaler(start,dauer);
+}
+
+function grundmiete(auto,start,dauer){
+  return wochenmiete(auto,start,dauer);
+}
+function preis(auto,start,dauer){
+  if(dauer<D.mind[start])return null;
+  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+}
+window.mxPreis=preis;
+
+function nummer(roh){
+  let n=(roh||"").replace(/[^0-9+]/g,"");
+  if(!n)return"";
+  if(n.startsWith("+"))n=n.slice(1);
+  else if(n.startsWith("00"))n=n.slice(2);
+  else if(n.startsWith("0"))n="49"+n.slice(1);
+  return n.length>=8?n:"";
+}
+window.mxNummer=nummer;
+
+function kurzD(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
+function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
+
+function nachricht(freieAutos,von,bis,dauer,anzFrei){
+  const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
+  if(!freieAutos.length && anzFrei>0){
+    return (EINZEL?"Bitte oben das Auto antippen, das Sie anbieten wollen.\n":"Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n")
+         + "Im Zeitraum " + wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+         + " sind " + anzFrei + (anzFrei===1?" Fahrzeug":" Fahrzeuge") + " frei.";
+  }
+  const z=[];
+  const zeitraum = wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
+                 +", "+dauer+(dauer===1?" Tag":" Tage");
+  z.push(freieAutos.length===1?"*Freies Fahrzeug*":"*Freie Fahrzeuge*");
+  z.push(zeitraum);
+  z.push("");
+  if(!freieAutos.length){
+    z.push("In dem Zeitraum sind leider alle Fahrzeuge vergeben.");
+    z.push("");
+    z.push("Sagen Sie mir gerne einen anderen Zeitraum, dann schaue ich noch einmal.");
+    return z.join("\n");
+  }
+  const mitPreis=freieAutos.map(c=>({c:c,p:preis(c,start,dauer)})).filter(x=>x.p!==null);
+  if(!mitPreis.length){
+    z.push("Bei Abholung am "+D.weekdays[start]+" beträgt die Mindestmietdauer "
+           +D.mind[start]+" Tage.");
+    z.push("");
+    z.push("Sagen Sie mir gerne einen passenden Zeitraum, dann rechne ich Ihnen das aus.");
+    return z.join("\n");
+  }
+  const extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
+  let sListe=0, sEnd=0;
+  mitPreis.forEach(x=>{
+    const kmZ=(typeof kmZusatz==="function")?kmZusatz(x.c,dauer):0;   // Kilometer dazu (pro Tag), gleicher Preis wie im Preisrechner
+    x.liste=grundmiete(x.c,start,dauer)+kmZ;
+    x.end=x.p*(1-extra)+kmZ;
+    sListe+=x.liste; sEnd+=x.end;
+  });
+  const proz=sListe>0?Math.round((sListe-sEnd)/sListe*100):0;
+  if(proz>0){
+    z.push("*Ihr Rabatt: "+proz+" %*");
+    z.push(extra>0 ? "Mengenrabatt und Sonderrabatt sind in allen Preisen enthalten."
+                   : "Bereits in allen Preisen enthalten.");
+    z.push("");
+  }
+  z.push(mitPreis.length===1?"*Dieses Fahrzeug ist frei*":"*Diese Fahrzeuge sind frei*");
+  z.push("");
+  mitPreis.forEach(x=>{
+    z.push("- "+x.c.n+": "+EUR.format(x.end)
+           +(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
+  });
+  if(mitPreis.length===1&&+mitPreis[0].c.kaution>0)z.push("Kaution: "+(+mitPreis[0].c.kaution).toLocaleString("de-DE")+" €");
+  z.push("");
+  z.push("Alle Preise für den kompletten Zeitraum, "
+    +kmSatz(dauer)+". Weitere Kilometer sind zubuchbar.");
+  if(dauer>1){
+    z.push("");
+    z.push("Gilt nur für den kompletten Zeitraum "+zeitraum
+      +" am Stück. Für einzelne Tage daraus gilt der reguläre Tagespreis.");
+  }
+  z.push("");
+  z.push(mitPreis.length===1?"Darf ich das Fahrzeug für Sie reservieren?":"Welches Fahrzeug darf ich für Sie reservieren?");
+  return z.join("\n");
+}
+
+/* --- Serverzugriff per JSONP, damit es ohne CORS laeuft --- */
+function melde(text,gut){
+  const m=$("meldung");m.textContent=text;m.className=gut?"gut":"schlecht";
+  if(gut)setTimeout(()=>{m.className="";},4000);
+}
+
+function laden(){
+  const b=[];
+  lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
+    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
+  // Anfrage mit Mietvertrag nicht doppelt zeigen: über die Nummer (a.vertrag) oder den Namen ohne Leerzeichen und Groß/klein (30.10.2026)
+  const nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
+  lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!b.some(x=>(a.vertrag&&x.nr===a.vertrag)||(nG(x.kunde)===nG(a.name)&&x.fahrzeug===a.auto&&x.von<a.bis&&x.bis>a.von)))
+    b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
+  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
+  BUCHUNGEN=b;zeichne();
+}
+
+function zeichne(){
+  const von=$("von").value, bis=$("bis").value;
+  if(typeof zeichneTafel==="function")zeichneTafel();
+  if(typeof angZeitraum==="function"&&!$("sAng").classList.contains("versteckt")){angZeitraum();kmChips()}
+  const t=tage(von,bis);
+  const vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
+  $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))+" "+uhr($("vonU").value)+" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))+" "+uhr($("bisU").value)+"   ("+t+(t===1?" Tag":" Tage")+")";
+  const rueck=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.bis===von),abh=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.von===bis);
+  $("tagInfo").innerHTML=rueck.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' kommt am '+kurzD(ausISO(b.bis))+' um '+uhr(b.bisU)+' zurück ('+esc(vorname(b.kunde))+')</span>').join("")
+    +abh.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</span>').join("");
+  const frei=[];
+  D.cars.forEach(c=>{if(!belegtZeit(c.n,vonZ,bisZ).length)frei.push(c.n);});
+  if(AUSWAHL===null)AUSWAHL=EINZEL?new Set(EIN_AUTO&&frei.includes(EIN_AUTO)?[EIN_AUTO]:[]):new Set(frei);
+  else [...AUSWAHL].forEach(n=>{if(!frei.includes(n))AUSWAHL.delete(n);});
+  frei.length=0;
+
+  const sortiert2=D.cars.slice().sort((a,b)=>(belegtZeit(a.n,vonZ,bisZ).length?1:0)-(belegtZeit(b.n,vonZ,bisZ).length?1:0));
+  $("liste").innerHTML=sortiert2.map(c=>{
+    const treffer=belegtZeit(c.n,vonZ,bisZ),amTag=belegtVon(c.n,von,bis).filter(b=>!treffer.includes(b));
+    if(!treffer.length)frei.push(c.n);
+    const drin=!treffer.length&&AUSWAHL.has(c.n);
+    const roh=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
+    const nach=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
+    const p=roh===null?null:roh*(1-nach)+kmZusatz(c,t);
+    const knapp=amTag.map(b=>b.bis===von?"frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt um "+uhr(b.bisU)+" zurück":"bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab").join(". ");
+    const info=treffer.length
+      ? "belegt: "+treffer.map(b=>(b.kunde?b.kunde+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; ")
+      : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum")+(knapp?". "+knapp:"");
+    return '<div class="zeile'+(treffer.length?"":" waehlbar")+(drin?" drin":"")
+      +'" data-auto="'+c.n+'"><span><span class="name">'+c.n+'</span>'
+      +'<span class="info'+(knapp?" ab":"")+'">'+info+'</span></span>'
+      +'<span class="marke '+(treffer.length?"belegt":(drin?"drin":"frei"))+'">'
+      +(treffer.length?"belegt":(drin?"im Text":"frei"))+'</span></div>';
+  }).join("");
+  [...document.querySelectorAll(".zeile.waehlbar")].forEach(z=>{
+    z.onclick=()=>{const n=z.dataset.auto;
+      if(EINZEL){AUSWAHL=new Set([n]);EIN_AUTO=n}else if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
+      textAngefasst=false;zeichne();};
+  });
+  const anzFrei=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length).length;
+  $("ueberschrift").textContent=EINZEL?anzFrei+" frei, "+(AUSWAHL.size?"anderes Auto antippen zum Wechseln":"Auto antippen"):anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
+
+  const fuerText=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL.has(c.n));
+  if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t,anzFrei);
+  const nr=nummer($("knr").value);
+  $("nrinfo").textContent = nr ? "Geht an +"+nr
+    : ($("knr").value.trim() ? "Nummer noch unvollständig"
+                             : "Ohne Nummer: Nachricht teilen und den Chat auswählen");
+  $("senden").textContent = nr ? "Per WhatsApp senden" : "Nachricht teilen";
+
+  const sortiert=BUCHUNGEN.slice().sort((a,b)=>a.von<b.von?-1:a.von>b.von?1:0);
+  $("buchungen").innerHTML=sortiert.map(b=>
+    '<div class="bzeile"><span><span class="bname">'+b.fahrzeug+'</span>'
+    +'<span class="bzeit">'+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))
+    +(b.kunde?" | "+b.kunde:"")+(b.notiz?" | "+b.notiz:"")+'</span></span>'
+    +(b.fest?'':'<button class="weg" data-id="'+b.id+'">Löschen</button>')+'</div>').join("");
+  $("leer").textContent=sortiert.length?"":"Nichts belegt. Mietverträge und gebuchte Anfragen erscheinen hier von selbst.";
+  [...document.querySelectorAll(".weg")].forEach(k=>k.onclick=()=>loeschen(k.dataset.id));
+}
+
+function loeschen(id){
+  const b=BUCHUNGEN.find(x=>x.id===id);
+  if(!confirm("Sperre "+(b?b.fahrzeug+" "+lang(ausISO(b.von)):"")+" aufheben?"))return;
+  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));laden();melde("Sperre aufgehoben.",true);
+}
+
+/* --- Start --- */
+const heute=new Date();
+$("von").value=nachISO(heute);
+$("bis").value=nachISO(plusTage(heute,3));
+$("von").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
+  if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
+  $("bis").min=nachISO(plusTage(ausISO($("von").value),1));zeichne();});
+$("bis").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
+  if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
+  zeichne();});
+let textAngefasst=false;
+(function(){
+  const stufen=[0,10,15,20];
+  $("rabchips").innerHTML=stufen.map(p=>
+    '<div class="rchip" data-p="'+p+'">'+(p===0?"kein":"-"+p+" %")+'</div>').join("");
+  function markieren(){
+    const w=+($("rab").value)||0;
+    [...document.querySelectorAll(".rchip")].forEach(c=>c.classList.toggle("an",+c.dataset.p===w));
+    $("rabinfo").textContent = w>0 ? w+" % Rabatt auf den Gesamtpreis" : "% Rabatt, leer lassen für keinen";
+  }
+  [...document.querySelectorAll(".rchip")].forEach(c=>{
+    c.onclick=()=>{ $("rab").value=c.dataset.p; textAngefasst=false; markieren(); zeichne(); };
+  });
+  ["input","change"].forEach(ev=>$("rab").addEventListener(ev,()=>{
+    const w=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
+    if(String(w)!==$("rab").value && document.activeElement!==$("rab")) $("rab").value=w;
+    textAngefasst=false; markieren(); zeichne();
+  }));
+  $("rab").addEventListener("blur",()=>{
+    $("rab").value=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
+    markieren(); zeichne();
+  });
+  markieren();
+})();
+$("vorschau").addEventListener("input",()=>{textAngefasst=true;});
+["input","change"].forEach(ev=>$("knr").addEventListener(ev,zeichne));
+function rueckmeldung(k,t){const a=k.textContent;k.textContent=t;setTimeout(()=>{k.textContent=a;},1600);}
+$("senden").onclick=async()=>{
+  const text=$("vorschau").value, nr=nummer($("knr").value);
+  if(nr){window.open("https://wa.me/"+nr+"?text="+encodeURIComponent(text),"_blank");return;}
+  if(navigator.share){try{await navigator.share({text:text});}catch(e){}return;}
+  try{await navigator.clipboard.writeText(text);rueckmeldung($("senden"),"Text kopiert");}
+  catch(e){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");}
+};
+$("kopieren").onclick=async()=>{
+  const text=$("vorschau").value;
+  try{await navigator.clipboard.writeText(text);}
+  catch(e){const t=$("vorschau");t.select();document.execCommand("copy");t.blur();}
+  rueckmeldung($("kopieren"),"Kopiert");
+};
+function spAutos(){$("spAuto").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("")}
+spAutos();$("spVon").value=nachISO(heute);$("spBis").value=nachISO(plusTage(heute,1));
+$("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
+  if(!von||!bis||tage(von,bis)<1){melde("Bitte Von und Bis eintragen (Bis nach Von).",false);return}
+  const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
+  schreib("mietixSperren",l);$("spGrund").value="";laden();fZu()};
+function fAuf(id){$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
+function fZu(){document.querySelectorAll(".fenster.auf").forEach(f=>f.classList.remove("auf"));$("fBg").classList.remove("auf");document.documentElement.style.overflow="";document.body.style.overflow=""}
+$("oListe").onclick=()=>fAuf("fListe");$("oSperren").onclick=()=>fAuf("fSperren");$("fBg").onclick=fZu;
+document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape")fZu()});
+
+/* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
+let TSTART=plusTage(heute,-1);
+const TAGE=30;
+const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","").replace("VW ","").replace(" Clubsport","").replace(" 2.0 Diesel"," Diesel");
+const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
+function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
+  $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
+const ZEIT=(t,u)=>t+"T"+(u||"10:00");
+const bZ=b=>({von:ZEIT(b.von,b.vonU),bis:ZEIT(b.bis,b.bisU)});
+function belegtZeit(f,vonZ,bisZ){return BUCHUNGEN.filter(b=>{if(b.fahrzeug!==f)return false;const z=bZ(b);return vonZ<z.bis&&bisZ>z.von})}
+window.mxBelegtZeit=belegtZeit;
+const uhr=u=>{if(!u)return"";const [h,m]=u.split(":");return m==="00"?(+h)+" Uhr":(+h)+":"+m+" Uhr"};
+const stunden=u=>{const [h,m]=(u||"10:00").split(":").map(Number);return h+m/60};
+function zeichneTafel(){if(!D.cars||!D.cars.length)return;
+  const von=$("von").value,bis=$("bis").value,h=nachISO(heute),tage=[];
+  for(let i=0;i<TAGE;i++)tage.push(plusTage(TSTART,i));
+  let html='<tr><th class="auto"></th>'+tage.map(d=>'<th class="tag'+(wtIndex(d)>=5?" we":"")+(nachISO(d)===h?" heute":"")+(nachISO(d)>=von&&nachISO(d)<bis?" gewaehlt":"")+'">'+wtKurz(d)+'<b>'+d.getDate()+'</b></th>').join("")+'</tr>';
+  D.cars.forEach(c=>{html+='<tr><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+'</th>';
+    tage.forEach((d,i)=>{const t=nachISO(d);
+      // alle Buchungen, die diesen Tag berühren; am Rückgabetag ist nur bis zur Uhrzeit belegt, danach frei
+      const tr=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.von<=t&&b.bis>=t&&!(b.bis===t&&b.von!==t&&stunden(b.bisU)===0));
+      let k="",inner='<i class="frei"></i>',label="";
+      if(wtIndex(d)>=5)k+=" we";if(t===h)k+=" heute";if(t>=von&&t<bis)k+=" gewaehlt";
+      tr.forEach(b=>{const sp=b.notiz==="Sperre";const a=b.von===t?stunden(b.vonU)/24:0,e=b.bis===t?stunden(b.bisU)/24:1;if(e<=a)return;
+        const start=b.von===t,ende=b.bis===t;
+        inner+='<i class="'+(sp?"sperre":"belegt")+(start?" start":"")+(ende?" ende":"")+'" style="left:'+(a*100).toFixed(1)+'%;right:'+((1-e)*100).toFixed(1)+'%"></i>';
+        // Name einmal, am Anfang des Bandes (oder am linken Rand, wenn die Miete vor der Tafel begann), so lang wie das Band
+        if(start||i===0){const endeTag=ausISO(b.bis),zellen=Math.min(TAGE-i,Math.round((endeTag-d)/86400000)+1);
+          const laenge=Math.max(0.6,(zellen-1)+(b.bis<=nachISO(plusTage(d,zellen-1))?stunden(b.bisU)/24:1)-a);
+          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?(b.kunde||"gesperrt"):vorname(b.kunde)||"belegt")+'</b>'}
+        k+=sp?" hatSperre":" hatBelegt"});
+      const b0=tr[0];
+      html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
+    html+='</tr>'});
+  $("tafel").innerHTML=html;tafelTitel();
+  [...$("tafel").querySelectorAll("td")].forEach(td=>td.onclick=()=>zelle(td.dataset.auto,td.dataset.t,td.dataset.b));
+  // den gewählten Zeitraum sichtbar halten
+  const idx=Math.max(0,Math.round((ausISO(von)-TSTART)/86400000)-1);const z=$("tafel").querySelector("th.tag");
+  if(z)$("tafelRoll").scrollLeft=Math.max(0,idx*z.offsetWidth-8)}
+function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><div class="unter">'+unter+'</div>'+
+    aktionen.map((a,i)=>'<'+(a.href?'a href="'+a.href+'"':'div')+' class="knopf'+(a.voll?" voll":" hell")+'" data-i="'+i+'">'+a.t+'</'+(a.href?'a':'div')+'>').join("")+'<a href="#" class="zu" id="blattZu">Schließen</a>';
+  $("blatt").classList.add("auf");$("blattBg").classList.add("auf");
+  const zu=()=>{$("blatt").classList.remove("auf");$("blattBg").classList.remove("auf")};
+  [...$("blatt").querySelectorAll("[data-i]")].forEach(k=>{const a=aktionen[+k.dataset.i];if(a.f)k.onclick=()=>{zu();a.f()}});
+  $("blattZu").onclick=e=>{e.preventDefault();zu()};$("blattBg").onclick=zu}
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
+  // Rückgabe- und Abholtag (30.10.2026, Baran): Bringt der Kunde den RS Q8 Sonntag um 16:30 zurück, ist er danach frei.
+  // Antippen startet die neue Miete ab dieser Uhrzeit. Holt jemand um 17 Uhr ab, endet eine Verlängerung bis dahin.
+  let abUhr=null,bisUhr=null,rueck=null;const vonAlt0=$("von").value;
+  if(b&&b.notiz!=="Sperre"){const tr=BUCHUNGEN.filter(x=>x.fahrzeug===auto&&x.von<=t&&x.bis>=t);
+    const r=tr.find(x=>x.bis===t&&x.von!==t),a=tr.find(x=>x.von===t&&x.bis!==t),mitte=tr.find(x=>x.von<t&&x.bis>t);
+    const verl=LETZTE_ZELLE===auto&&vonAlt0&&t>vonAlt0&&t<=nachISO(plusTage(ausISO(vonAlt0),30));
+    if(!mitte&&a&&!r&&verl){bisUhr=a.vonU||"10:00";b=null}
+    else if(!mitte&&r&&stunden(r.bisU)<22){abUhr=r.bisU||"10:00";rueck=r;b=null}}
+  const A="https://barankohler.github.io/";
+  if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
+      {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
+  if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
+      b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
+      b.aid?{t:"Anfrage im Anfragen-Buch",voll:true,href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
+      b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
+      {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
+  // frei: erster Tipp = dieser Tag, zweiter Tipp auf einen späteren Tag = bis dahin
+  const von=$("von").value,bisAlt=$("bis").value;let nv=t,nb=nachISO(plusTage(d,1));
+  if(von&&t>von&&t<=nachISO(plusTage(ausISO(von),30))&&bisAlt<=t&&LETZTE_ZELLE===auto){nv=von;nb=t}
+  LETZTE_ZELLE=auto;
+  const naechste=(u,hoch)=>{const o=[...$("vonU").options].map(x=>x.value||x.textContent);const m=stunden(u);const f=hoch?o.find(x=>stunden(x)>=m):o.slice().reverse().find(x=>stunden(x)<=m);return f||(hoch?o[o.length-1]:o[0])};
+  if(abUhr&&nv===t){$("vonU").value=naechste(abUhr,true);VON_AUTO=true}else if(nv===t&&VON_AUTO){$("vonU").value="10:00";VON_AUTO=false}
+  if(bisUhr&&nb===t){$("bisU").value=naechste(bisUhr,false);BIS_AUTO=true}else if(nv===t&&BIS_AUTO){$("bisU").value="10:00";BIS_AUTO=false}
+  $("von").value=nv;$("bis").value=nb;textAngefasst=false;AUSWAHL=null;zeichne();
+  const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null;
+  const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
+  const knapp=belegtVon(auto,nv,nb).filter(b=>!belegtZeit(auto,vonZ,bisZ).includes(b)).map(b=>b.bis===nv?" Frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt zurück.":" Bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab.").join("");
+  blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
+      {t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
+      {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
+      frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
+      rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
+      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;fAuf("fSperren")}}].filter(Boolean))}
+let LETZTE_ZELLE=null,VON_AUTO=false,BIS_AUTO=false;
+// Gewählte Uhrzeit läuft mit in Mietvertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
+const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
+/* Kilometer dazu: Staffel je Auto aus der Preisdatei, pro Tag, genau wie im Preisrechner */
+let KM=0;
+function kmPreis(car,km){km=Math.max(0,Math.round(km)||0);if(!km||!car.km||car.km.length<2)return 0;
+  const preise=car.km.slice(1),stufen=D.kmStufen||[50,100,150,200,300];const maxKm=stufen[stufen.length-1],maxPreis=preise[preise.length-1];
+  if(km>=maxKm)return Math.round(km*maxPreis/maxKm);let x0=0,y0=0;
+  for(let i=0;i<stufen.length;i++){if(km<=stufen[i])return Math.round(y0+(preise[i]-y0)*(km-x0)/(stufen[i]-x0));x0=stufen[i];y0=preise[i]}return 0}
+function kmZusatz(car,dauer){return 0}   // Extra-Kilometer schreiben wir von Hand dazu, kein Aufpreis mehr (30.10.2026)
+let KM_INKL=null,KM_EXTRA=0,KM_TAGE=null;   // KM_INKL null = automatisch 150 km pro Tag
+const kmInkl=t=>KM_INKL==null?D.freiKm*t:KM_INKL;
+const kmGesamt=t=>kmInkl(t)+KM_EXTRA;
+const kmZahl=n=>Number(n).toLocaleString("de-DE");
+function kmSatz(t){return "inklusive "+kmZahl(kmGesamt(t))+" km"+(KM_EXTRA?" (davon "+kmZahl(KM_EXTRA)+" Extra-Kilometer für Sie)":"")}
+function kmChips(){const t=tage($("von").value,$("bis").value);
+  if(!$("kmInkl")){
+    $("kmchips").innerHTML='<label class="kmf"><span>Inklusive</span><input type="number" id="kmInkl" inputmode="numeric" min="0" step="10"><b>km</b></label>'+
+      '<label class="kmf"><span>Extra von uns</span><input type="number" id="kmExtra" inputmode="numeric" min="0" step="10" placeholder="0"><b>km</b></label>';
+    $("kmInkl").addEventListener("input",()=>{const v=$("kmInkl").value.trim();KM_INKL=v===""?null:Math.max(0,Math.round(+v)||0);textAngefasst=false;zeichne()});
+    $("kmExtra").addEventListener("input",()=>{KM_EXTRA=Math.max(0,Math.round(+$("kmExtra").value)||0);textAngefasst=false;zeichne()});
+    ["kmInkl","kmExtra"].forEach(id=>$(id).addEventListener("blur",()=>kmChips()));
+  }
+  if(KM_TAGE!==null&&KM_TAGE!==t)KM_INKL=null;   // anderer Zeitraum: wieder 150 km pro Tag
+  KM_TAGE=t;
+  if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl(t);
+  if(document.activeElement!==$("kmExtra"))$("kmExtra").value=KM_EXTRA||"";
+  $("kminfo").textContent=(KM_INKL==null?D.freiKm+" km pro Tag, "+t+(t===1?" Tag":" Tage")+". ":"Von Hand geändert. ")+"Im Text steht: "+kmSatz(t)+"."}
+function angZeitraum(){const von=$("von").value,bis=$("bis").value,t=tage(von,bis);
+  $("angZeitraum").innerHTML='<span>'+wtKurz(ausISO(von))+" "+kurzD(ausISO(von))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(bis))+" "+kurzD(ausISO(bis))+" "+uhr($("bisU").value)+", "+t+(t===1?" Tag":" Tage")+'</span><span class="aend" id="angAend">ändern</span>';
+  $("angAend").onclick=()=>{reiter("kal");$("tafelKarte").scrollIntoView({behavior:"smooth"})}}
+function reiter(r){["sKal","sKal2"].forEach(id=>$(id).classList.toggle("versteckt",r!=="kal"));$("sAng").classList.toggle("versteckt",r!=="ang");
+  [...$("reiter2").children].forEach(c=>c.classList.toggle("an",c.dataset.r===r));if(r==="ang"){angZeitraum();kmChips()}window.scrollTo(0,0)}
+[...$("reiter2").children].forEach(c=>c.onclick=()=>reiter(c.dataset.r));
+(function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
+  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>'<option'+(x==="10:00"?" selected":"")+'>'+x+'</option>').join("");$(id).addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;zeichne()})})})();
+$("tZurueck").onclick=()=>{TSTART=plusTage(TSTART,-7);zeichneTafel()};
+$("tVor").onclick=()=>{TSTART=plusTage(TSTART,7);zeichneTafel()};
+$("tHeute").onclick=()=>{TSTART=plusTage(heute,-1);zeichneTafel()};
+// Chips für den Anruf: setzen den Zeitraum, darunter steht sofort, was frei ist und was es kostet
+function chipZeitraum(z){const h=heute,w=h.getDay();let v,b;
+  // Gleiche Knöpfe wie im Mietvertrag: dN = N Tage ab heute, weW,N = nächster Wochentag W (heute zählt mit) plus N Tage
+  if(z[0]==="d"){v=h;b=plusTage(h,+z.slice(1))}else{const [wd,n]=z.slice(2).split(",").map(Number);v=plusTage(h,(wd-w+7)%7);b=plusTage(v,n)}
+  $("von").value=nachISO(v);$("bis").value=nachISO(b);textAngefasst=false;AUSWAHL=null;
+  if(nachISO(v)<nachISO(TSTART)||nachISO(b)>nachISO(plusTage(TSTART,TAGE-1)))TSTART=plusTage(v,-1);
+  zeichne();document.querySelectorAll("#tChips div").forEach(c=>c.classList.toggle("an",c.dataset.z===z))}
+document.querySelectorAll("#tChips div").forEach(c=>c.onclick=()=>chipZeitraum(c.dataset.z));
+
+laden();
+window.addEventListener("mietix-abgleich",laden);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)laden()});
+
+function __uebernehmen(p){
+  D.stand=p.stand||D.stand; standAnzeigen();
+  D.weekdays=p.weekdays; D.faktor=p.faktor; D.mind=p.mind; D.days=p.days;
+  D.rabatt=p.rabatt; D.freiKm=p.freiKm;
+  D.kmStufen=p.kmStufen||[50,100,150,200,300];
+  D.cars=p.cars.map(function(c){return {n:c.anzeige,gp:c.gp,kaution:c.kaution,frSa:c.frSa,km:c.km||[]};});
+}
+
+/* --- Gemeinsame Preisdatei: eine Aenderung wirkt in allen Werkzeugen --- */
+(function(){
+  try{
+    fetch("https://barankohler.github.io/mietix-preise/preise.json",{cache:"no-store"})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(p){
+        if(!p||!p.cars||!p.cars.length)return;
+        __uebernehmen(p); if(typeof spAutos==="function")spAutos();
+        var neu=(typeof render==="function")?render:
+                (typeof zeichne==="function")?zeichne:
+                (typeof rechne==="function")?rechne:null;
+        if(neu)neu();
+      }).catch(function(){});
+  }catch(e){}
+})();
+
+/* --- Handynummer des Kunden zwischen den Werkzeugen merken ---
+   Nur zwei Stunden gueltig, damit nie eine alte Nummer aus einem
+   anderen Vorgang vorbelegt wird. */
+(function(){
+  try{
+    var f=document.getElementById("knr")||document.getElementById("nummer")||document.getElementById("tel");
+    if(!f)return;
+    var roh=localStorage.getItem("mietixNummer");
+    if(roh&&!f.value.trim()){
+      var w=JSON.parse(roh);
+      if(w&&w.nr&&(Date.now()-w.zeit)<2*60*60*1000){
+        f.value=w.nr;
+        f.dispatchEvent(new Event("input",{bubbles:true}));
+        f.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+    }
+    f.addEventListener("input",function(){
+      var v=f.value.trim();
+      if(v.replace(/\D/g,"").length>=8)
+        localStorage.setItem("mietixNummer",JSON.stringify({nr:v,zeit:Date.now()}));
+    });
+  }catch(e){}
+})();
+
+/* Preisstand kommt aus der gemeinsamen Preisdatei, nie mehr von Hand */
+function standAnzeigen(){
+  const e=document.getElementById("preisstand");
+  if(!e||!D.stand)return;
+  e.textContent=D.stand.split("-").reverse().join(".");
+}
+standAnzeigen();
+</script>
+<script>/* Mietix Abgleich: Mietverträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
+   Wird von tools/vertrag/build_html.py und tools/anfragen/build_html.py in die Seite eingebaut.
+   - Die Werkzeuge arbeiten weiter nur mit localStorage. Dieser Baustein merkt jede Änderung an den vier Speichern,
+     schickt sie hoch und holt neue Stände der anderen Geräte (beim Start, beim Zurückkehren zur Seite, jede Minute).
+   - Ohne Internet oder ohne Anmeldung läuft alles wie vorher, der Abgleich holt später nach.
+   - Gelöschte Einträge (Anfragen-Buch) gehen als {_weg:true} hoch, damit sie auch auf den anderen Geräten verschwinden.
+   - Anmeldung: E-Mail und Passwort, einmal pro Gerät. Gilt für alle Mietix-Werkzeuge auf barankohler.github.io. */
+(function(){
+const URL_="https://zbeqrwvlmiulxvhryiku.supabase.co";
+const KEY="sb_publishable_LVkvpgXMpBbq_OXgwOfTqg_ZRcRkFyQ";   // öffentlich gedacht, Schutz über Anmeldung und Regeln in der Datenbank
+const SPEICHER={mietixVorgaenge:{tab:"vorgaenge",pk:"nr",liste:true},mietixAnfragen:{tab:"anfragen",pk:"id",liste:true},
+  mietixKunden:{tab:"kunden",pk:"name",liste:false},mietixFahrzeuge:{tab:"fahrzeuge",pk:"name",liste:false},
+  mietixAusgaben:{tab:"ausgaben",pk:"id",liste:true},mietixSperren:{tab:"sperren",pk:"id",liste:true},
+  mietixAufgaben:{tab:"aufgaben",pk:"id",liste:true},mietixZustand:{tab:"zustand",pk:"id",liste:true},mietixAutos:{tab:"autos",pk:"name",liste:false},mietixStand:{tab:"stand",pk:"id",liste:false},mietixPapierkorb:{tab:"papierkorb",pk:"id",liste:true}};
+const roh=Storage.prototype.setItem;
+const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
+const merk=(k,v)=>{try{roh.call(localStorage,k,JSON.stringify(v))}catch(e){}};
+const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return String(h)};
+let sitzung=lies("mietixSitzung",null),laeuft=false,nochmal=false,zuletzt=null,fehler="";
+
+/* ---------- Anmeldung ---------- */
+async function auth(pfad,body){const r=await fetch(URL_+"/auth/v1/"+pfad,{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error_description||j.msg||j.message||"Anmeldung fehlgeschlagen");e.status=r.status;throw e}return j}
+function sichern(j){sitzung={token:j.access_token,neu:j.refresh_token,bis:Date.now()+(j.expires_in||3600)*1000-60000,
+  email:(j.user&&j.user.email)||(sitzung&&sitzung.email)||""};merk("mietixSitzung",sitzung)}
+async function token(){if(!sitzung)return null;
+  if(Date.now()>sitzung.bis){try{sichern(await auth("token?grant_type=refresh_token",{refresh_token:sitzung.neu}))}
+    // Abmelden nur, wenn der Speicher die Anmeldung wirklich ablehnt, nicht bei schlechtem Netz (30.10.2026)
+    catch(e){if(e.status>=400&&e.status<500){sitzung=null;localStorage.removeItem("mietixSitzung");zeigen()}return null}}
+  return sitzung.token}
+async function api(pfad,opt){const t=await token();if(!t)throw new Error("nicht angemeldet");
+  const r=await fetch(URL_+"/rest/v1/"+pfad,Object.assign({},opt,{headers:Object.assign({apikey:KEY,Authorization:"Bearer "+t,"Content-Type":"application/json"},(opt||{}).headers||{})}));
+  if(!r.ok)throw new Error("Speicher antwortet "+r.status);const s=await r.text();return s?JSON.parse(s):null}
+
+/* ---------- Abgleich ---------- */
+function alsMap(k,w){const c=SPEICHER[k],m={};if(c.liste)(w||[]).forEach(x=>{if(x&&x[c.pk]!==undefined)m[String(x[c.pk])]=x});else Object.assign(m,w||{});return m}
+function ausMap(k,m){const c=SPEICHER[k];if(!c.liste)return m;return Object.keys(m).sort().map(p=>m[p])}
+/* Zusammenführen statt Überschreiben (30.10.2026, Nachtschicht):
+   - Erst holen, dann schicken. So kennt jedes Gerät den neuesten Stand, bevor es seinen eigenen hochlädt.
+   - Je Eintrag merkt sich das Gerät, wie er beim letzten Abgleich aussah (Fingerabdruck je Feld).
+     Haben beide Geräte verschiedene Felder geändert, kommen beide Änderungen zusammen.
+   - Haben beide dasselbe Feld verschieden geändert, bleibt die Fassung dieses Geräts stehen und die andere
+     Fassung liegt im Papierkorb ("Andere Fassung"), dort kann man sie wiederherstellen. Nichts verschwindet still.
+   - Geändert schlägt Gelöscht: wird ein Eintrag hier geändert und dort gelöscht, bleibt er da.
+   - Beim Holen wird zwei Minuten überlappend gefragt, damit kein Eintrag wegen ungleich gehender Uhren fehlt. */
+const UEBERLAPPUNG=2*60*1000;
+const FELDWEISE={mietixVorgaenge:1,mietixAnfragen:1,mietixKunden:1,mietixFahrzeuge:1,mietixAutos:1};
+// Inhalt unabhängig von der Reihenfolge der Felder (die Datenbank sortiert Felder um)
+const ordne=x=>Array.isArray(x)?x.map(ordne):x&&typeof x==="object"?Object.keys(x).sort().reduce((o,n)=>{o[n]=ordne(x[n]);return o},{}):x;
+const fp=x=>hash(JSON.stringify(ordne(x))===undefined?"":JSON.stringify(ordne(x)));
+// Fingerabdruck stimmt mit der Grundlage überein (neue Form oder die Form vor dem 30.10.2026)
+const gleichBasis=(x,b)=>b!==undefined&&(fp(x)===b||hash(JSON.stringify(x))===b);
+const felderVon=x=>{const f={};if(x&&typeof x==="object"&&!Array.isArray(x))Object.keys(x).forEach(n=>f[n]=fp(x[n]));return f};
+function andereFassung(k,p,eintrag){if(k==="mietixPapierkorb"||k==="mietixStand")return;
+  const pk=lies("mietixPapierkorb",[]),jetzt=new Date().toISOString(),c=SPEICHER[k];
+  const s=fp(eintrag);if(pk.some(x=>x.ablage===k&&x.schluessel===p&&fp(x.eintrag)===s))return;
+  pk.push({id:k+":"+p+":"+Date.now()+":f",ablage:k,schluessel:p,eintrag,zeit:jetzt,andere:true,
+    text:"Andere Fassung: "+(BESCHRIFTUNG[k]||(x=>NAMEN[k]+" "+p))(eintrag||{})});
+  merk("mietixPapierkorb",pk)}
+function zusammen(k,p,lokal,server,basisHash,basisFelder){
+  // Rückgabe: der Eintrag, der hier stehen soll (undefined = löschen)
+  const lokalGeaendert=lokal===undefined?(basisHash!==undefined&&basisHash!=="weg"):!gleichBasis(lokal,basisHash);
+  if(server&&server._weg){if(lokal===undefined)return undefined;
+    if(basisHash!==undefined&&lokalGeaendert)return lokal;          // hier geändert, dort gelöscht: bleibt da
+    return undefined}
+  if(lokal===undefined){if(basisHash!==undefined&&basisHash!=="weg"&&gleichBasis(server,basisHash))return undefined; // hier gelöscht, dort unverändert
+    return server}
+  if(fp(lokal)===fp(server))return lokal;
+  if(basisHash===undefined){andereFassung(k,p,lokal);return server}  // erstes Mal auf diesem Gerät: gemeinsamer Stand gilt, eigener liegt im Papierkorb
+  if(!lokalGeaendert)return server;                                   // hier nichts geändert: neuer Stand gilt
+  if(gleichBasis(server,basisHash))return lokal;                               // dort nichts geändert: eigener Stand bleibt
+  // beide geändert
+  if(FELDWEISE[k]&&basisFelder&&typeof lokal==="object"&&typeof server==="object"&&!Array.isArray(lokal)){
+    const out={},namen=new Set([...Object.keys(lokal),...Object.keys(server),...Object.keys(basisFelder)]);let streit=false;
+    namen.forEach(n=>{const lf=n in lokal?fp(lokal[n]):undefined,sf=n in server?fp(server[n]):undefined,bf=basisFelder[n];
+      if(lf===sf){if(n in lokal)out[n]=lokal[n]}
+      else if(lf===bf){if(n in server)out[n]=server[n]}
+      else if(sf===bf){if(n in lokal)out[n]=lokal[n]}
+      else{streit=true;if(n in lokal)out[n]=lokal[n];else if(n in server)out[n]=server[n]}});
+    if(streit)andereFassung(k,p,server);
+    return out}
+  andereFassung(k,p,server);return lokal}
+async function abgleichen(){
+  if(!sitzung||!navigator.onLine)return;if(laeuft){nochmal=true;return}laeuft=true;fehler="";zeigen();
+  const H=lies("mietixAbgleich",{}),geholt=[];
+  try{
+    for(const k of Object.keys(SPEICHER)){const c=SPEICHER[k],h=H[k]=H[k]||{zeit:"",hash:{}};if(!h.felder)h.felder={};
+      // 1) runter: was die anderen Geräte geschickt haben, Eintrag für Eintrag zusammengeführt
+      const ab=h.zeit?new Date(new Date(h.zeit).getTime()-UEBERLAPPUNG).toISOString():"";
+      const seit=ab?"&geaendert=gt."+encodeURIComponent(ab):"";
+      const zeilen=await api(c.tab+"?select="+c.pk+",daten,geaendert&order=geaendert.asc"+seit,{method:"GET"})||[];
+      let anders=false;const m2=alsMap(k,lies(k,c.liste?[]:{}));
+      zeilen.forEach(z=>{const p=String(z[c.pk]);if(z.geaendert>h.zeit)h.zeit=z.geaendert;
+        const vorher=p in m2?JSON.stringify(m2[p]):undefined;
+        const ergebnis=zusammen(k,p,m2[p],z.daten,h.hash[p],h.felder[p]);
+        if(ergebnis===undefined){if(p in m2){delete m2[p];anders=true}}
+        else if(JSON.stringify(ergebnis)!==vorher){m2[p]=ergebnis;anders=true}
+        // Grundlage für das nächste Mal ist jetzt der gemeinsame Stand
+        if(z.daten&&z.daten._weg){h.hash[p]="weg";delete h.felder[p]}
+        else{h.hash[p]=fp(z.daten);if(FELDWEISE[k])h.felder[p]=felderVon(z.daten)}});
+      if(anders){merk(k,ausMap(k,m2));geholt.push(k)}
+      // 2) hoch: alles, was hier anders ist als der gemeinsame Stand (auch Gelöschtes)
+      const m=alsMap(k,lies(k,c.liste?[]:{})),jetzt=new Date().toISOString(),hoch=[];
+      Object.keys(m).forEach(p=>{if(gleichBasis(m[p],h.hash[p])){h.hash[p]=fp(m[p]);return}hoch.push({[c.pk]:p,daten:m[p],geaendert:jetzt})});
+      Object.keys(h.hash).forEach(p=>{if(!(p in m)&&h.hash[p]!=="weg")hoch.push({[c.pk]:p,daten:{_weg:true},geaendert:jetzt})});
+      for(let i=0;i<hoch.length;i+=200)await api(c.tab+"?on_conflict="+c.pk,{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(hoch.slice(i,i+200))});
+      hoch.forEach(z=>{const p=z[c.pk];if(z.daten._weg){h.hash[p]="weg";delete h.felder[p]}else{h.hash[p]=fp(z.daten);if(FELDWEISE[k])h.felder[p]=felderVon(z.daten)}});
+      if(k==="mietixVorgaenge"){const max=Math.max(0,...Object.keys(m).filter(n=>/^\d{6}$/.test(n)).map(Number));
+        if(max)await api("rpc/vertragsnummer_mindestens",{method:"POST",body:JSON.stringify({n:max})})}
+      merk("mietixAbgleich",H)}
+    zuletzt=new Date();
+    if(geholt.length)window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:geholt}));
+  }catch(e){fehler=e.message||"Abgleich fehlgeschlagen"}
+  laeuft=false;zeigen();if(nochmal){nochmal=false;setTimeout(abgleichen,500)}}
+// Jede Änderung an den vier Speichern löst kurz danach einen Abgleich aus
+let warte=null;
+Storage.prototype.setItem=function(k,v){const alt=(this===localStorage&&SPEICHER[k])?localStorage.getItem(k):null;roh.call(this,k,v);
+  if(this===localStorage&&SPEICHER[k]){clearTimeout(warte);warte=setTimeout(abgleichen,800);if(k!=="mietixStand"&&k!=="mietixPapierkorb")sicherheitsnetz(k,alt,v)}};
+
+/* ---------- Sicherheitsnetz (28.10.2026, Baran: "Verklicken darf nichts verlieren") ----------
+   1. Rückgängig: jede Änderung an einer Ablage zeigt 8 Sekunden lang einen Knopf, der den Stand davor zurückholt.
+   2. Papierkorb: was aus einer Liste verschwindet, landet in mietixPapierkorb (Tabelle papierkorb, 90 Tage) und
+      kann in der Zentrale wiederhergestellt werden (window.mietixWiederherstellen).
+   3. Die Datenbank schreibt dazu jede Änderung in die Tabelle verlauf (SQL in tools/vertrag/speicher.sql). */
+const NAMEN={mietixVorgaenge:"Mietvertrag",mietixAnfragen:"Anfrage",mietixKunden:"Kunde",mietixFahrzeuge:"Fahrzeug",mietixAusgaben:"Ausgabe",
+  mietixSperren:"Sperre",mietixAufgaben:"Aufgabe",mietixZustand:"Zustand",mietixAutos:"Auto"};
+const BESCHRIFTUNG={mietixVorgaenge:x=>"Mietvertrag "+(x.nr||"")+" "+(x.name||""),mietixAnfragen:x=>"Anfrage "+(x.name||"")+(x.auto?", "+x.auto:""),
+  mietixAusgaben:x=>"Ausgabe "+(x.betrag!=null?String(x.betrag).replace(".",",")+" €":"")+(x.art?", "+String(x.art).trim():"")+(x.auto?", "+x.auto:""),
+  mietixSperren:x=>"Sperre "+(x.auto||"")+(x.von?" ab "+x.von.split("-").reverse().join("."):""),mietixAufgaben:x=>"Aufgabe "+(x.aufgabe||""),
+  mietixZustand:x=>"Zustand "+(x.auto||"")+": "+(x.text||"")};
+let burst=null,burstZeit=null;
+function sicherheitsnetz(k,alt,neu){
+  // Papierkorb: Einträge, die aus einer Liste verschwunden sind (nicht bei Rückgängig selbst)
+  if(!rueckLaeuft){try{const c=SPEICHER[k];const ma=alsMap(k,JSON.parse(alt||"null")||(c.liste?[]:{})),mn=alsMap(k,JSON.parse(neu||"null")||(c.liste?[]:{}));
+    const weg=Object.keys(ma).filter(p=>!(p in mn));
+    if(weg.length){const pk=lies("mietixPapierkorb",[]),jetzt=new Date().toISOString();
+      weg.forEach(p=>pk.push({id:k+":"+p+":"+Date.now(),ablage:k,schluessel:p,eintrag:ma[p],zeit:jetzt,text:(BESCHRIFTUNG[k]||(x=>NAMEN[k]+" "+p))(ma[p]||{})}));
+      const grenze=new Date(Date.now()-90*864e5).toISOString();merk("mietixPapierkorb",pk.filter(x=>x.zeit>grenze));
+      if(sitzung){clearTimeout(warte);warte=setTimeout(abgleichen,800)}}}catch(e){}}
+  if(rueckLaeuft)return;
+  // Rückgängig: Änderungen innerhalb von 0,7 Sekunden gehören zusammen (z. B. Mietvertrag + Kunde + Fahrzeug)
+  const jetzt=Date.now();if(!burst||jetzt-burstZeit>700)burst={};burstZeit=jetzt;if(!(k in burst))burst[k]=alt;
+  rueckZeigen(Object.keys(burst).map(x=>NAMEN[x]||x).filter((x,i,a)=>a.indexOf(x)===i).join(", "))}
+let rueckLaeuft=false,rueckTimer=null;
+function rueckZeigen(text){let el=document.getElementById("mietixRueck");
+  if(!el){el=document.createElement("div");el.id="mietixRueck";el.innerHTML='<span></span><button type="button">Rückgängig</button>';document.body.appendChild(el);
+    el.querySelector("button").onclick=rueckgaengig}
+  el.querySelector("span").textContent="Gespeichert: "+text;el.classList.add("an");clearTimeout(rueckTimer);rueckTimer=setTimeout(()=>el.classList.remove("an"),8000)}
+function rueckgaengig(){if(!burst)return;
+  if("mietixVorgaenge" in burst&&!confirm("Die letzte Änderung am Mietvertrag wird zurückgenommen (zum Beispiel das Speichern). Was im Formular steht, bleibt stehen. Weiter?"))return;
+  const b=burst;burst=null;rueckLaeuft=true;
+  try{Object.keys(b).forEach(k=>{if(b[k]===null)localStorage.removeItem(k);else roh.call(localStorage,k,b[k])})}finally{rueckLaeuft=false}
+  const el=document.getElementById("mietixRueck");if(el){el.querySelector("span").textContent="Zurückgeholt.";clearTimeout(rueckTimer);rueckTimer=setTimeout(()=>el.classList.remove("an"),1500)}
+  window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:Object.keys(b)}));clearTimeout(warte);warte=setTimeout(abgleichen,800)}
+window.mietixWiederherstellen=function(id){const pk=lies("mietixPapierkorb",[]),e=pk.find(x=>x.id===id);if(!e)return false;
+  if(e.ablage==="mietixEntwurfVertrag"){merk("mietixPapierkorb",pk.filter(x=>x.id!==id));   // angefangener Mietvertrag: liegt nur auf dem Gerät, frisch für 48 Stunden
+    roh.call(localStorage,"mietixEntwurfVertrag",JSON.stringify(Object.assign({},e.eintrag,{zeit:new Date().toISOString()})));
+    window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:["mietixPapierkorb"]}));clearTimeout(warte);warte=setTimeout(abgleichen,800);return true}
+  const c=SPEICHER[e.ablage];if(!c)return false;const m=alsMap(e.ablage,lies(e.ablage,c.liste?[]:{}));m[e.schluessel]=e.eintrag;
+  merk("mietixPapierkorb",pk.filter(x=>x.id!==id));localStorage.setItem(e.ablage,JSON.stringify(ausMap(e.ablage,m)));
+  window.dispatchEvent(new CustomEvent("mietix-abgleich",{detail:[e.ablage,"mietixPapierkorb"]}));return true};
+window.mietixPapierkorb=()=>lies("mietixPapierkorb",[]).slice().sort((a,b)=>a.zeit<b.zeit?1:-1);
+
+/* ---------- Vertragsnummer aus dem gemeinsamen Speicher ---------- */
+window.mietixNeueNummer=async function(){if(!sitzung||!navigator.onLine)return null;
+  try{const n=await api("rpc/neue_vertragsnummer",{method:"POST",body:"{}"});return typeof n==="string"?n:null}catch(e){return null}};
+window.mietixAbgleichen=abgleichen;
+
+/* ---------- Link aus der Einladungs- oder Passwort-Mail: Passwort selbst festlegen ---------- */
+let pwSetzen=false,linkFehler="";
+(function(){const h=new URLSearchParams(location.hash.slice(1));if(!h.get("access_token")&&!h.get("error"))return;
+  history.replaceState(null,"",location.pathname+location.search);
+  if(h.get("error")){linkFehler="Der Link aus der Mail ist abgelaufen oder schon benutzt. Bitte eine neue Einladung anfordern.";return}
+  sichern({access_token:h.get("access_token"),refresh_token:h.get("refresh_token"),expires_in:+h.get("expires_in")||3600});
+  pwSetzen=/invite|recovery|signup/.test(h.get("type")||"")})();
+
+/* ---------- Anzeige: Anmeldung oder Stand ---------- */
+function zeigen(){const el=document.getElementById("abgleich");if(!el)return;
+  if(sitzung&&pwSetzen){el.innerHTML='<div class="abgl"><b>Passwort festlegen</b><div class="abgl-text">Für '+(sitzung.email||"dieses Konto")+'. Damit meldest du dich auf allen Geräten an, auch für die Brücke. Mindestens 8 Zeichen.</div>'+
+    '<input id="ablNeu" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Neues Passwort (sichtbar, damit kein Tippfehler)">'+
+    '<button id="ablSetzen" type="button">Passwort speichern</button><div class="abgl-fehler" id="ablFehler"></div></div>';
+    document.getElementById("ablSetzen").onclick=async()=>{const pw=document.getElementById("ablNeu").value,f=document.getElementById("ablFehler");
+      if(pw.length<8){f.textContent="Bitte mindestens 8 Zeichen.";return}
+      try{const t=await token();const r=await fetch(URL_+"/auth/v1/user",{method:"PUT",headers:{apikey:KEY,Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+        if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.msg||j.message||"Speichern ging nicht")}
+        pwSetzen=false;zeigen();abgleichen()}catch(e){f.textContent=e.message}};return}
+  const pkt=document.getElementById("abgleichPunkt");
+  if(pkt)pkt.style.background=!sitzung?"#B0B0B3":fehler?"#C4161C":"#1B8A4B";
+  if(!sitzung){el.innerHTML='<div class="abgl rot"><b>Nicht angemeldet</b><div class="abgl-text">Einmal anmelden, dann ist alles gesichert.</div>'+
+    '<input id="ablMail" type="email" inputmode="email" autocomplete="username" placeholder="E-Mail">'+
+    '<input id="ablPw" type="password" autocomplete="current-password" placeholder="Passwort">'+
+    '<button id="ablLos" type="button">Anmelden</button><div class="abgl-fehler" id="ablFehler">'+linkFehler+'</div>'+
+    '<a href="#" id="ablNeuZugang" class="abgl-link">Noch keinen Zugang? Hier anlegen</a></div>';
+    const mail=()=>document.getElementById("ablMail").value.trim(),pw=()=>document.getElementById("ablPw").value,f=document.getElementById("ablFehler");
+    document.getElementById("ablLos").onclick=async()=>{f.textContent="";
+      try{sichern(await auth("token?grant_type=password",{email:mail(),password:pw()}));
+        zeigen();abgleichen()}catch(e){f.textContent=/Invalid login/i.test(e.message)?"E-Mail oder Passwort stimmt nicht.":e.message}};
+    // Zugang selbst anlegen: geht nur, solange Baran die Registrierung in Supabase kurz freigibt
+    document.getElementById("ablNeuZugang").onclick=async e=>{e.preventDefault();f.textContent="";
+      if(!mail()||pw().length<8){f.textContent="Oben E-Mail und ein eigenes Passwort (mindestens 8 Zeichen) eintragen, dann hier tippen.";return}
+      try{const j=await auth("signup",{email:mail(),password:pw()});
+        if(j.access_token){sichern(j);zeigen();abgleichen()}else f.textContent="Zugang angelegt. Bitte die Mail bestätigen und dann anmelden."}
+      catch(e){f.textContent=/not allowed|disabled/i.test(e.message)?"Zugang anlegen ist gerade gesperrt. Baran muss es kurz freigeben.":
+        /already/i.test(e.message)?"Für diese E-Mail gibt es schon einen Zugang. Bitte oben anmelden.":e.message}};return}
+  const stand=laeuft?"gleicht ab …":fehler?"nicht abgeglichen: "+fehler:zuletzt?"abgeglichen um "+String(zuletzt.getHours()).padStart(2,"0")+":"+String(zuletzt.getMinutes()).padStart(2,"0"):"wartet auf Internet";
+  el.innerHTML='<div class="abgl klein"><span>Alle Geräte: '+stand+'</span><span><a href="#" id="ablPwNeu">Passwort ändern</a> &nbsp; <a href="#" id="ablAus">abmelden</a></span></div>';
+  // Angemeldet: neues Passwort setzen geht ohne das alte (für "Passwort vergessen" ohne Mail, 28.10.2026)
+  document.getElementById("ablPwNeu").onclick=e=>{e.preventDefault();pwSetzen=true;zeigen()};
+  document.getElementById("ablAus").onclick=e=>{e.preventDefault();if(!confirm("Auf diesem Gerät abmelden? Die Daten bleiben hier."))return;
+    sitzung=null;localStorage.removeItem("mietixSitzung");zeigen()}}
+const css=document.createElement("style");
+css.textContent=".abgl{background:#fff;border:1px solid #E4E4E7;border-radius:16px;padding:14px;margin-bottom:14px}"+
+  ".abgl b{display:block;font-size:15px;margin-bottom:4px}.abgl-text{font-size:13px;color:#6F6F72;margin-bottom:8px}"+
+  ".abgl input{width:100%;border:1px solid #E4E4E7;border-radius:12px;padding:12px;font-weight:600;font-size:16px;font-family:inherit;margin-top:6px;min-height:46px;box-sizing:border-box}"+
+  ".abgl button{width:100%;margin-top:8px;background:#C4161C;color:#fff;border:0;border-radius:12px;padding:13px;font-weight:800;font-size:16px;font-family:inherit;cursor:pointer}"+
+  ".abgl-fehler{color:#C4161C;font-size:13px;font-weight:700;margin-top:6px}"+
+  ".abgl-link{display:block;text-align:center;margin-top:10px;font-size:13px;color:#6F6F72}"+
+  ".abgl.klein{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#6F6F72;padding:10px 14px}.abgl.klein a{color:#6F6F72}"+
+  ".abgl.rot{border:2px solid #C4161C}.abgl.rot b{color:#C4161C}"+
+  "#mietixRueck{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));transform:translateY(-160%);z-index:9999;background:#2E2E30;color:#fff;"+
+  "border-radius:999px;padding:8px 8px 8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 14px Inter,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);"+
+  "transition:transform .25s;max-width:560px;margin:0 auto;white-space:nowrap}#mietixRueck span{overflow:hidden;text-overflow:ellipsis;min-width:0}"+
+  "#mietixRueck.an{transform:translateY(0)}#mietixRueck span{flex:1 1 auto}"+
+  "#mietixRueck button{flex:0 0 auto!important;width:auto!important;min-height:0!important;height:auto!important;margin:0!important;box-shadow:none!important;background:#C4161C!important;color:#fff!important;border:0!important;border-radius:999px!important;padding:9px 14px!important;font:800 14px Inter,system-ui,sans-serif!important;cursor:pointer;display:inline-block!important}";
+document.head.appendChild(css);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)abgleichen()});
+window.addEventListener("online",abgleichen);
+setInterval(abgleichen,60000);
+zeigen();abgleichen();
+})();
+</script>
+<script>
+/* Angebot an einem Ort (30.10.2026, Baran): Die Kachel Angebot und "Angebot schicken" in der Anfrage kommen hierher.
+   Was verschickt wird (ein Auto, Preis mit Rabatt und Kilometern, Uhrzeiten), wird in der Anfrage gespeichert
+   und wandert von dort in den Mietvertrag. Ohne Anfrage und ohne Nummer wird nur gerechnet, nichts gespeichert. */
+let ANG_ANFRAGE=null;
+function angebotDaten(){const von=$("von").value,bis=$("bis").value,dauer=tage(von,bis);if(!von||!bis||dauer<1)return null;
+  const start=wtIndex(ausISO(von)),extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100,vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
+  const autos=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL&&AUSWAHL.has(c.n));if(autos.length!==1)return null;
+  const c=autos[0],p=preis(c,start,dauer);if(p===null)return null;
+  return{auto:c.n,von:von,bis:bis,vonU:$("vonU").value,bisU:$("bisU").value,preis:Math.round((p*(1-extra)+kmZusatz(c,dauer))*100)/100,
+    kmExtra:KM_EXTRA,kmInkl:kmInkl(dauer),freikm:kmGesamt(dauer),rabatt:Math.round(extra*100),am:new Date().toISOString()}}
+function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)return;
+  let l=[];try{l=JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")}catch(e){}
+  let x=ANG_ANFRAGE?l.find(a=>a.id===ANG_ANFRAGE):null;
+  if(!x&&!nr)return;
+  if(!x){const j=new Date();x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(j),uhr:String(j.getHours()).padStart(2,"0")+":"+String(j.getMinutes()).padStart(2,"0"),
+    name:"",alter:"",ort:"",nummer:nr,notiz:"Angebot aus dem Kalender",status:"angebot"};l.push(x);ANG_ANFRAGE=x.id}
+  Object.assign(x,{auto:d.auto,von:d.von,bis:d.bis,vonU:d.vonU,bisU:d.bisU,angebot:d});if(nr&&!x.nummer)x.nummer=nr;if(x.status==="offen")x.status="angebot";
+  localStorage.setItem("mietixAnfragen",JSON.stringify(l));
+  let m=document.getElementById("angGespeichert");if(!m){m=document.createElement("p");m.id="angGespeichert";m.className="klein";m.style.cssText="text-align:center;color:#1E9E5A;font-weight:800;margin-top:8px";$("kopieren").after(m)}
+  m.innerHTML='In Anfragen gespeichert: '+d.auto+', '+EUR.format(d.preis)+'. <a href="https://barankohler.github.io/mietix-anfragen/?zeige=alle" style="color:inherit">ansehen</a>'}
+function artZeigen(){[...$("wahlArt").children].forEach(c=>c.classList.toggle("an",(c.dataset.w==="1")===EINZEL))}
+[...$("wahlArt").children].forEach(c=>c.onclick=()=>{EINZEL=c.dataset.w==="1";try{localStorage.setItem("mietixAngebotArt",EINZEL?"ein":"alle")}catch(e){}
+  if(EINZEL){const eins=EIN_AUTO&&AUSWAHL&&AUSWAHL.has(EIN_AUTO)?EIN_AUTO:(AUSWAHL&&AUSWAHL.size===1?[...AUSWAHL][0]:"");EIN_AUTO=eins;AUSWAHL=new Set(eins?[eins]:[])}else AUSWAHL=null;
+  artZeigen();textAngefasst=false;zeichne()});
+artZeigen();
+function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=false;reiter("ang");AUSWAHL=new Set([auto]);zeichne()}
+(function(){const s=$("senden").onclick,k=$("kopieren").onclick;
+  $("senden").onclick=async()=>{angebotMerken();await s()};$("kopieren").onclick=async()=>{angebotMerken();await k()}})();
+// ?zeige=angebot&anfrage=ID&auto=&von=&bis=&vonU=&bisU=&knr= öffnet das Angebot schon ausgefüllt
+(function(){const q=new URLSearchParams(location.search);if(q.get("zeige")!=="angebot")return;history.replaceState(null,"",location.pathname);
+  ANG_ANFRAGE=q.get("anfrage")||null;let x=null;try{x=(JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")).find(a=>a.id===ANG_ANFRAGE)||null}catch(e){}
+  const g=k=>q.get(k)||(x&&(x[k]||(x.angebot&&x.angebot[k])))||"";
+  let n=0;const setzen=()=>{if(!D||!D.cars||!D.cars.length){if(++n<40)setTimeout(setzen,250);return}
+    if(g("von"))$("von").value=g("von");if(g("bis"))$("bis").value=g("bis");
+    ["vonU","bisU"].forEach(id=>{const u=q.get(id)||(x&&(x[id]||(x.angebot&&x.angebot[id])));if(u&&[...$(id).options].some(o=>o.value===u||o.textContent===u))$(id).value=u});
+    const nr=q.get("knr")||(x&&x.nummer)||"";if(nr)$("knr").value=nr;
+    if(x&&x.angebot){KM_EXTRA=+x.angebot.kmExtra||0;if(x.angebot.kmInkl!=null){KM_INKL=+x.angebot.kmInkl;KM_TAGE=tage(g("von"),g("bis"))}if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
+    const a=g("auto");if(a){EINZEL=true;EIN_AUTO=a;artZeigen()}AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
+  setzen()})();
+</script>
+<div class="fenster" id="fBuchen" role="dialog" aria-label="Neue Buchung"><div class="fKopf"><h3>Neue Buchung</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
+  <div class="bZr"><div><label class="bL">von</label><input type="date" id="bVon"><select id="bVonU"></select></div>
+    <div><label class="bL">bis</label><input type="date" id="bBis"><select id="bBisU"></select></div></div>
+  <div class="bInfo" id="bZeit"></div>
+  <label class="bL">Fahrzeug</label><select id="bAuto"></select>
+  <div class="bWarn" id="bWarn"></div>
+  <label class="bL">Vor- und Nachname *</label><input id="bName" autocomplete="off">
+  <label class="bL">Telefon</label><input id="bTel" inputmode="tel">
+  <label class="bL">Straße und Hausnummer</label><input id="bStr" autocomplete="off">
+  <label class="bL">PLZ und Wohnort</label><input id="bOrt" autocomplete="off">
+  <div class="bZr"><div><label class="bL">Geburtsdatum</label><input type="date" id="bGeb"></div>
+    <div><label class="bL">Geburtsort</label><input id="bGebOrt" autocomplete="off"></div></div>
+  <div class="bTipp" style="margin-top:6px">Was du hier einträgst, steht später schon im Mietvertrag.</div>
+  <label class="bL">Mietpreis für den ganzen Zeitraum €</label><input id="bPreis" inputmode="decimal">
+  <div class="bFrage"><b>Anzahlung erhalten?</b><div class="bJn" id="bAnzJn"><div data-jn="nein" class="an">Nein</div><div data-jn="ja">Ja</div></div></div>
+  <div id="bAnzW" class="versteckt"><div class="bZr"><div><label class="bL">Betrag €</label><input id="bAnz" inputmode="decimal"></div>
+    <div><label class="bL">Bezahlt am</label><input type="date" id="bAnzAm"></div></div>
+    <label class="bL">Wie bezahlt?</label><div class="bJn" id="bArt"><div data-art="bar" class="an">Bar</div><div data-art="ec">EC-Karte</div><div data-art="kredit">Kreditkarte</div><div data-art="ueberweisung">Überweisung</div></div></div>
+  <label class="bL">Notiz (nur für uns)</label><input id="bNotiz">
+  <button class="bOk" id="bOk" type="button">Buchung speichern</button>
+  <div class="bTipp">Die Buchung steht danach im Kalender, unter „Gebucht“ in den Anfragen und füllt später den Mietvertrag aus.</div>
+</div>
+<style>
+#werFrei{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:12px}
+#werFrei h2{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+#werFrei .tPruef{padding:0;margin-top:8px}#werFrei .tChips{padding:0}
+.nBuch{display:block;width:100%;margin:0 0 12px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:14px;font:800 16px Inter,system-ui,sans-serif;cursor:pointer}
+#freiKopf{font-weight:800;margin:12px 0 6px;font-size:15px}
+.fZeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #EFEFF1}
+.fZeile b{display:block;font-size:15px}.fZeile i{display:block;font-style:normal;font-size:12px;color:#6F6F72;margin-top:2px}
+.fZeile.belegt>div:first-child{opacity:.45}.fKn{display:flex;gap:6px;flex:0 0 auto}
+.fZeile button.hellK{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}.fZeile .fRot{flex:0 0 auto;max-width:55%;text-align:right;color:var(--red);font-weight:800;font-size:14px}
+.fZeile i.fRaus{color:var(--red);font-weight:700}#werFrei #tagInfo{display:none}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
+.bInfo{background:#F6F6F7;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
+.bZr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bZr>div{min-width:0}
+#fBuchen .bZr select{margin-top:6px}
+.bL{display:block;font-size:13px;font-weight:700;color:#6F6F72;margin:12px 0 4px}
+#fBuchen input,#fBuchen select{width:100%;border:1.5px solid #E4E4E7;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit;background:#fff}
+.bFrage{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.bJn{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.bJn div{border:1.5px solid #E4E4E7;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer}.bJn div.an{background:var(--red);border-color:var(--red);color:#fff}
+.bWarn{color:var(--red);font-weight:800;font-size:13px;margin-top:6px}
+.bOk{display:block;width:100%;margin-top:16px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:15px;font:800 17px Inter,system-ui,sans-serif;cursor:pointer}
+.bTipp{font-size:12px;color:#6F6F72;margin-top:10px}
+.bMeld{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1B8A4B;color:#fff;padding:12px 18px;border-radius:999px;font-weight:800;z-index:60}
+</style>
+<script>
+/* Wer ist frei? und Neue Buchung (30.10.2026, Baran: am Telefon sofort sehen, was frei ist, und gleich buchen) */
+(function(){
+  const sk=$("sKal");if(!sk)return;
+  const box=document.createElement("div");box.id="werFrei";
+  box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><h2>Wer ist frei?</h2><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
+  const kal=$("tafelKarte")&&$("tafelKarte").closest(".block");if(kal&&kal.parentNode===sk)sk.insertBefore(box,kal.nextSibling);else sk.insertBefore(box,sk.firstChild);
+  const z=$("werZeit");const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)z.appendChild(tc);if(tp)z.appendChild(tp);
+})();
+const bTage=()=>tage($("von").value,$("bis").value);
+function bZeitText(){const v=$("von").value,b=$("bis").value,t=bTage();if(!v||!b||t<1)return"";
+  return wtKurz(ausISO(v))+" "+kurzD(ausISO(v))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(b))+" "+kurzD(ausISO(b))+" "+uhr($("bisU").value)+" ("+t+(t===1?" Tag":" Tage")+")"}
+function bPreis(n){const c=D.cars.find(x=>x.n===n);const v=$("von").value,t=bTage();if(!c||!v||t<1)return null;const p=preis(c,wtIndex(ausISO(v)),t);return p===null?null:Math.round(p)}
+function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,b0=b,t=bTage();
+  if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
+  const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
+  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl.slice().sort((a,b)=>bZ(a).bis-bZ(b).bis)[bl.length-1];
+      const rot=x.notiz==="Sperre"?"gesperrt bis "+kurzD(ausISO(x.bis)):"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
+      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
+    // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
+    const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
+    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
+  $("freiKopf").textContent=bZeitText()+": "+n+" von "+D.cars.length+" frei";
+  $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
+  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch));
+  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>angebotFuer(x.dataset.ang))}
+{const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
+function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
+  $("bWarn").textContent=bl.length?"Achtung: in dem Zeitraum schon belegt"+(bl[0].kunde?" ("+vorname(bl[0].kunde)+")":"")+".":""}
+function bZeitrFuellen(){["vonU","bisU"].forEach(i=>{const z=$("b"+i[0].toUpperCase()+i.slice(1));z.innerHTML=$(i).innerHTML;z.value=$(i).value});
+  $("bVon").value=$("von").value;$("bBis").value=$("bis").value;$("bZeit").textContent=bZeitText()}
+function bZeitrAendern(){const a=[["bVon","von"],["bVonU","vonU"],["bBis","bis"],["bBisU","bisU"]];
+  a.forEach(([b,o])=>{if($(o).value!==$(b).value){$(o).value=$(b).value;$(o).dispatchEvent(new Event("change"))}});
+  bZeitrFuellen();const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()}
+["bVon","bVonU","bBis","bBisU"].forEach(i=>$(i).addEventListener("change",bZeitrAendern));
+function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
+  bZeitrFuellen();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
+  $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz"].forEach(i=>$(i).value="");$("bAnzAm").value=nachISO(new Date());
+  const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";
+  bJn("nein");bWarnen();fAuf("fBuchen");setTimeout(()=>$("bName").focus(),250)}
+function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.dataset.jn===w));$("bAnzW").classList.toggle("versteckt",w!=="ja");
+  if(w==="ja"&&!$("bAnz").value){const p=parseFloat(String($("bPreis").value).replace(/\./g,"").replace(",","."));if(p)$("bAnz").value=String(Math.round(p*0.3))}}
+[...$("bAnzJn").children].forEach(c=>c.onclick=()=>bJn(c.dataset.jn));
+[...$("bArt").children].forEach(c=>c.onclick=()=>[...$("bArt").children].forEach(x=>x.classList.toggle("an",x===c)));
+$("bAuto").onchange=()=>{const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()};
+$("nBuch").onclick=()=>buchenAuf("");
+// Doppeltippen legt keine zweite Buchung an (30.10.2026)
+let B_SPERRE=0;
+$("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").value.trim();if(!name){alert("Bitte den Namen eintragen.");$("bName").focus();return}
+  // Doppel-Schutz: derselbe Kunde, dasselbe Auto, überlappender Zeitraum schon als Buchung oder Mietvertrag da
+  {const nG=t=>String(t||"").toLowerCase().replace(/\s+/g,""),au=$("bAuto").value,v0=$("von").value,b0=$("bis").value,ueber=(a1,b1,a2,b2)=>a1<b2&&b1>a2;
+   const da=lies("mietixAnfragen",[]).find(x=>x.status==="gebucht"&&nG(x.name)===nG(name)&&x.auto===au&&x.von&&x.bis&&ueber(v0,b0,x.von,x.bis))
+     ||lies("mietixVorgaenge",[]).find(x=>x.status!=="zurück"&&nG(x.name)===nG(name)&&x.auto===au&&x.vonD&&x.bisD&&ueber(v0,b0,x.vonD,x.bisD));
+   if(da){alert(name+" hat für "+kurzAuto(au)+" in diesem Zeitraum schon "+(da.nr?"den Mietvertrag "+da.nr:"eine Buchung")+". Es wird keine zweite angelegt.");return}}
+  if($("bWarn").textContent&&!confirm($("bWarn").textContent+"\n\nTrotzdem buchen?"))return;
+  const zahl=x=>parseFloat(String(x||"").replace(/\./g,"").replace(",","."))||0;const v=$("von").value,b=$("bis").value,t=bTage(),h=new Date();
+  const anzJa=[...$("bAnzJn").children].some(c=>c.dataset.jn==="ja"&&c.classList.contains("an"))&&zahl($("bAnz").value)>0;
+  const art=([...$("bArt").children].find(c=>c.classList.contains("an"))||{dataset:{}}).dataset.art||"bar";
+  const x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(h),uhr:String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0"),
+    name,alter:"",ort:$("bOrt").value.trim(),nummer:$("bTel").value.trim(),
+    anschrift:[$("bStr").value.trim(),$("bOrt").value.trim()].filter(Boolean).join(", "),geb:$("bGeb").value,gebort:$("bGebOrt").value.trim(),auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,
+    notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",
+    angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:(D.freiKm||150)*t,freikm:(D.freiKm||150)*t,kmExtra:0,rabatt:0,am:h.toISOString()}};
+  if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:$("bAnzAm").value||nachISO(h)};
+  B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
+  const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
+</script>
+<script>
+/* Zwei Seiten aus einem Bauplan (30.10.2026, Baran): index.html = Kalender, angebot.html = Angebot.
+   Gleiche Preisrechnung, gleiche Daten, nur anders aufgeteilt. */
+(function(){const SEITE="ang";
+  const r0=reiter;reiter=function(){return r0(SEITE)};
+  $("reiter2").classList.add("versteckt");
+  const titel=document.querySelector("h1 span");
+  if(SEITE==="kal"){if(titel)titel.textContent="KALENDER";document.title="Mietix Kalender";
+    // Angebot für ein Auto: auf die Angebot-Seite, Auto und Zeitraum schon ausgefüllt
+    angebotFuer=function(auto){const q=new URLSearchParams({zeige:"angebot",auto,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value});location.href="angebot.html?"+q};
+    return}
+  if(titel)titel.textContent="ANGEBOT";document.title="Mietix Angebot";
+  // Reihenfolge: Zeitraum, Auto, Kilometer, Rabatt, Nachricht
+  const blk=id=>$(id)&&$(id).closest(".block");const zb=blk("angZeitraum"),fz=blk("liste");
+  $("angZeitraum").classList.add("versteckt");
+  const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)zb.appendChild(tc);if(tp)zb.appendChild(tp);
+  if(fz&&zb)zb.after(fz);
+  const k=document.createElement("a");k.href="./";k.className="zumKal";k.textContent="Zum Kalender ›";$("sAng").appendChild(k);
+  try{reiter("ang")}catch(e){}
+})();
+</script>
+<style>.zumKal{display:block;text-align:center;margin:18px 0 6px;color:var(--grey);font-weight:700}
+#sAng .tChips{padding:0}#sAng .tChips div{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 10px rgba(0,0,0,.05)}#sAng .tChips div.an{background:var(--red)}#sAng .tPruef{margin:10px 0 0;padding-top:10px}#sAng #tagInfo{display:none}</style></body>
+</html>
