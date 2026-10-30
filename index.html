@@ -137,6 +137,14 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 #blatt .knopf{margin-top:8px;text-decoration:none}#blatt .knopf.voll{background:var(--red);color:#fff}
 #blatt .zu{display:block;text-align:center;font-size:13px;color:var(--grey);margin-top:12px;font-weight:700}
 @media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}#tafel td b{width:calc(var(--l) * 40px);font-size:13px}}
+
+#rabchips{display:none!important}
+#rab{font-size:22px;font-weight:800;text-align:center}
+#kmchips{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kmf{display:flex;flex-direction:column;gap:6px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.06)}
+.kmf span{font-size:13px;font-weight:700;color:var(--grey)}
+.kmf input{font-size:22px;font-weight:800;border:1.5px solid #E4E4E7;border-radius:10px;padding:8px 10px;width:100%;min-height:48px}
+.kmf b{font-size:13px;color:var(--grey)}
 </style>
 </head>
 <body>
@@ -169,7 +177,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
     <div class="karte" id="angZeitraum"></div>
   </div>
   <div class="block">
-    <p class="feldname">Kilometer dazu (pro Tag)</p>
+    <p class="feldname">Kilometer</p>
     <div id="kmchips"></div>
     <p class="klein" id="kminfo"></p>
   </div>
@@ -333,8 +341,8 @@ function nachricht(freieAutos,von,bis,dauer,anzFrei){
            +(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
   });
   z.push("");
-  z.push("Alle Preise für den kompletten Zeitraum, inklusive "
-    +((D.freiKm+(typeof KM==="number"?KM:0))*dauer).toLocaleString("de-DE")+" km. Weitere Kilometer sind zubuchbar.");
+  z.push("Alle Preise für den kompletten Zeitraum, "
+    +kmSatz(dauer)+". Weitere Kilometer sind zubuchbar.");
   if(dauer>1){
     z.push("");
     z.push("Gilt nur für den kompletten Zeitraum "+zeitraum
@@ -445,7 +453,7 @@ let textAngefasst=false;
   function markieren(){
     const w=+($("rab").value)||0;
     [...document.querySelectorAll(".rchip")].forEach(c=>c.classList.toggle("an",+c.dataset.p===w));
-    $("rabinfo").textContent = w>0 ? "Prozent zusätzlich auf den Gesamtpreis" : "kein Sonderrabatt";
+    $("rabinfo").textContent = w>0 ? w+" % Rabatt auf den Gesamtpreis" : "% Rabatt, leer lassen für keinen";
   }
   [...document.querySelectorAll(".rchip")].forEach(c=>{
     c.onclick=()=>{ $("rab").value=c.dataset.p; textAngefasst=false; markieren(); zeichne(); };
@@ -560,12 +568,25 @@ function kmPreis(car,km){km=Math.max(0,Math.round(km)||0);if(!km||!car.km||car.k
   const preise=car.km.slice(1),stufen=D.kmStufen||[50,100,150,200,300];const maxKm=stufen[stufen.length-1],maxPreis=preise[preise.length-1];
   if(km>=maxKm)return Math.round(km*maxPreis/maxKm);let x0=0,y0=0;
   for(let i=0;i<stufen.length;i++){if(km<=stufen[i])return Math.round(y0+(preise[i]-y0)*(km-x0)/(stufen[i]-x0));x0=stufen[i];y0=preise[i]}return 0}
-function kmZusatz(car,dauer){return KM?dauer*kmPreis(car,KM):0}
-function kmChips(){const st=[0].concat(D.kmStufen||[50,100,150,200,300]);
-  $("kmchips").innerHTML=st.map(k=>'<div class="rchip'+(k===KM?" an":"")+'" data-km="'+k+'">'+(k?"+"+k+" km":"inklusive")+'</div>').join("");
-  [...$("kmchips").children].forEach(c=>c.onclick=()=>{KM=+c.dataset.km;textAngefasst=false;zeichne()});
-  const t=tage($("von").value,$("bis").value);
-  $("kminfo").textContent=KM?"+"+KM+" km pro Tag, macht "+((D.freiKm+KM)*t).toLocaleString("de-DE")+" km gesamt. Preis je Auto steht in der Liste.":D.freiKm+" km pro Tag sind inklusive, macht "+(D.freiKm*t).toLocaleString("de-DE")+" km."}
+function kmZusatz(car,dauer){return 0}   // Extra-Kilometer schreiben wir von Hand dazu, kein Aufpreis mehr (30.10.2026)
+let KM_INKL=null,KM_EXTRA=0,KM_TAGE=null;   // KM_INKL null = automatisch 150 km pro Tag
+const kmInkl=t=>KM_INKL==null?D.freiKm*t:KM_INKL;
+const kmGesamt=t=>kmInkl(t)+KM_EXTRA;
+const kmZahl=n=>Number(n).toLocaleString("de-DE");
+function kmSatz(t){return "inklusive "+kmZahl(kmGesamt(t))+" km"+(KM_EXTRA?" (davon "+kmZahl(KM_EXTRA)+" Extra-Kilometer für Sie)":"")}
+function kmChips(){const t=tage($("von").value,$("bis").value);
+  if(!$("kmInkl")){
+    $("kmchips").innerHTML='<label class="kmf"><span>Inklusive</span><input type="number" id="kmInkl" inputmode="numeric" min="0" step="10"><b>km</b></label>'+
+      '<label class="kmf"><span>Extra von uns</span><input type="number" id="kmExtra" inputmode="numeric" min="0" step="10" placeholder="0"><b>km</b></label>';
+    $("kmInkl").addEventListener("input",()=>{const v=$("kmInkl").value.trim();KM_INKL=v===""?null:Math.max(0,Math.round(+v)||0);textAngefasst=false;zeichne()});
+    $("kmExtra").addEventListener("input",()=>{KM_EXTRA=Math.max(0,Math.round(+$("kmExtra").value)||0);textAngefasst=false;zeichne()});
+    ["kmInkl","kmExtra"].forEach(id=>$(id).addEventListener("blur",()=>kmChips()));
+  }
+  if(KM_TAGE!==null&&KM_TAGE!==t)KM_INKL=null;   // anderer Zeitraum: wieder 150 km pro Tag
+  KM_TAGE=t;
+  if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl(t);
+  if(document.activeElement!==$("kmExtra"))$("kmExtra").value=KM_EXTRA||"";
+  $("kminfo").textContent=(KM_INKL==null?D.freiKm+" km pro Tag, "+t+(t===1?" Tag":" Tage")+". ":"Von Hand geändert. ")+"Im Text steht: "+kmSatz(t)+"."}
 function angZeitraum(){const von=$("von").value,bis=$("bis").value,t=tage(von,bis);
   $("angZeitraum").innerHTML='<span>'+wtKurz(ausISO(von))+" "+kurzD(ausISO(von))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(bis))+" "+kurzD(ausISO(bis))+" "+uhr($("bisU").value)+", "+t+(t===1?" Tag":" Tage")+'</span><span class="aend" id="angAend">ändern</span>';
   $("angAend").onclick=()=>{reiter("kal");$("tafelKarte").scrollIntoView({behavior:"smooth"})}}
@@ -889,7 +910,7 @@ function angebotDaten(){const von=$("von").value,bis=$("bis").value,dauer=tage(v
   const autos=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL&&AUSWAHL.has(c.n));if(autos.length!==1)return null;
   const c=autos[0],p=preis(c,start,dauer);if(p===null)return null;
   return{auto:c.n,von:von,bis:bis,vonU:$("vonU").value,bisU:$("bisU").value,preis:Math.round((p*(1-extra)+kmZusatz(c,dauer))*100)/100,
-    kmExtra:KM,freikm:(D.freiKm+KM)*dauer,rabatt:Math.round(extra*100),am:new Date().toISOString()}}
+    kmExtra:KM_EXTRA,kmInkl:kmInkl(dauer),freikm:kmGesamt(dauer),rabatt:Math.round(extra*100),am:new Date().toISOString()}}
 function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)return;
   let l=[];try{l=JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")}catch(e){}
   let x=ANG_ANFRAGE?l.find(a=>a.id===ANG_ANFRAGE):null;
@@ -910,7 +931,7 @@ function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)r
     if(g("von"))$("von").value=g("von");if(g("bis"))$("bis").value=g("bis");
     ["vonU","bisU"].forEach(id=>{const u=q.get(id)||(x&&(x[id]||(x.angebot&&x.angebot[id])));if(u&&[...$(id).options].some(o=>o.value===u||o.textContent===u))$(id).value=u});
     const nr=q.get("knr")||(x&&x.nummer)||"";if(nr)$("knr").value=nr;
-    if(x&&x.angebot){KM=x.angebot.kmExtra||0;if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
+    if(x&&x.angebot){KM_EXTRA=+x.angebot.kmExtra||0;if(x.angebot.kmInkl!=null){KM_INKL=+x.angebot.kmInkl;KM_TAGE=tage(g("von"),g("bis"))}if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
     const a=g("auto");AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
   setzen()})();
 </script></body>
