@@ -870,7 +870,7 @@ function rueckZeigen(text){let el=document.getElementById("mietixRueck");
   const andere=()=>{try{return[...document.querySelectorAll("#meldung,#zMeld,#erfolgBox.auf,.bMeld,.meld.an,#meld.an")].some(m=>m.offsetParent!==null&&getComputedStyle(m).display!=="none"&&getComputedStyle(m).opacity!=="0")}catch(e){return false}};
   let n=0;const los=()=>{if(andere()&&n++<20){rueckTimer=setTimeout(los,200);return}el.classList.add("an");rueckTimer=setTimeout(()=>el.classList.remove("an"),6000)};los()}
 function rueckgaengig(){if(!burst)return;
-  if("mietixVorgaenge" in burst&&!confirm("Die letzte Änderung am Mietvertrag wird zurückgenommen (zum Beispiel das Speichern). Was im Formular steht, bleibt stehen. Weiter?"))return;
+  if("mietixVorgaenge" in burst&&!confirm("Die letzte Änderung am Mietvertrag wird zurückgenommen. Was gerade in einem offenen Formular steht, bleibt dort stehen. Weiter?"))return;
   const b=burst;burst=null;rueckLaeuft=true;
   try{Object.keys(b).forEach(k=>{if(b[k]===null)localStorage.removeItem(k);else roh.call(localStorage,k,b[k])})}finally{rueckLaeuft=false}
   const el=document.getElementById("mietixRueck");if(el){el.querySelector("span").textContent="Zurückgeholt.";clearTimeout(rueckTimer);rueckTimer=setTimeout(()=>el.classList.remove("an"),1500)}
@@ -1019,7 +1019,9 @@ function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.f
     k.toBlob(async b=>{const f=new File([b],name,{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){}}
       const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},"image/jpeg",.92)}})();
 (function(){const s=$("senden").onclick,k=$("kopieren").onclick;
-  $("senden").onclick=async()=>{angebotMerken();await s()};$("kopieren").onclick=async()=>{angebotMerken();await k()}})();
+  // Ohne gewähltes Auto steht nur ein Hinweis in der Vorschau: der darf nie beim Kunden landen (31.10.2026, Prüfbericht)
+  const leer=kn=>{if(/^Bitte oben/.test(($("vorschau").value||"").trim())){rueckmeldung(kn,"Erst oben ein Auto antippen");return true}return false};
+  $("senden").onclick=async()=>{if(leer($("senden")))return;angebotMerken();await s()};$("kopieren").onclick=async()=>{if(leer($("kopieren")))return;angebotMerken();await k()}})();
 // ?zeige=angebot&anfrage=ID&auto=&von=&bis=&vonU=&bisU=&knr= öffnet das Angebot schon ausgefüllt
 (function(){const q=new URLSearchParams(location.search);if(q.get("zeige")!=="angebot")return;history.replaceState(null,"",location.pathname);
   ANG_ANFRAGE=q.get("anfrage")||null;let x=null;try{x=(JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")).find(a=>a.id===ANG_ANFRAGE)||null}catch(e){}
