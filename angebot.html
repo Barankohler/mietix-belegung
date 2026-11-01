@@ -37,8 +37,11 @@ main{max-width:560px;margin:0 auto;padding:12px 14px 190px}
 .fuss{text-align:center;font-size:12px;color:#8A8A8E;font-weight:600;margin-top:14px;line-height:1.5}.fuss a{color:#8A8A8E}
 .leiste{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid #E5E5EA;padding:10px 14px calc(12px + env(safe-area-inset-bottom))}
 .leiste .in{max-width:560px;margin:0 auto}
-.sum{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:700;color:#6E6E73;margin-bottom:8px}.sum b{color:#1C1C1E;white-space:nowrap}
-.sum span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Zusammenfassung über „Senden“ (01.11.2026, Baran: professioneller): links Auto und Zeitraum, rechts Betrag und inklusive km */
+.sum{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:10px}
+.sum>span{min-width:0}.sum b{display:block;font-size:16px;font-weight:800;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum i{display:block;font-style:normal;font-size:13px;font-weight:600;color:#8A8A8E;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sumR{flex:0 0 auto;text-align:right}#sumR b{font-size:19px}
 #senden{display:block;width:100%;border:0;border-radius:15px;padding:15px;font-weight:800;font-size:17px;font-family:inherit;background:#25D366;color:#fff;cursor:pointer}
 #senden.aus{background:#BDBDC2}
 .mehr{display:flex;justify-content:center;gap:18px;margin-top:9px;white-space:nowrap}
@@ -99,7 +102,7 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   <div class="fuss" id="fuss"></div>
 </main>
 <div class="leiste"><div class="in">
-  <div class="sum"><span id="sumL">Erst ein Auto antippen</span><b id="sumR"></b></div>
+  <div class="sum"><span id="sumL"><i>Erst ein Auto antippen</i></span><span id="sumR"></span></div>
   <button id="senden" class="aus" type="button">Senden</button>
   <div class="mehr"><span id="mText">Text ansehen</span><span id="mKopie">Kopieren</span><span id="mBild">Als Bild</span><a href="./" style="font-size:14px;font-weight:800;color:#6E6E73;text-decoration:none;padding:4px 2px">Kalender</a></div>
 </div></div>
@@ -289,10 +292,10 @@ function zeichne(){laden();const d=t(),k=S.kunde;
   $("werName").textContent=k?(k.name||"ohne Namen"):"Ohne Kunde";$("werInfo").textContent=k?k.info:"Antippen: Anfrage, früherer Mieter oder Nummer";
   $("rabT").textContent=S.rab?S.rab+" %":"kein";$("pakT").textContent=S.pakKm?"+"+S.pakKm.toLocaleString("de-DE")+" km":"kein";
   autosZeichnen();const g=gewaehlt(),P=g.map(posten);
-  if(!P.length){$("sumL").textContent=D?"Erst ein Auto antippen":"Preise werden geladen …";$("sumR").textContent="";$("senden").classList.add("aus");$("senden").textContent="Senden";return}
+  if(!P.length){$("sumL").innerHTML="<i>"+(D?"Erst ein Auto antippen":"Preise werden geladen …")+"</i>";$("sumR").innerHTML="";$("senden").classList.add("aus");$("senden").textContent="Senden";return}
   const km=kmInkl();
-  $("sumL").textContent=(P.length===1?P[0].name.replace("Mercedes-Benz ","").replace("Mercedes ",""):P.length+" Autos")+", "+tz(d)+", "+km.toLocaleString("de-DE")+(S.pakKm?" + "+S.pakKm.toLocaleString("de-DE"):"")+" km";
-  $("sumR").textContent=P.length===1?E(P[0].summe):"ab "+E(Math.min(...P.map(p=>p.summe)));
+  $("sumL").innerHTML="<b>"+esc(P.length===1?P[0].name:P.length+" Autos zur Auswahl")+"</b><i>"+esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU)+", "+tz(d))+"</i>";
+  $("sumR").innerHTML="<b>"+(P.length===1?"":"ab ")+E(P.length===1?P[0].summe:Math.min(...P.map(p=>p.summe)))+"</b><i>inklusive "+(km+(S.pakKm||0)).toLocaleString("de-DE")+" km</i>";
   $("senden").classList.remove("aus");$("senden").textContent=k&&k.nummer?"An "+(k.name?vorname(k.name):"Kunden")+" senden":"Senden";
   $("fuss").innerHTML="Belegt zählen Mietverträge, gebuchte Anfragen und Sperren. Preisstand: "+esc(D.stand?D.stand.split("-").reverse().join("."):"")}
 
@@ -713,7 +716,7 @@ zeigen();abgleichen();auslagernBald();
 
   // Unerwartete Fehler: lieber sagen als still hängen
   let zuletzt="";
-  const melde=m=>{m=String(m||"").trim();if(!m||m===zuletzt||/ResizeObserver|^Script error|AbortError|NotAllowedError|share|Load failed|Failed to fetch|NetworkError/i.test(m))return;
+  const melde=m=>{m=String(m||"").trim();if(!m||m===zuletzt||/ResizeObserver|^Script error|AbortError|NotAllowedError|share|Load failed|Failed to fetch|NetworkError|Transition|view transition|InvalidStateError/i.test(m))return;
     zuletzt=m;mxFehler("Da hat etwas nicht geklappt ("+m.slice(0,120)+"). Bitte die Seite neu laden.",15000)};
   addEventListener("error",e=>{if(e.message)melde(e.message)});
   addEventListener("unhandledrejection",e=>melde(e.reason&&(e.reason.message||e.reason)));
