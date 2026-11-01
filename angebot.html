@@ -1,715 +1,359 @@
-<!DOCTYPE html>
-<html lang="de">
-<head><style>input,select,textarea{font-size:16px;font-family:inherit;max-width:100%;box-sizing:border-box}input[type=date],input[type=time],input[type=datetime-local]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;min-height:44px}select{min-width:0}</style>
+<!doctype html>
+<html lang="de"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2E2E30">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Mietix Verfügbarkeiten">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>Mietix Verfügbarkeiten</title>
+<meta name="apple-mobile-web-app-title" content="Angebot">
+<title>Mietix Angebot</title>
 <style>
-:root{--red:#C4161C;--dark:#2E2E30;--grey:#6F6F72;--line:#E2E2E4;--bg:#F2F2F4;
-      --frei:#1B9E4B;--freibg:#E8F6EE;--belegtbg:#FDEBEC;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-     background:var(--bg);color:var(--dark);-webkit-text-size-adjust:100%;padding-bottom:34px;}
-header{background:var(--dark);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 18px 10px;
-       border-bottom:3px solid var(--red);display:flex;justify-content:space-between;align-items:center;}
-header h1{font-size:15px;letter-spacing:1.2px;font-weight:800;}
-header h1 span{color:var(--red);}
-#zahnrad{font-size:18px;cursor:pointer;padding:2px 4px;}
-main{padding:18px 18px 0;}
-.feldname{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--grey);
-          margin:0 0 8px 3px;font-weight:800;}
-.block{margin-bottom:20px;}
-.karte{background:#fff;border-radius:16px;padding:17px;
-  box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
-input[type=date],input[type=text],input[type=url]{width:100%;background:#fff;border:none;
-  border-radius:16px;padding:16px 17px;font-size:18px;font-weight:700;font-family:inherit;
-  color:var(--dark);min-height:56px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
-input:focus{outline:2px solid var(--dark);outline-offset:-2px;}
-.karte input{box-shadow:none;border:1px solid var(--line);font-size:17px;min-height:52px;}
-input[type=number]{width:100%;background:#fff;border:none;border-radius:16px;padding:16px 17px;
-  font-size:18px;font-weight:700;font-family:inherit;color:var(--dark);min-height:56px;
-  box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
-#rabchips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.rchip{background:#fff;border-radius:14px;padding:13px 4px;text-align:center;font-weight:800;
-  font-size:16px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);}
-.rchip.an{background:var(--red);color:#fff;}
-#zeitraumtext{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
-.zeile{display:flex;justify-content:space-between;align-items:center;gap:12px;
-  background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;
-  box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);}
-.zeile .name{font-size:16px;font-weight:800;}
-.zeile .info{display:block;font-size:12px;color:var(--grey);margin-top:3px;font-weight:600;}
-.marke{font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;white-space:nowrap;flex:none;}
-.marke.frei{background:var(--freibg);color:var(--frei);}
-.marke.belegt{background:var(--belegtbg);color:var(--red);}
-.marke.drin{background:var(--red);color:#fff;}
-.zeile.waehlbar{cursor:pointer;}
-.zeile.waehlbar:active{transform:scale(.99);}
-.zeile.waehlbar:not(.drin){opacity:.55;}
-.zeile.drin{box-shadow:0 0 0 2px var(--red),0 4px 12px rgba(196,22,28,.16);}
-.knopf{display:block;width:100%;margin-top:11px;border:none;border-radius:15px;padding:17px;
-  font-size:16px;font-weight:800;text-align:center;font-family:inherit;cursor:pointer;color:#fff;
-  background:var(--red);box-shadow:0 6px 18px rgba(196,22,28,.3);}
-.knopf:active{transform:scale(.985);}
-.knopf.hell{background:#fff;color:var(--dark);border:1.5px solid var(--line);box-shadow:none;}
-.knopf.gruen{background:#25D366;box-shadow:0 6px 18px rgba(37,211,102,.35);}
-#vorschau{width:100%;min-height:230px;font-size:16px;line-height:1.6;border:1px solid var(--line);
-  border-radius:13px;padding:14px;font-family:inherit;color:var(--dark);background:#FAFAFB;resize:vertical;}
-#knr{margin-top:11px;}
-#nrinfo{font-size:12px;color:var(--grey);margin:8px 0 0 3px;font-weight:600;}
-.knopf.aus{background:#C9C9CC;pointer-events:none;box-shadow:none;}
-.feld2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-.klein{font-size:11px;color:var(--grey);margin:7px 0 0 3px;font-weight:600;}
-#meldung{display:none;margin-top:13px;font-size:13px;font-weight:700;padding:12px 14px;border-radius:12px;margin-top:11px;}
-#meldung.gut{display:block;background:var(--freibg);color:var(--frei);}
-#meldung.schlecht{display:block;background:var(--belegtbg);color:var(--red);}
-.bzeile{display:flex;justify-content:space-between;align-items:center;gap:10px;
-  padding:12px 0;border-bottom:1px solid var(--line);}
-.bzeile:last-child{border-bottom:none;}
-.bzeile .bname{font-size:15px;font-weight:800;}
-.bzeile .bzeit{display:block;font-size:12px;color:var(--grey);margin-top:2px;font-weight:600;}
-.weg{background:none;border:none;color:var(--red);font-size:13px;font-weight:800;
-  cursor:pointer;font-family:inherit;padding:6px 4px;flex:none;}
-#leer{font-size:13px;color:var(--grey);font-weight:600;}
-footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
-#einbg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:none;padding:24px 18px;
-  overflow-y:auto;}
-#einbg.auf{display:block;}
-#einkarte{background:#fff;border-radius:18px;padding:20px;max-width:520px;margin:0 auto;}
-#einkarte h3{font-size:17px;font-weight:800;margin-bottom:10px;}
-#einkarte p{font-size:13px;line-height:1.6;color:var(--grey);margin-bottom:12px;}
-#einkarte ol{font-size:13px;line-height:1.7;color:var(--dark);margin:0 0 14px 18px;}
-
-/* Tafel (29.10.2026) */
-#tafelKarte{background:#fff;border-radius:16px;padding:12px 0 10px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:10px}
-.tKopf{display:flex;justify-content:space-between;align-items:center;padding:0 14px 8px}
-.tKopf b{font-size:15px}.tKopf .tNav{display:flex;gap:6px}
-.tKopf .tNav div{padding:7px 11px;border-radius:999px;background:var(--bg);font-weight:800;font-size:13px;cursor:pointer;user-select:none}
-.tKopf .tNav div.an{background:var(--dark);color:#fff}
-#tafelRoll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
-#tafelRoll::-webkit-scrollbar{display:none}
-#tafel{border-collapse:separate;border-spacing:0;table-layout:fixed}
-#tafel th,#tafel td{height:36px;padding:0;border-bottom:1px solid #F0F0F2}
-#tafel th.auto{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-size:12px;line-height:1.15;font-weight:800;padding:0 6px 0 12px;white-space:normal;width:96px;min-width:96px;max-width:96px;overflow:hidden;box-shadow:2px 0 0 #F0F0F2}
-#tafel th.tag{width:34px;min-width:34px;font-size:11px;font-weight:700;color:var(--grey);text-align:center;line-height:1.15;padding-bottom:4px;height:40px;vertical-align:bottom}
-#tafel th.tag.we{color:var(--dark)}#tafel th.tag.heute b{background:var(--red);color:#fff;border-radius:7px;padding:1px 5px}
-#tafel th.tag b{display:block;font-size:13px}
-#tafel td{width:34px;min-width:34px;position:relative;cursor:pointer}
-#tafel td i{position:absolute;top:3px;bottom:3px;left:1px;right:1px;border-radius:8px}
-#tafel td i.frei{background:#E8F6EE}#tafel td.we i.frei{background:#DDF1E5}
-#tafel td i.belegt{background:#F7C5C8;border-radius:0}#tafel td i.belegt.start{border-radius:8px 0 0 8px}#tafel td i.belegt.ende{border-radius:0 8px 8px 0}#tafel td i.belegt.start.ende{border-radius:8px}
-#tafel td i.sperre{background:#DADADF;border-radius:0}#tafel td i.sperre.start{border-radius:8px 0 0 8px}#tafel td i.sperre.ende{border-radius:0 8px 8px 0}
-#tafel td.gewaehlt{background:#FFF4D6}#tafel th.tag.gewaehlt{background:#FFF4D6;border-radius:8px 8px 0 0;color:var(--dark)}
-.feld2 input,input[type=date]{min-width:0}
-.feld2 input{padding:10px 8px;text-align:center;font-size:16px}
-.feld2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-#spAuto{display:block;width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 36px 12px 14px;font-weight:700;font-size:16px;font-family:inherit;color:var(--dark);min-height:48px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238A8A8E' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center}main{overflow-x:hidden}
-#tafel td.heute{background:#FFF8F8}
-#tafel td b{position:absolute;top:3px;bottom:3px;display:flex;align-items:center;padding:0 6px;box-sizing:border-box;width:calc(var(--l) * 34px);min-width:44px;font-size:12px;font-weight:800;color:#8A1014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;pointer-events:none}
-#tafel td.sperre b{color:#4A4A4F}
-.tChips{display:flex;gap:7px;flex-wrap:wrap;padding:8px 14px 0}
-.tChips div{padding:9px 13px;border-radius:999px;background:var(--bg);font-weight:800;font-size:14px;cursor:pointer;user-select:none}
-.tChips div.an{background:var(--red);color:#fff}
-.tChips .tLab{flex-basis:100%;font-size:13px;color:#6F6F72;font-weight:600;margin-top:2px}
-.tLegende{display:flex;gap:14px;padding:8px 14px 0;font-size:11px;color:var(--grey);font-weight:700}
+*{box-sizing:border-box}
+body{margin:0;background:#F2F2F7;color:#1C1C1E;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+header{background:#fff;border-bottom:3px solid #C4161C;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:28px;font-weight:800}
+main{max-width:560px;margin:0 auto;padding:12px 14px 190px}
 .versteckt{display:none!important}
-#knr{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;font-weight:600;font-size:16px;font-family:inherit;min-height:50px}
-.reiter2{display:flex;gap:8px;margin:0 0 16px}
-.reiter2 div{flex:1;text-align:center;padding:13px;border-radius:14px;background:#fff;font-weight:800;font-size:16px;color:var(--grey);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045)}
-.reiter2 div.an{background:var(--red);color:#fff}
-#kmchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-#angZeitraum{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;font-size:15px}
-#angZeitraum .aend{background:var(--bg);border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;white-space:nowrap}
-.tPruef{margin:12px 14px 0;border-top:1px solid #F0F0F2;padding-top:12px}
-.tZeile{display:flex;align-items:center;gap:8px;margin-bottom:8px}.tZeile span{width:30px;font-size:13px;font-weight:800;color:var(--grey)}
-.tZeile input[type=date]{flex:1;min-width:0;box-shadow:none;border:1px solid var(--line);font-size:16px;min-height:46px;padding:10px 12px;border-radius:12px}
-.tZeile select{width:92px;border:1px solid var(--line);border-radius:12px;padding:10px 8px;font-weight:700;font-size:16px;font-family:inherit;color:var(--dark);background:#fff;min-height:46px}
-#tagInfo{font-size:13px;font-weight:700;margin-top:6px;line-height:1.5}#tagInfo span{display:block;color:var(--dark)}#tagInfo span::before{content:"→ ";color:var(--red)}
-.zeile .info.ab{color:#9A6700}
-.tLegende span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:#E8F6EE}
-.tLegende span.b::before{background:#F7C5C8}.tLegende span.s::before{background:#DADADF}
-.fKnoepfe{display:grid;gap:10px;margin-top:18px}
-.fKnopf{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;text-align:left;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);min-height:60px}
-.fKnopf b{display:block;font-size:16px;font-weight:800;color:var(--dark)}.fKnopf i{display:block;font-style:normal;font-size:13px;color:var(--grey);margin-top:2px;font-weight:600}
-.fKnopf em{font-style:normal;font-size:28px;color:var(--red);font-weight:700;line-height:1}.fKnopf:active{background:#F6F6F7}
-.fBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none}.fBg.auf{display:block}
-.fenster{position:fixed;left:0;right:0;bottom:0;z-index:51;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:none;box-shadow:0 -10px 30px rgba(0,0,0,.18);margin:0 auto;max-width:560px}
-.fenster.auf{display:block}
-@media(min-width:700px){.fenster{top:50%;bottom:auto;transform:translateY(-50%);border-radius:22px;width:calc(100% - 48px);padding:20px}}
-.fKopf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.fKopf h3{font-size:19px;font-weight:900;margin:0}
-.fZu{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:#F2F2F4;font-size:17px;font-weight:800;cursor:pointer;color:var(--dark)}
-.fText{font-size:14px;color:var(--grey);font-weight:600;margin:0 0 10px}
-#blattBg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:none}#blattBg.auf{display:block}
-#blatt{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:41;max-width:640px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.15);display:none}
-#blatt.auf{display:block}#blatt h3{font-size:18px;font-weight:900;margin-bottom:2px}#blatt .unter{font-size:14px;color:var(--grey);margin-bottom:10px;font-weight:600}
-#blatt .knopf{margin-top:8px;text-decoration:none}#blatt .knopf.voll{background:var(--red);color:#fff}
-#blatt .zu{display:block;text-align:center;font-size:13px;color:var(--grey);margin-top:12px;font-weight:700}
-@media(min-width:900px){#tafel th.tag,#tafel td{width:40px;min-width:40px}#tafel th.auto{width:170px;min-width:170px;max-width:170px}#tafel td b{width:calc(var(--l) * 40px);font-size:13px}}
+.k{background:#fff;border-radius:18px;padding:13px 14px;margin-bottom:10px}
+.lbl{font-size:11.5px;font-weight:800;color:#8A8A8E;text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px}
+.wer{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wer b{display:block;font-size:17px;font-weight:800}.wer i{display:block;font-style:normal;font-size:13.5px;color:#8A8A8E;font-weight:600;margin-top:2px}
+.wer em{font-style:normal;color:#C4161C;font-size:26px;font-weight:700;line-height:1}
+.zr{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -14px 9px;padding:0 14px}.zr::-webkit-scrollbar{display:none}
+.zr span{flex:0 0 auto;padding:9px 13px;border-radius:999px;background:#F2F2F4;font-weight:800;font-size:14px;cursor:pointer;white-space:nowrap}
+.zr span.an{background:#1C1C1E;color:#fff}
+.zt{font-size:15px;font-weight:800;cursor:pointer}.zt small{font-weight:700;color:#8A8A8E;font-size:13px;white-space:nowrap}.zt u{color:#C4161C;text-decoration:none;font-size:13px;white-space:nowrap}
+.auto{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;margin:0 -14px;border-top:1px solid #EFEFF2;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.auto:first-of-type{border-top:0}
+.auto .n{min-width:0}.auto b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auto i{display:block;font-style:normal;font-size:13px;color:#8A8A8E;font-weight:600;margin-top:1px}
+.auto .p{text-align:right;font-weight:800;font-size:16px;white-space:nowrap}.auto .p i{text-align:right}
+.auto.an{background:#EEF8F2}.auto.an b{color:#1E8E4E}
+.haken{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#1E8E4E;color:#fff;font-size:13px;font-weight:900;align-items:center;justify-content:center;margin-right:8px;vertical-align:-4px}
+.auto.belegt{opacity:.45;cursor:default}
+.leer{color:#8A8A8E;font-weight:700;font-size:14px;padding:6px 0}
+.zwei{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.wahl{background:#fff;border-radius:16px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:58px}
+.wahl small{display:block;font-size:11.5px;color:#8A8A8E;font-weight:800;text-transform:uppercase;letter-spacing:.5px}.wahl b{font-size:16px}
+.wahl em{font-style:normal;color:#C4161C;font-weight:800;font-size:18px}
+.fuss{text-align:center;font-size:12px;color:#8A8A8E;font-weight:600;margin-top:14px;line-height:1.5}.fuss a{color:#8A8A8E}
+.leiste{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid #E5E5EA;padding:10px 14px calc(12px + env(safe-area-inset-bottom))}
+.leiste .in{max-width:560px;margin:0 auto}
+.sum{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:700;color:#6E6E73;margin-bottom:8px}.sum b{color:#1C1C1E;white-space:nowrap}
+.sum span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#senden{display:block;width:100%;border:0;border-radius:15px;padding:15px;font-weight:800;font-size:17px;font-family:inherit;background:#25D366;color:#fff;cursor:pointer}
+#senden.aus{background:#BDBDC2}
+.mehr{display:flex;justify-content:center;gap:18px;margin-top:9px;white-space:nowrap}
+.mehr span{white-space:nowrap;font-size:14px;font-weight:800;color:#6E6E73;cursor:pointer;padding:4px 2px}
+.rad div{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-radius:13px;font-weight:800;font-size:17px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rad div i{font-style:normal;color:#8A8A8E;font-weight:700;font-size:15px}
+.rad div.an{background:#1C1C1E;color:#fff}.rad div.an i{color:#D1D1D6}
+.feld label{display:block;font-size:13px;font-weight:700;color:#6E6E73;margin:10px 2px 5px}
+.feld input,.feld select{width:100%;border:1.5px solid #E4E4E7;border-radius:12px;padding:12px;font-weight:600;font-size:16px;font-family:inherit;background:#fff;color:#1C1C1E;min-height:48px;-webkit-appearance:none;appearance:none}
+.feld .zw{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.knopf{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:800;font-size:16px;font-family:inherit;background:#1C1C1E;color:#fff;margin-top:14px;cursor:pointer}
+.knopf.hell{background:#F2F2F4;color:#1C1C1E}
+#kSuche{width:100%;border:0;border-radius:12px;padding:12px 14px;font-weight:600;font-size:16px;font-family:inherit;background:#F2F2F4;margin-bottom:6px}
+.gk{font-size:11.5px;font-weight:800;color:#8A8A8E;text-transform:uppercase;letter-spacing:.6px;margin:12px 4px 6px}
+.liste{border:1px solid #E4E4E7;border-radius:14px;overflow:hidden}
+.kz{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #EFEFF2;cursor:pointer}.kz:first-child{border-top:0}.kz:active{background:#F6F6F7}
+.kz .t{flex:1;min-width:0}.kz b{display:block;font-size:16px;font-weight:800}.kz small{display:block;font-size:13px;color:#8A8A8E;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kz em{font-style:normal;color:#C4161C;font-size:22px;font-weight:700}
+.chip{font-size:12px;font-weight:800;border-radius:999px;padding:4px 9px;white-space:nowrap}.chip.g{background:#E3F4EA;color:#1E8E4E}.chip.o{background:#FFF1DC;color:#9A6400}
+mark{background:#FFF1A8;color:inherit;border-radius:3px}
+#text{white-space:pre-wrap;font-size:15px;line-height:1.45;background:#DCF8C6;border-radius:14px 14px 3px 14px;padding:12px 13px;margin:4px 0 0}
+#textEdit{width:100%;min-height:260px;border:1.5px solid #E4E4E7;border-radius:12px;padding:12px;font-weight:500;font-size:16px;font-family:inherit;line-height:1.45}
+.meld{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1E8E4E;color:#fff;padding:11px 18px;border-radius:999px;font-weight:800;font-size:15px;z-index:95;display:none;white-space:nowrap}
+@media(max-width:380px){.mehr{gap:12px}.mehr span,.mehr a{font-size:13px!important}}
 
-#rabchips{display:none!important}
-#rab{font-size:22px;font-weight:800;text-align:center}
-#kmchips{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kmf{display:flex;flex-direction:column;gap:6px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.06)}
-.kmf span{font-size:13px;font-weight:700;color:var(--grey)}
-.kmf input{font-size:22px;font-weight:800;border:1.5px solid #E4E4E7;border-radius:10px;padding:8px 10px;width:100%;min-height:48px}
-.kmf b{font-size:13px;color:var(--grey)}
-</style>
-<style>#wahlArt{margin:0 0 12px}#wahlArt div{padding:11px 8px;font-size:15px;background:#F2F2F4;box-shadow:none}#wahlArt div.an{background:var(--red);color:#fff}</style></head>
-<body>
-<header>
-  <h1>MIETIX <span>VERFÜGBARKEITEN</span> <i id="abgleichPunkt" title="Abgleich aller Geräte" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#B0B0B3;vertical-align:middle;margin-left:4px"></i></h1>
-</header>
+.mxKnopf,.mxKlapp>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;background:#fff;border:1.5px solid #E4E4E7;border-radius:16px;padding:14px 16px;min-height:60px;text-align:left;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);color:#1C1C1E;margin:0 0 10px;-webkit-tap-highlight-color:transparent}
+.mxKnopf span,.mxKlapp>summary span{flex:1;min-width:0}
+.mxKnopf b,.mxKlapp>summary b{display:block;font-size:16px;font-weight:800;color:#1C1C1E}
+.mxKnopf i,.mxKlapp>summary i{display:block;font-style:normal;font-size:13px;color:#8A8A8E;margin-top:2px;font-weight:600}
+.mxKnopf em,.mxKlapp>summary em{flex:0 0 auto;font-style:normal;font-size:28px;color:#C4161C;font-weight:700;line-height:1;transition:transform .15s}
+.mxKnopf:active,.mxKlapp>summary:active{background:#F6F6F7}
+.mxKlapp>summary{list-style:none}.mxKlapp>summary::-webkit-details-marker{display:none}
+.mxKlapp[open]>summary{margin-bottom:10px}.mxKlapp[open]>summary em{transform:rotate(90deg)}
+.mxBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90;display:none}.mxBg.auf{display:block}
+.mxFenster{position:fixed;left:0;right:0;bottom:0;z-index:91;background:#fff;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:none;box-shadow:0 -10px 30px rgba(0,0,0,.18);margin:0 auto;max-width:560px;box-sizing:border-box;text-align:left}
+.mxFenster.auf{display:block;animation:mxHoch .22s ease-out}.mxBg.auf{animation:mxBlende .2s ease-out}
+@keyframes mxHoch{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}@keyframes mxBlende{from{opacity:0}to{opacity:1}}
+@media(min-width:700px){.mxFenster{top:50%;bottom:auto;transform:translateY(-50%);border-radius:22px;width:calc(100% - 48px);padding:20px}.mxFenster.auf{animation:mxMitte .2s ease-out}}
+@keyframes mxMitte{from{transform:translateY(-46%);opacity:0}to{transform:translateY(-50%);opacity:1}}
+.mxKopf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.mxKopf h3{font-size:19px;font-weight:900;margin:0;color:#1C1C1E}
+.mxZu{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:#F2F2F4;font-size:17px;font-weight:800;cursor:pointer;color:#1C1C1E;font-family:inherit}
+.mxKlein{margin-top:8px}.mxKlein>summary{display:inline-flex;align-items:center;gap:6px;list-style:none;cursor:pointer;font-size:14px;font-weight:800;color:#1C1C1E;background:#F2F2F4;border-radius:999px;padding:9px 14px;min-height:40px;box-sizing:border-box}
+.mxKlein>summary::-webkit-details-marker{display:none}.mxKlein>summary em{font-style:normal;color:#C4161C;font-size:18px;line-height:1;transition:transform .15s}.mxKlein[open]>summary em{transform:rotate(90deg)}
+.mxText{font-size:14px;color:#8A8A8E;font-weight:600;margin:0 0 10px;line-height:1.4}
+</style></head><body>
+<header><h1><span>Angebot</span></h1></header>
 <main>
-  <div id="abgleich" style="margin-top:14px"></div>
-  <div class="reiter2" id="reiter2"><div data-r="kal" class="an">Kalender</div><div data-r="ang">Angebot</div></div>
-  <section id="sKal">
-  <div class="block">
-    <p class="feldname">Belegung</p>
-    <div id="tafelKarte">
-      <div class="tKopf"><b id="tTitel"></b><div class="tNav"><div id="tZurueck">‹</div><div id="tHeute" class="an">Heute</div><div id="tVor">›</div></div></div>
-      <div id="tafelRoll"><table id="tafel"></table></div>
-      <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
-      <div class="tChips" id="tChips"><span class="tLab">Ab heute:</span><div data-z="d1">1 Tag</div><div data-z="d2">2 Tage</div><div data-z="d3">3 Tage</div><div data-z="d7">1 Woche</div><span class="tLab">Wochenende (nächstes):</span><div data-z="we5,1">Fr bis Sa</div><div data-z="we5,2">Fr bis So</div><div data-z="we6,2">Sa bis Mo</div><div data-z="we5,3">Fr bis Mo</div></div>
-      <div class="tPruef">
-        <div class="tZeile"><span>von</span><input type="date" id="von" min="2026-01-01" max="2028-12-31"><select id="vonU"></select></div>
-        <div class="tZeile"><span>bis</span><input type="date" id="bis" min="2026-01-02" max="2028-12-31"><select id="bisU"></select></div>
-        <p id="zeitraumtext"></p>
-        <div id="tagInfo"></div>
-      </div>
-    </div>
-  </div>
-  </section>
-  <section id="sAng" class="versteckt">
-  <div class="block">
-    <p class="feldname">Zeitraum</p>
-    <div class="karte" id="angZeitraum"></div>
-  </div>
-  <div class="block">
-    <p class="feldname">Kilometer</p>
-    <div id="kmchips"></div>
-    <p class="klein" id="kminfo"></p>
-  </div>
-  <div class="block">
-    <p class="feldname">Rabatt für den Kunden</p>
-    <div id="rabchips"></div>
-    <div class="feld2" style="margin-top:8px;align-items:center">
-      <input type="number" id="rab" min="0" max="90" step="1" value="0" inputmode="numeric">
-      <span id="rabinfo" style="font-size:13px;color:var(--grey);font-weight:600"></span>
-    </div>
-  </div>
-
-  <div class="block">
-    <div class="reiter2" id="wahlArt"><div data-w="1">Ein Auto</div><div data-w="0">Alle freien</div></div>
-    <p class="feldname" id="ueberschrift">Fahrzeuge</p>
-    <div id="liste"></div>
-  </div>
-
-  <div class="block">
-    <p class="feldname">Antwort an den Kunden</p>
-    <div class="karte">
-      <textarea id="vorschau" rows="11"></textarea>
-      <input type="tel" id="knr" class="versteckt" inputmode="tel" autocomplete="off" placeholder="Handynummer (optional)">
-      <div id="nrinfo" class="versteckt"></div>
-      <button class="knopf gruen" id="senden" type="button">Nachricht teilen</button>
-      <button class="knopf hell" id="kopieren" type="button">Text kopieren</button>
-    </div>
-  </div>
-
-  <div class="block">
-    </section><section id="sKal2">
-    <!-- Selten gebraucht: Knopf, dann Fenster (30.10.2026, Baran: Übersicht ist wichtig) -->
-    <div class="fKnoepfe">
-      <button class="fKnopf" id="oListe" type="button"><span><b>Belegt und gesperrt</b><i>Alle Mieten und Sperren als Liste</i></span><em>›</em></button>
-      <button class="fKnopf" id="oSperren" type="button"><span><b>Fahrzeug sperren</b><i>Werkstatt, privat</i></span><em>›</em></button>
-    </div>
-    </section>
-    <div class="fBg" id="fBg"></div>
-    <div class="fenster" id="fListe" role="dialog" aria-label="Belegt und gesperrt"><div class="fKopf"><h3>Belegt und gesperrt</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
-      <div id="buchungen"></div><div id="leer"></div><div id="meldung"></div></div>
-    <div class="fenster" id="fSperren" role="dialog" aria-label="Fahrzeug sperren"><div class="fKopf"><h3>Fahrzeug sperren</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
-      <p class="fText">Das Auto gilt in der Zeit als belegt, zum Beispiel Werkstatt oder privat.</p>
-      <select id="spAuto"></select>
-      <div class="feld2" style="margin-top:8px"><input type="date" id="spVon"><input type="date" id="spBis"></div>
-      <input type="text" id="spGrund" placeholder="Grund" style="margin-top:8px">
-      <button class="knopf" id="sperren" type="button">Sperren</button>
-    </div>
-  </div>
-
-  <footer>
-    Belegt: Mietverträge, gebuchte Anfragen und Sperren. Preisstand: <span id="preisstand">21.08.2026</span>.
-  </footer>
+  <div id="abgleich" style="margin:0 0 10px"></div>
+  <div class="k" id="werK"><div class="lbl">Für wen? (freiwillig)</div>
+    <div class="wer" id="wer"><span><b id="werName">Ohne Kunde</b><i id="werInfo">Antippen: Anfrage, früherer Mieter oder Nummer</i></span><em>›</em></div></div>
+  <div class="k"><div class="lbl">Zeitraum</div>
+    <div class="zr" id="zr"><span data-z="d1">1 Tag</span><span data-z="d2">2 Tage</span><span data-z="d3">3 Tage</span><span data-z="d7">1 Woche</span><span data-z="we5,1">Fr bis Sa</span><span data-z="we5,2">Fr bis So</span><span data-z="we6,2">Sa bis Mo</span><span data-z="we5,3">Fr bis Mo</span></div>
+    <div class="zt" id="zt"></div></div>
+  <div class="k"><div class="lbl" id="autoLbl">Auto antippen</div><div id="autos"><div class="leer">Preise werden geladen …</div></div></div>
+  <div class="zwei"><div class="wahl" id="wRab"><span><small>Rabatt</small><b id="rabT">kein</b></span><em>⌄</em></div>
+    <div class="wahl" id="wPak"><span><small>Kilometerpaket</small><b id="pakT">kein</b></span><em>⌄</em></div></div>
+  <div class="fuss" id="fuss"></div>
 </main>
-<div id="blattBg"></div><div id="blatt"></div>
+<div class="leiste"><div class="in">
+  <div class="sum"><span id="sumL">Erst ein Auto antippen</span><b id="sumR"></b></div>
+  <button id="senden" class="aus" type="button">Senden</button>
+  <div class="mehr"><span id="mText">Text ansehen</span><span id="mKopie">Kopieren</span><span id="mBild">Als Bild</span><a href="./" style="font-size:14px;font-weight:800;color:#6E6E73;text-decoration:none;padding:4px 2px">Kalender</a></div>
+</div></div>
+<div class="meld" id="meld"></div>
 
-
-
-
+<div class="mxFenster" id="fWer" role="dialog" aria-label="Für wen"><div class="mxKopf"><h3>Für wen?</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <input id="kSuche" type="search" autocomplete="off" placeholder="Name, Auto oder Telefon">
+  <div id="kListe"></div>
+  <div class="gk">Ohne Namen oder neu</div>
+  <div class="feld"><div class="zw"><div><label>WhatsApp-Nummer</label><input id="nNr" type="tel" inputmode="tel" autocomplete="off"></div><div><label>Name (freiwillig)</label><input id="nName" autocomplete="off"></div></div></div>
+  <button class="knopf" id="nOk" type="button">Übernehmen</button>
+  <button class="knopf hell" id="nOhne" type="button">Ohne Kunde, nur Preise</button>
+</div>
+<div class="mxFenster" id="fZeit" role="dialog" aria-label="Zeitraum"><div class="mxKopf"><h3>Zeitraum</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <div class="feld"><div class="zw"><div><label>Von</label><input id="von" type="date"></div><div><label>Uhrzeit</label><select id="vonU"></select></div></div>
+    <div class="zw"><div><label>Bis</label><input id="bis" type="date"></div><div><label>Uhrzeit</label><select id="bisU"></select></div></div></div>
+  <button class="knopf" type="button" onclick="mxZu()">Fertig</button>
+</div>
+<div class="mxFenster" id="fRab" role="dialog" aria-label="Rabatt"><div class="mxKopf"><h3>Rabatt</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <p class="mxText">Zusätzlich zum Mengenrabatt, auf den Mietpreis.</p><div class="rad" id="rabListe"></div>
+  <div class="feld versteckt" id="rabInd"><label>Rabatt in %</label><input id="rabZahl" type="number" inputmode="numeric" min="0" max="90" data-einheit="%"><button class="knopf" id="rabOk" type="button">Übernehmen</button></div>
+</div>
+<div class="mxFenster" id="fPak" role="dialog" aria-label="Kilometerpaket"><div class="mxKopf"><h3>Kilometerpaket</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <p class="mxText" id="pakInfo"></p><div class="rad" id="pakListe"></div>
+  <div class="feld versteckt" id="pakInd"><div class="zw"><div><label>Kilometer</label><input id="pakKm" type="number" inputmode="numeric" min="0" step="10" data-einheit="km"></div><div><label>Preis</label><input id="pakPr" type="number" inputmode="decimal" min="0" data-einheit="€"></div></div>
+    <button class="knopf" id="pakOk" type="button">Übernehmen</button></div>
+  <div class="feld"><label>Inklusive Kilometer (gesamt)</label><input id="kmInkl" type="number" inputmode="numeric" min="0" step="10" data-einheit="km"></div>
+</div>
+<div class="mxFenster" id="fText" role="dialog" aria-label="Text"><div class="mxKopf"><h3>So kommt es an</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <div id="text"></div><textarea id="textEdit" class="versteckt"></textarea>
+  <button class="knopf hell" id="tAendern" type="button">Text ändern</button>
+</div>
 <script>
-const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 1, 1, 1], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450, "frSa": 349}, {"n": "Audi RS 3 Limousine", "gp": 199.0, "kaution": 1450, "frSa": 249}, {"n": "VW Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000, "frSa": 199}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Mercedes GLC 63 S AMG", "gp": 269.0, "kaution": 1450, "frSa": 349}, {"n": "Mercedes C 63 S AMG", "gp": 289.0, "kaution": 1450, "frSa": 349}, {"n": "Audi R8 performance", "gp": 399.0, "kaution": 2500, "frSa": 499}, {"n": "VW Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000, "frSa": 129}, {"n": "Mercedes-Benz S580L AMG Chauffeur-Paket", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "BMW M 850i", "gp": 249.0, "kaution": 1450, "frSa": 349}], "url": "", "stand": "2026-10-19"};
-let BUCHUNGEN=[];
+const $=id=>document.getElementById(id);
 const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
 const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let AUSWAHL=null,EIN_AUTO="",EINZEL=true;try{EINZEL=localStorage.getItem("mietixAngebotArt")!=="alle"}catch(e){}   // Fahrzeuge, die im Kundentext stehen sollen
-const $=id=>document.getElementById(id);
-const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
-
-function ausISO(s){const[j,m,t]=s.split("-").map(Number);return new Date(j,m-1,t);}
-function nachISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
-function wtIndex(d){return (d.getDay()+6)%7;}
-function lang(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();}
-function plusTage(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
-function tage(v,b){return Math.round((ausISO(b)-ausISO(v))/86400000);}
-
-/* Zwei Zeitraeume ueberschneiden sich, wenn Start des einen vor Ende des anderen liegt.
-   Der Rueckgabetag zaehlt nicht mit, deshalb echtes Kleiner. */
-function ueberschneidet(v1,b1,v2,b2){return v1<b2 && b1>v2;}
-window.mxUeberschneidet=ueberschneidet;
-
-function belegtVon(fahrzeug,von,bis){
-  return BUCHUNGEN.filter(b=>b.fahrzeug===fahrzeug&&ueberschneidet(von,bis,b.von,b.bis));
-}
-window.mxBelegtVon=(f,v,b,liste)=>{const alt=BUCHUNGEN;if(liste)BUCHUNGEN=liste;
-  const r=belegtVon(f,v,b);BUCHUNGEN=alt;return r;};
-
-/* --- Preis fuer den angefragten Zeitraum, gleiche Logik wie im Preisrechner --- */
-function scaler(start,dauer){const W=D.faktor.reduce((a,b)=>a+b,0);
-  let s=Math.floor(dauer/7)*W;for(let k=0;k<dauer%7;k++)s+=D.faktor[(start+k)%7];return s;}
-
-
-/* Preisregel wie in der Excel: alles laeuft ueber die Wochentagsfaktoren und den
-   Mengenrabatt. Einzige Ausnahme ist die Ein-Tages-Miete am Wochenende, die den
-   festen Sonderpreis des Fahrzeugs kostet (Fr auf Sa, Sa auf So, So auf Mo). */
-function wochenmiete(a,start,dauer){
-  if(dauer===1 && start>=4) return a.frSa || a.gp*D.faktor[start];
-  return a.gp*scaler(start,dauer);
-}
-
-function grundmiete(auto,start,dauer){
-  return wochenmiete(auto,start,dauer);
-}
-function preis(auto,start,dauer){
-  if(dauer<D.mind[start])return null;
-  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
-}
-window.mxPreis=preis;
-
-function nummer(roh){
-  let n=(roh||"").replace(/[^0-9+]/g,"");
-  if(!n)return"";
-  if(n.startsWith("+"))n=n.slice(1);
-  else if(n.startsWith("00"))n=n.slice(2);
-  else if(n.startsWith("0"))n="49"+n.slice(1);
-  return n.length>=8?n:"";
-}
-window.mxNummer=nummer;
-
-function kurzD(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
-function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
-
-function nachricht(freieAutos,von,bis,dauer,anzFrei){
-  const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
-  if(!freieAutos.length && anzFrei>0){
-    return (EINZEL?"Bitte oben das Auto antippen, das Sie anbieten wollen.\n":"Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n")
-         + "Im Zeitraum " + wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
-         + " sind " + anzFrei + (anzFrei===1?" Fahrzeug":" Fahrzeuge") + " frei.";
-  }
-  const z=[];
-  const zeitraum = wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
-                 +", "+dauer+(dauer===1?" Tag":" Tage");
-  z.push(freieAutos.length===1?"*Freies Fahrzeug*":"*Freie Fahrzeuge*");
-  z.push(zeitraum);
-  z.push("");
-  if(!freieAutos.length){
-    z.push("In dem Zeitraum sind leider alle Fahrzeuge vergeben.");
-    z.push("");
-    z.push("Sagen Sie mir gerne einen anderen Zeitraum, dann schaue ich noch einmal.");
-    return z.join("\n");
-  }
-  const mitPreis=freieAutos.map(c=>({c:c,p:preis(c,start,dauer)})).filter(x=>x.p!==null);
-  if(!mitPreis.length){
-    z.push("Bei Abholung am "+D.weekdays[start]+" beträgt die Mindestmietdauer "
-           +D.mind[start]+" Tage.");
-    z.push("");
-    z.push("Sagen Sie mir gerne einen passenden Zeitraum, dann rechne ich Ihnen das aus.");
-    return z.join("\n");
-  }
-  const extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
-  let sListe=0, sEnd=0;
-  mitPreis.forEach(x=>{
-    const kmZ=(typeof kmZusatz==="function")?kmZusatz(x.c,dauer):0;   // Kilometer dazu (pro Tag), gleicher Preis wie im Preisrechner
-    x.liste=grundmiete(x.c,start,dauer)+kmZ;
-    x.end=x.p*(1-extra)+kmZ;
-    sListe+=x.liste; sEnd+=x.end;
-  });
-  const proz=sListe>0?Math.round((sListe-sEnd)/sListe*100):0;
-  if(proz>0){
-    z.push("*Ihr Rabatt: "+proz+" %*");
-    z.push(extra>0 ? "Mengenrabatt und Sonderrabatt sind in allen Preisen enthalten."
-                   : "Bereits in allen Preisen enthalten.");
-    z.push("");
-  }
-  z.push(mitPreis.length===1?"*Dieses Fahrzeug ist frei*":"*Diese Fahrzeuge sind frei*");
-  z.push("");
-  mitPreis.forEach(x=>{
-    z.push("- "+x.c.n+": "+EUR.format(x.end)
-           +(x.end<x.liste-0.005?" statt "+EUR.format(x.liste):""));
-  });
-  if(mitPreis.length===1&&+mitPreis[0].c.kaution>0)z.push("Kaution: "+(+mitPreis[0].c.kaution).toLocaleString("de-DE")+" €");
-  z.push("");
-  z.push("Alle Preise für den kompletten Zeitraum, "
-    +kmSatz(dauer)+". Weitere Kilometer sind zubuchbar.");
-  if(dauer>1){
-    z.push("");
-    z.push("Gilt nur für den kompletten Zeitraum "+zeitraum
-      +" am Stück. Für einzelne Tage daraus gilt der reguläre Tagespreis.");
-  }
-  z.push("");
-  z.push(mitPreis.length===1?"Darf ich das Fahrzeug für Sie reservieren?":"Welches Fahrzeug darf ich für Sie reservieren?");
-  return z.join("\n");
-}
-
-/* --- Serverzugriff per JSONP, damit es ohne CORS laeuft --- */
-function melde(text,gut){
-  const m=$("meldung");m.textContent=text;m.className=gut?"gut":"schlecht";
-  if(gut)setTimeout(()=>{m.className="";},4000);
-}
-
-function laden(){
-  const b=[];
-  lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
-    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
-  // Anfrage mit Mietvertrag nicht doppelt zeigen: über die Nummer (a.vertrag) oder den Namen ohne Leerzeichen und Groß/klein (30.10.2026)
-  const nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
-  // Anfrage mit Mietvertrag zählt nie selbst, auch wenn das Auto schon zurück ist (31.10.2026, Prüfbericht: sonst blieb ein früher
-  // zurückgegebenes Auto bis zum Ende der Anfrage belegt)
-  const alleV=lies("mietixVorgaenge",[]);
-  lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!(a.vertrag&&alleV.some(v=>v.nr===a.vertrag))&&!alleV.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
-    b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
-  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
-  BUCHUNGEN=b;zeichne();
-}
-
-function zeichne(){
-  const von=$("von").value, bis=$("bis").value;
-  if(typeof zeichneTafel==="function")zeichneTafel();
-  if(typeof angZeitraum==="function"&&!$("sAng").classList.contains("versteckt")){angZeitraum();kmChips()}
-  const t=tage(von,bis);
-  const vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
-  $("zeitraumtext").textContent=D.weekdays[wtIndex(ausISO(von))]+", "+lang(ausISO(von))+" "+uhr($("vonU").value)+" bis "+D.weekdays[wtIndex(ausISO(bis))]+", "+lang(ausISO(bis))+" "+uhr($("bisU").value)+"   ("+t+(t===1?" Tag":" Tage")+")";
-  const rueck=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.bis===von),abh=BUCHUNGEN.filter(b=>b.notiz!=="Sperre"&&b.von===bis);
-  $("tagInfo").innerHTML=rueck.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' kommt am '+kurzD(ausISO(b.bis))+' um '+uhr(b.bisU)+' zurück ('+esc(vorname(b.kunde))+')</span>').join("")
-    +abh.map(b=>'<span>'+kurzAuto(b.fahrzeug)+' geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</span>').join("");
-  const frei=[];
-  D.cars.forEach(c=>{if(!belegtZeit(c.n,vonZ,bisZ).length)frei.push(c.n);});
-  if(AUSWAHL===null)AUSWAHL=EINZEL?new Set(EIN_AUTO&&frei.includes(EIN_AUTO)?[EIN_AUTO]:[]):new Set(frei);
-  else [...AUSWAHL].forEach(n=>{if(!frei.includes(n))AUSWAHL.delete(n);});
-  frei.length=0;
-
-  const sortiert2=D.cars.slice().sort((a,b)=>(belegtZeit(a.n,vonZ,bisZ).length?1:0)-(belegtZeit(b.n,vonZ,bisZ).length?1:0));
-  $("liste").innerHTML=sortiert2.map(c=>{
-    const treffer=belegtZeit(c.n,vonZ,bisZ),amTag=belegtVon(c.n,von,bis).filter(b=>!treffer.includes(b));
-    if(!treffer.length)frei.push(c.n);
-    const drin=!treffer.length&&AUSWAHL.has(c.n);
-    const roh=treffer.length?null:preis(c,wtIndex(ausISO(von)),t);
-    const nach=Math.min(90,Math.max(0,+($("rab").value)||0))/100;
-    const p=roh===null?null:roh*(1-nach)+kmZusatz(c,t);
-    const knapp=amTag.map(b=>b.bis===von?"frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt um "+uhr(b.bisU)+" zurück":"bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab").join(". ");
-    const info=treffer.length
-      ? "belegt: "+treffer.map(b=>(b.kunde?b.kunde+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; ")
-      : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum")+(knapp?". "+knapp:"");
-    return '<div class="zeile'+(treffer.length?"":" waehlbar")+(drin?" drin":"")
-      +'" data-auto="'+c.n+'"><span><span class="name">'+c.n+'</span>'
-      +'<span class="info'+(knapp?" ab":"")+'">'+info+'</span></span>'
-      +'<span class="marke '+(treffer.length?"belegt":(drin?"drin":"frei"))+'">'
-      +(treffer.length?"belegt":(drin?"im Text":"frei"))+'</span></div>';
-  }).join("");
-  [...document.querySelectorAll(".zeile.waehlbar")].forEach(z=>{
-    z.onclick=()=>{const n=z.dataset.auto;
-      if(EINZEL){AUSWAHL=new Set([n]);EIN_AUTO=n}else if(AUSWAHL.has(n))AUSWAHL.delete(n);else AUSWAHL.add(n);
-      textAngefasst=false;zeichne();};
-  });
-  const anzFrei=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length).length;
-  $("ueberschrift").textContent=EINZEL?anzFrei+" frei, "+(AUSWAHL.size?"anderes Auto antippen zum Wechseln":"Auto antippen"):anzFrei+" frei, "+AUSWAHL.size+" im Text (antippen zum Ändern)";
-
-  const fuerText=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL.has(c.n));
-  if(!textAngefasst)$("vorschau").value=nachricht(fuerText,von,bis,t,anzFrei);
-  const nr=nummer($("knr").value);
-  $("nrinfo").textContent = nr ? "Geht an +"+nr
-    : ($("knr").value.trim() ? "Nummer noch unvollständig"
-                             : "Ohne Nummer: Nachricht teilen und den Chat auswählen");
-  $("senden").textContent = nr ? "Per WhatsApp senden" : "Nachricht teilen";
-
-  const sortiert=BUCHUNGEN.slice().sort((a,b)=>a.von<b.von?-1:a.von>b.von?1:0);
-  $("buchungen").innerHTML=sortiert.map(b=>
-    '<div class="bzeile"><span><span class="bname">'+b.fahrzeug+'</span>'
-    +'<span class="bzeit">'+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))
-    +(b.kunde?" | "+b.kunde:"")+(b.notiz?" | "+b.notiz:"")+'</span></span>'
-    +(b.fest?'':'<button class="weg" data-id="'+b.id+'">Löschen</button>')+'</div>').join("");
-  $("leer").textContent=sortiert.length?"":"Nichts belegt. Mietverträge und gebuchte Anfragen erscheinen hier von selbst.";
-  [...document.querySelectorAll(".weg")].forEach(k=>k.onclick=()=>loeschen(k.dataset.id));
-}
-
-function loeschen(id){
-  const b=BUCHUNGEN.find(x=>x.id===id);
-  if(!confirm("Sperre "+(b?b.fahrzeug+" "+lang(ausISO(b.von)):"")+" aufheben?"))return;
-  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));laden();melde("Sperre aufgehoben.",true);
-}
-
-/* --- Start --- */
-const heute=new Date();
-$("von").value=nachISO(heute);
-$("bis").value=nachISO(plusTage(heute,3));
-$("von").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
-  if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
-  $("bis").min=nachISO(plusTage(ausISO($("von").value),1));zeichne();});
-$("bis").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
-  if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
-  zeichne();});
-let textAngefasst=false;
-(function(){
-  const stufen=[0,10,15,20];
-  $("rabchips").innerHTML=stufen.map(p=>
-    '<div class="rchip" data-p="'+p+'">'+(p===0?"kein":"-"+p+" %")+'</div>').join("");
-  function markieren(){
-    const w=+($("rab").value)||0;
-    [...document.querySelectorAll(".rchip")].forEach(c=>c.classList.toggle("an",+c.dataset.p===w));
-    $("rabinfo").textContent = w>0 ? w+" % Rabatt auf den Gesamtpreis" : "% Rabatt, leer lassen für keinen";
-  }
-  [...document.querySelectorAll(".rchip")].forEach(c=>{
-    c.onclick=()=>{ $("rab").value=c.dataset.p; textAngefasst=false; markieren(); zeichne(); };
-  });
-  ["input","change"].forEach(ev=>$("rab").addEventListener(ev,()=>{
-    const w=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
-    if(String(w)!==$("rab").value && document.activeElement!==$("rab")) $("rab").value=w;
-    textAngefasst=false; markieren(); zeichne();
-  }));
-  $("rab").addEventListener("blur",()=>{
-    $("rab").value=Math.max(0,Math.min(90,Math.round(+$("rab").value)||0));
-    markieren(); zeichne();
-  });
-  markieren();
-})();
-$("vorschau").addEventListener("input",()=>{textAngefasst=true;});
-["input","change"].forEach(ev=>$("knr").addEventListener(ev,zeichne));
-function rueckmeldung(k,t){const a=k.textContent;k.textContent=t;setTimeout(()=>{k.textContent=a;},1600);}
-$("senden").onclick=async()=>{
-  const text=$("vorschau").value, nr=nummer($("knr").value);
-  if(nr){window.open("https://wa.me/"+nr+"?text="+encodeURIComponent(text),"_blank");return;}
-  if(navigator.share){try{await navigator.share({text:text});}catch(e){}return;}
-  try{await navigator.clipboard.writeText(text);rueckmeldung($("senden"),"Text kopiert");}
-  catch(e){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");}
-};
-$("kopieren").onclick=async()=>{
-  const text=$("vorschau").value;
-  try{await navigator.clipboard.writeText(text);}
-  catch(e){const t=$("vorschau");t.select();document.execCommand("copy");t.blur();}
-  rueckmeldung($("kopieren"),"Kopiert");
-};
-function spAutos(){$("spAuto").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("")}
-spAutos();$("spVon").value=nachISO(heute);$("spBis").value=nachISO(plusTage(heute,1));
-$("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
-  if(!von||!bis||tage(von,bis)<1){melde("Bitte Von und Bis eintragen (Bis nach Von).",false);return}
-  const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
-  schreib("mietixSperren",l);$("spGrund").value="";laden();fZu()};
-function fAuf(id){$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
-function fZu(){document.querySelectorAll(".fenster.auf").forEach(f=>f.classList.remove("auf"));$("fBg").classList.remove("auf");document.documentElement.style.overflow="";document.body.style.overflow=""}
-$("oListe").onclick=()=>fAuf("fListe");$("oSperren").onclick=()=>fAuf("fSperren");$("fBg").onclick=fZu;
-document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape")fZu()});
-
-/* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
-let TSTART=plusTage(heute,-1);
-const TAGE=30;
-const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","").replace("VW ","").replace(" Clubsport","").replace(" 2.0 Diesel"," Diesel");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const ausISO=t=>{const[a,b,c]=t.split("-").map(Number);return new Date(a,b-1,c,12)};
+const plus=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const tage=(v,b)=>v&&b?Math.round((ausISO(b)-ausISO(v))/86400000):0;
+const WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const kurz=t=>{const d=ausISO(t);return WT[d.getDay()]+" "+String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."};
+const lang=t=>kurz(t)+t.slice(0,4);
+const uhr=u=>{if(!u)return"";const[h,m]=u.split(":");return m==="00"?(+h)+" Uhr":(+h)+":"+m+" Uhr"};
+const E=n=>Math.round(n).toLocaleString("de-DE")+" €";
+const tz=t=>t+(t===1?" Tag":" Tage");
+const ziff=t=>String(t||"").replace(/\D/g,"");
+const waNr=t=>{let n=ziff(t);if(String(t||"").trim().startsWith("+"))return n;if(n.startsWith("00"))return n.slice(2);if(n.startsWith("0"))return "49"+n.slice(1);return n};
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
-function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
-  $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
-const ZEIT=(t,u)=>t+"T"+(u||"10:00");
-const bZ=b=>({von:ZEIT(b.von,b.vonU),bis:ZEIT(b.bis,b.bisU)});
-function belegtZeit(f,vonZ,bisZ){return BUCHUNGEN.filter(b=>{if(b.fahrzeug!==f)return false;const z=bZ(b);return vonZ<z.bis&&bisZ>z.von})}
-window.mxBelegtZeit=belegtZeit;
-const uhr=u=>{if(!u)return"";const [h,m]=u.split(":");return m==="00"?(+h)+" Uhr":(+h)+":"+m+" Uhr"};
-const stunden=u=>{const [h,m]=(u||"10:00").split(":").map(Number);return h+m/60};
-function zeichneTafel(){if(!D.cars||!D.cars.length)return;
-  const von=$("von").value,bis=$("bis").value,h=nachISO(heute),tage=[];
-  for(let i=0;i<TAGE;i++)tage.push(plusTage(TSTART,i));
-  let html='<tr><th class="auto"></th>'+tage.map(d=>'<th class="tag'+(wtIndex(d)>=5?" we":"")+(nachISO(d)===h?" heute":"")+(nachISO(d)>=von&&nachISO(d)<bis?" gewaehlt":"")+'">'+wtKurz(d)+'<b>'+d.getDate()+'</b></th>').join("")+'</tr>';
-  D.cars.forEach(c=>{html+='<tr><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+'</th>';
-    tage.forEach((d,i)=>{const t=nachISO(d);
-      // alle Buchungen, die diesen Tag berühren; am Rückgabetag ist nur bis zur Uhrzeit belegt, danach frei
-      const tr=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.von<=t&&b.bis>=t&&!(b.bis===t&&b.von!==t&&stunden(b.bisU)===0));
-      let k="",inner='<i class="frei"></i>',label="";
-      if(wtIndex(d)>=5)k+=" we";if(t===h)k+=" heute";if(t>=von&&t<bis)k+=" gewaehlt";
-      tr.forEach(b=>{const sp=b.notiz==="Sperre";const a=b.von===t?stunden(b.vonU)/24:0,e=b.bis===t?stunden(b.bisU)/24:1;if(e<=a)return;
-        const start=b.von===t,ende=b.bis===t;
-        inner+='<i class="'+(sp?"sperre":"belegt")+(start?" start":"")+(ende?" ende":"")+'" style="left:'+(a*100).toFixed(1)+'%;right:'+((1-e)*100).toFixed(1)+'%"></i>';
-        // Name einmal, am Anfang des Bandes (oder am linken Rand, wenn die Miete vor der Tafel begann), so lang wie das Band
-        if(start||i===0){const endeTag=ausISO(b.bis),zellen=Math.min(TAGE-i,Math.round((endeTag-d)/86400000)+1);
-          const laenge=Math.max(0.6,(zellen-1)+(b.bis<=nachISO(plusTage(d,zellen-1))?stunden(b.bisU)/24:1)-a);
-          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?(b.kunde||"gesperrt"):vorname(b.kunde)||"belegt")+'</b>'}
-        k+=sp?" hatSperre":" hatBelegt"});
-      const b0=tr[0];
-      html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
-    html+='</tr>'});
-  $("tafel").innerHTML=html;tafelTitel();
-  [...$("tafel").querySelectorAll("td")].forEach(td=>td.onclick=()=>zelle(td.dataset.auto,td.dataset.t,td.dataset.b));
-  // den gewählten Zeitraum sichtbar halten
-  const idx=Math.max(0,Math.round((ausISO(von)-TSTART)/86400000)-1);const z=$("tafel").querySelector("th.tag");
-  if(z)$("tafelRoll").scrollLeft=Math.max(0,idx*z.offsetWidth-8)}
-function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><div class="unter">'+unter+'</div>'+
-    aktionen.map((a,i)=>'<'+(a.href?'a href="'+a.href+'"':'div')+' class="knopf'+(a.voll?" voll":" hell")+'" data-i="'+i+'">'+a.t+'</'+(a.href?'a':'div')+'>').join("")+'<a href="#" class="zu" id="blattZu">Schließen</a>';
-  $("blatt").classList.add("auf");$("blattBg").classList.add("auf");
-  const zu=()=>{$("blatt").classList.remove("auf");$("blattBg").classList.remove("auf")};
-  [...$("blatt").querySelectorAll("[data-i]")].forEach(k=>{const a=aktionen[+k.dataset.i];if(a.f)k.onclick=()=>{zu();a.f()}});
-  $("blattZu").onclick=e=>{e.preventDefault();zu()};$("blattBg").onclick=zu}
-const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
-  // Rückgabe- und Abholtag (30.10.2026, Baran): Bringt der Kunde den RS Q8 Sonntag um 16:30 zurück, ist er danach frei.
-  // Antippen startet die neue Miete ab dieser Uhrzeit. Holt jemand um 17 Uhr ab, endet eine Verlängerung bis dahin.
-  let abUhr=null,bisUhr=null,rueck=null;const vonAlt0=$("von").value;
-  if(b&&b.notiz!=="Sperre"){const tr=BUCHUNGEN.filter(x=>x.fahrzeug===auto&&x.von<=t&&x.bis>=t);
-    const r=tr.find(x=>x.bis===t&&x.von!==t),a=tr.find(x=>x.von===t&&x.bis!==t),mitte=tr.find(x=>x.von<t&&x.bis>t);
-    const verl=LETZTE_ZELLE===auto&&vonAlt0&&t>vonAlt0&&t<=nachISO(plusTage(ausISO(vonAlt0),30));
-    if(!mitte&&a&&!r&&verl){bisUhr=a.vonU||"10:00";b=null}
-    else if(!mitte&&r&&stunden(r.bisU)<22){abUhr=r.bisU||"10:00";rueck=r;b=null}}
-  const A="https://barankohler.github.io/";
-  if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
-      {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
-  if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
-      b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
-      b.aid?{t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?anfrage="+encodeURIComponent(b.aid)}:null,   // Liste Punkt 18
-      b.aid?{t:"Anfrage im Anfragen-Buch",href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
-      b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
-      {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
-  // frei: erster Tipp = dieser Tag, zweiter Tipp auf einen späteren Tag = bis dahin
-  const von=$("von").value,bisAlt=$("bis").value;let nv=t,nb=nachISO(plusTage(d,1));
-  if(von&&t>von&&t<=nachISO(plusTage(ausISO(von),30))&&bisAlt<=t&&LETZTE_ZELLE===auto){nv=von;nb=t}
-  LETZTE_ZELLE=auto;
-  const naechste=(u,hoch)=>{const o=[...$("vonU").options].map(x=>x.value||x.textContent);const m=stunden(u);const f=hoch?o.find(x=>stunden(x)>=m):o.slice().reverse().find(x=>stunden(x)<=m);return f||(hoch?o[o.length-1]:o[0])};
-  if(abUhr&&nv===t){$("vonU").value=naechste(abUhr,true);VON_AUTO=true}else if(nv===t&&VON_AUTO){$("vonU").value="10:00";VON_AUTO=false}
-  if(bisUhr&&nb===t){$("bisU").value=naechste(bisUhr,false);BIS_AUTO=true}else if(nv===t&&BIS_AUTO){$("bisU").value="10:00";BIS_AUTO=false}
-  $("von").value=nv;$("bis").value=nb;textAngefasst=false;AUSWAHL=null;zeichne();
-  const tg=tage(nv,nb),c=D.cars.find(x=>x.n===auto),p=c?preis(c,wtIndex(ausISO(nv)),tg):null;
-  const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
-  const knapp=belegtVon(auto,nv,nb).filter(b=>!belegtZeit(auto,vonZ,bisZ).includes(b)).map(b=>b.bis===nv?" Frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt zurück.":" Bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab.").join("");
-  blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
-      {t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
-      {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
-      frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
-      rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
-      {t:"Sperren (Werkstatt, privat)",f:()=>{$("spAuto").value=auto;$("spVon").value=nv;$("spBis").value=nb;fAuf("fSperren")}}].filter(Boolean))}
-let LETZTE_ZELLE=null,VON_AUTO=false,BIS_AUTO=false;
-// Gewählte Uhrzeit läuft mit in Mietvertrag und Anfrage, dort nicht nochmal wählen (30.10.2026)
-const UHR_Q=()=>"&vonU="+encodeURIComponent($("vonU").value||"10:00")+"&bisU="+encodeURIComponent($("bisU").value||"10:00");
-/* Kilometer dazu: Staffel je Auto aus der Preisdatei, pro Tag, genau wie im Preisrechner */
-let KM=0;
-function kmPreis(car,km){km=Math.max(0,Math.round(km)||0);if(!km||!car.km||car.km.length<2)return 0;
-  const preise=car.km.slice(1),stufen=D.kmStufen||[50,100,150,200,300];const maxKm=stufen[stufen.length-1],maxPreis=preise[preise.length-1];
-  if(km>=maxKm)return Math.round(km*maxPreis/maxKm);let x0=0,y0=0;
-  for(let i=0;i<stufen.length;i++){if(km<=stufen[i])return Math.round(y0+(preise[i]-y0)*(km-x0)/(stufen[i]-x0));x0=stufen[i];y0=preise[i]}return 0}
-function kmZusatz(car,dauer){return 0}   // Extra-Kilometer schreiben wir von Hand dazu, kein Aufpreis mehr (30.10.2026)
-let KM_INKL=null,KM_EXTRA=0,KM_TAGE=null;   // KM_INKL null = automatisch 150 km pro Tag
-const kmInkl=t=>KM_INKL==null?D.freiKm*t:KM_INKL;
-const kmGesamt=t=>kmInkl(t)+KM_EXTRA;
-const kmZahl=n=>Number(n).toLocaleString("de-DE");
-function kmSatz(t){return "inklusive "+kmZahl(kmGesamt(t))+" km"+(KM_EXTRA?" (davon "+kmZahl(KM_EXTRA)+" Extra-Kilometer für Sie)":"")}
-function kmChips(){const t=tage($("von").value,$("bis").value);
-  if(!$("kmInkl")){
-    $("kmchips").innerHTML='<label class="kmf"><span>Inklusive</span><input type="number" id="kmInkl" inputmode="numeric" min="0" step="10"><b>km</b></label>'+
-      '<label class="kmf"><span>Extra von uns</span><input type="number" id="kmExtra" inputmode="numeric" min="0" step="10" placeholder="0"><b>km</b></label>';
-    $("kmInkl").addEventListener("input",()=>{const v=$("kmInkl").value.trim();KM_INKL=v===""?null:Math.max(0,Math.round(+v)||0);textAngefasst=false;zeichne()});
-    $("kmExtra").addEventListener("input",()=>{KM_EXTRA=Math.max(0,Math.round(+$("kmExtra").value)||0);textAngefasst=false;zeichne()});
-    ["kmInkl","kmExtra"].forEach(id=>$(id).addEventListener("blur",()=>kmChips()));
-  }
-  if(KM_TAGE!==null&&KM_TAGE!==t)KM_INKL=null;   // anderer Zeitraum: wieder 150 km pro Tag
-  KM_TAGE=t;
-  if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl(t);
-  if(document.activeElement!==$("kmExtra"))$("kmExtra").value=KM_EXTRA||"";
-  $("kminfo").textContent=(KM_INKL==null?D.freiKm+" km pro Tag, "+t+(t===1?" Tag":" Tage")+". ":"Von Hand geändert. ")+"Im Text steht: "+kmSatz(t)+"."}
-function angZeitraum(){const von=$("von").value,bis=$("bis").value,t=tage(von,bis);
-  $("angZeitraum").innerHTML='<span>'+wtKurz(ausISO(von))+" "+kurzD(ausISO(von))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(bis))+" "+kurzD(ausISO(bis))+" "+uhr($("bisU").value)+", "+t+(t===1?" Tag":" Tage")+'</span><span class="aend" id="angAend">ändern</span>';
-  $("angAend").onclick=()=>{reiter("kal");$("tafelKarte").scrollIntoView({behavior:"smooth"})}}
-function reiter(r){["sKal","sKal2"].forEach(id=>$(id).classList.toggle("versteckt",r!=="kal"));$("sAng").classList.toggle("versteckt",r!=="ang");
-  [...$("reiter2").children].forEach(c=>c.classList.toggle("an",c.dataset.r===r));if(r==="ang"){angZeitraum();kmChips()}window.scrollTo(0,0)}
-[...$("reiter2").children].forEach(c=>c.onclick=()=>reiter(c.dataset.r));
+const heute=new Date();heute.setHours(12,0,0,0);
+function meld(t){const m=$("meld");m.textContent=t;m.style.display="block";clearTimeout(meld.t);meld.t=setTimeout(()=>m.style.display="none",2400)}
+
+/* ---------- Preise wie im Preisrechner ---------- */
+let D=null;
+const nameV=c=>c.anzeige||c.n;
+const wt=t=>(ausISO(t).getDay()+6)%7;   // Montag = 0
+function grund(c,s,d){if(d===1&&s>=4)return c.frSa||c.gp*D.faktor[s];const W=D.faktor.reduce((a,b)=>a+b,0);let x=Math.floor(d/7)*W;for(let k=0;k<d%7;k++)x+=D.faktor[(s+k)%7];return c.gp*x}
+function miete(c,s,d){return grund(c,s,d)*(1-D.rabatt[Math.min(d,D.days||D.rabatt.length)-1])}
+window.mxPreis=(c,s,d)=>miete(c,s,d);
+// Kilometerpaket: Excel-Stufen, dazwischen und darüber der Rabatt der nächstkleineren Stufe (Baran 1.11.2026)
+function paketPreis(c,km){km=Math.round(+km||0);if(!km)return 0;const st=D.kmStufen||[50,100,150,200,300],kp=+c.kmPreis||0,pr=(c.km||[]).slice(1);
+  const i=st.indexOf(km);if(i>=0&&pr[i]!=null)return pr[i];if(!kp)return 0;
+  let r=0;for(let j=0;j<st.length;j++)if(st[j]<km&&pr[j]!=null)r=1-pr[j]/(st[j]*kp);return Math.round(km*kp*(1-r))}
+window.mxPaketPreis=(c,km)=>paketPreis(c,km);
+
+/* ---------- Belegt: Mietverträge, gebuchte Anfragen, Sperren (Anfragen und Angebote blockieren nie) ---------- */
+let BUCH=[];
+function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
+  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg)b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00"})});
+  lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!a._weg&&!(a.vertrag&&V.some(v=>v.nr===a.vertrag))&&!V.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
+    b.push({auto:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00"})});
+  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00"})});
+  BUCH=b}
+const Z=(t,u)=>t+"T"+(u||"10:00");
+function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
+
+/* ---------- Zustand ---------- */
+const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d3",autos:[],rab:0,pakKm:0,pakPr:null,kmInkl:null,
+  kunde:null,   // {name,nummer,anfrage,info}
+  text:null};   // von Hand geänderter Text
+const t=()=>tage(S.von,S.bis);
+const kmInkl=()=>S.kmInkl==null?(D?D.freiKm||150:150)*Math.max(1,t()):S.kmInkl;
+
+/* ---------- Zeitraum ---------- */
 (function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
-  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>'<option'+(x==="10:00"?" selected":"")+'>'+x+'</option>').join("");$(id).addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;zeichne()})})})();
-$("tZurueck").onclick=()=>{TSTART=plusTage(TSTART,-7);zeichneTafel()};
-$("tVor").onclick=()=>{TSTART=plusTage(TSTART,7);zeichneTafel()};
-$("tHeute").onclick=()=>{TSTART=plusTage(heute,-1);zeichneTafel()};
-// Chips für den Anruf: setzen den Zeitraum, darunter steht sofort, was frei ist und was es kostet
-function chipZeitraum(z){const h=heute,w=h.getDay();let v,b;
-  // Gleiche Knöpfe wie im Mietvertrag: dN = N Tage ab heute, weW,N = nächster Wochentag W (heute zählt mit) plus N Tage
-  if(z[0]==="d"){v=h;b=plusTage(h,+z.slice(1))}else{const [wd,n]=z.slice(2).split(",").map(Number);v=plusTage(h,(wd-w+7)%7);b=plusTage(v,n)}
-  $("von").value=nachISO(v);$("bis").value=nachISO(b);textAngefasst=false;AUSWAHL=null;
-  if(nachISO(v)<nachISO(TSTART)||nachISO(b)>nachISO(plusTage(TSTART,TAGE-1)))TSTART=plusTage(v,-1);
-  zeichne();document.querySelectorAll("#tChips div").forEach(c=>c.classList.toggle("an",c.dataset.z===z))}
-document.querySelectorAll("#tChips div").forEach(c=>c.onclick=()=>chipZeitraum(c.dataset.z));
+  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>"<option>"+x+"</option>").join("");$(id).value="10:00"})})();
+function chip(z){const w=heute.getDay();let v,b;
+  if(z[0]==="d"){v=heute;b=plus(heute,+z.slice(1))}else{const[wd,n]=z.slice(2).split(",").map(Number);v=plus(heute,(wd-w+7)%7);b=plus(v,n)}
+  S.von=iso(v);S.bis=iso(b);S.chip=z;S.text=null;zeichne()}
+[...$("zr").children].forEach(c=>c.onclick=()=>chip(c.dataset.z));
+$("zt").onclick=()=>{$("von").value=S.von;$("bis").value=S.bis;$("vonU").value=S.vonU;$("bisU").value=S.bisU;mxAuf("fZeit")};
+["von","bis","vonU","bisU"].forEach(id=>$(id).addEventListener("change",()=>{const v=$("von").value,b=$("bis").value;
+  if(v)S.von=v;if(b)S.bis=b;if(S.bis<=S.von){S.bis=iso(plus(ausISO(S.von),1));$("bis").value=S.bis}S.vonU=$("vonU").value;S.bisU=$("bisU").value;S.chip="";S.text=null;zeichne()}));
 
-laden();
-window.addEventListener("mietix-abgleich",laden);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)laden()});
+/* ---------- Für wen? ---------- */
+function kundenDaten(){const grenze=iso(plus(heute,-30)),V=lies("mietixVorgaenge",[]),kb=lies("mietixKunden",{});
+  const anf=lies("mietixAnfragen",[]).filter(a=>!a._weg&&a.status!=="abgesagt"&&!a.vertrag&&(a.name||a.nummer)&&(a.tag||"")>=grenze)
+    .sort((x,y)=>(y.status==="gebucht")-(x.status==="gebucht")||String(y.tag||"").localeCompare(String(x.tag||""))||String(y.uhr||"").localeCompare(String(x.uhr||"")));
+  const m={};V.filter(v=>v.name&&!v._weg).forEach(v=>{const k=v.name.trim().toLowerCase().replace(/\s+/g," ");const x=m[k]||(m[k]={name:v.name.trim(),n:0,auto:"",d:"",tel:""});
+    x.n++;if((v.vonD||"")>=x.d){x.d=v.vonD||"";x.auto=v.auto||"";x.tel=v.telefon||x.tel}});
+  Object.values(m).forEach(x=>{const k=kb[x.name];if(!x.tel&&k&&k.telefon)x.tel=k.telefon});
+  return{anf,mieter:Object.values(m).sort((a,b)=>b.d.localeCompare(a.d))}}
+function wann(a){if(!a.tag)return"";const d=tage(a.tag,iso(heute));return(d<=0?"heute":d===1?"gestern":"vor "+d+" Tagen")+(a.uhr&&d<=1?" "+a.uhr:"")}
+function kundeListe(){const q=$("kSuche").value.trim(),qo=q.toLowerCase().replace(/\s+/g,""),pass=(...f)=>!qo||f.some(x=>String(x||"").toLowerCase().replace(/\s+/g,"").includes(qo));
+  const {anf,mieter}=kundenDaten(),a=anf.filter(x=>pass(x.name,x.auto,x.nummer)).slice(0,25),m=q?mieter.filter(x=>pass(x.name,x.auto,x.tel)).slice(0,25):[];
+  const hl=s=>{s=esc(s);if(!q)return s;const i=s.toLowerCase().indexOf(q.toLowerCase());return i<0?s:s.slice(0,i)+"<mark>"+s.slice(i,i+q.length)+"</mark>"+s.slice(i+q.length)};
+  let h="";
+  if(a.length)h+='<div class="gk">Anfragen</div><div class="liste">'+a.map((x,i)=>'<div class="kz" data-a="'+i+'"><div class="t"><b>'+hl(x.name||"ohne Namen")+'</b><small>'+esc([x.auto,x.von?kurz(x.von)+(x.bis?" bis "+kurz(x.bis):""):"",x.nummer,wann(x)].filter(Boolean).join(", "))+'</small></div>'+
+    (x.status==="gebucht"?'<span class="chip g">gebucht</span>':x.status==="angebot"?'<span class="chip o">Angebot</span>':"")+'<em>›</em></div>').join("")+'</div>';
+  if(m.length)h+='<div class="gk">Frühere Mieter</div><div class="liste">'+m.map((x,i)=>'<div class="kz" data-m="'+i+'"><div class="t"><b>'+hl(x.name)+'</b><small>'+esc([x.n+(x.n===1?" Mietvertrag":" Mietverträge"),x.auto,x.d?kurz(x.d):""].filter(Boolean).join(", "))+'</small></div>'+(x.n>=2?'<span class="chip o">Stammkunde</span>':"")+'<em>›</em></div>').join("")+'</div>';
+  if(!h)h='<div class="leer" style="padding:10px 4px">'+(q?"Nichts gefunden.":"Keine offenen Anfragen der letzten 30 Tage. Oben suchen findet auch frühere Mieter.")+'</div>';
+  $("kListe").innerHTML=h;
+  $("kListe").querySelectorAll("[data-a]").forEach(e=>e.onclick=()=>{anfrageNehmen(a[+e.dataset.a]);mxZu()});
+  $("kListe").querySelectorAll("[data-m]").forEach(e=>e.onclick=()=>{const x=m[+e.dataset.m];S.kunde={name:x.name,nummer:x.tel,anfrage:null,info:"früherer Mieter"+(x.tel?", "+x.tel:"")};S.text=null;mxZu();zeichne()})}
+function anfrageNehmen(x){const ab=x.angebot||{};S.kunde={name:x.name||"",nummer:x.nummer||"",anfrage:x.id,info:"Anfrage "+wann(x)+(x.nummer?", "+x.nummer:"")};S.text=null;
+  if(x.von&&x.bis&&tage(x.von,x.bis)>0){S.von=x.von;S.bis=x.bis;S.chip=""}S.vonU=x.vonU||ab.vonU||S.vonU;S.bisU=x.bisU||ab.bisU||S.bisU;
+  if(ab.rabatt!=null)S.rab=+ab.rabatt||0;if(ab.paketKm){S.pakKm=+ab.paketKm;const pc=D&&D.cars.find(c=>nameV(c)===ab.auto);S.pakPr=ab.paketPreis!=null&&pc&&+ab.paketPreis!==paketPreis(pc,S.pakKm)?+ab.paketPreis:null}
+  if(ab.kmInkl!=null&&ab.von===S.von&&ab.bis===S.bis)S.kmInkl=+ab.kmInkl;
+  S.autos=[];const w=ab.auto||x.auto;if(w&&D&&D.cars.some(c=>nameV(c)===w))S.autos=[w];zeichne()}
+$("wer").onclick=()=>{$("kSuche").value="";$("nNr").value=S.kunde&&!S.kunde.anfrage?S.kunde.nummer||"":"";$("nName").value=S.kunde&&!S.kunde.anfrage?S.kunde.name||"":"";kundeListe();mxAuf("fWer")};
+$("kSuche").oninput=kundeListe;
+$("nOk").onclick=()=>{const nr=$("nNr").value.trim(),nm=$("nName").value.trim();if(!nr&&!nm){$("nNr").focus();return}
+  if(nr&&ziff(nr).length<6){meld("Nummer unvollständig");$("nNr").focus();return}
+  S.kunde={name:nm,nummer:nr,anfrage:null,info:nr||"ohne Nummer"};S.text=null;mxZu();zeichne()};
+$("nOhne").onclick=()=>{S.kunde=null;S.text=null;mxZu();zeichne()};
 
-function __uebernehmen(p){
-  D.stand=p.stand||D.stand; standAnzeigen();
-  D.weekdays=p.weekdays; D.faktor=p.faktor; D.mind=p.mind; D.days=p.days;
-  D.rabatt=p.rabatt; D.freiKm=p.freiKm;
-  D.kmStufen=p.kmStufen||[50,100,150,200,300];
-  D.cars=p.cars.map(function(c){return {n:c.anzeige,gp:c.gp,kaution:c.kaution,frSa:c.frSa,km:c.km||[]};});
-}
+/* ---------- Rabatt und Kilometerpaket ---------- */
+const RAB=[0,5,10,15,20,25,30,35,40],PAK=[0,50,100,150,200,250,300,350,400];
+function rabListe(){$("rabInd").classList.add("versteckt");
+  $("rabListe").innerHTML=RAB.map(r=>'<div data-r="'+r+'" class="'+(S.rab===r?"an":"")+'"><span>'+(r?r+" %":"kein Rabatt")+'</span><i></i></div>').join("")+
+    '<div data-r="x" class="'+(RAB.includes(S.rab)?"":"an")+'"><span>Individuell …</span><i>'+(RAB.includes(S.rab)?"":S.rab+" %")+'</i></div>';
+  $("rabListe").querySelectorAll("[data-r]").forEach(e=>e.onclick=()=>{if(e.dataset.r==="x"){$("rabInd").classList.remove("versteckt");$("rabZahl").value=S.rab||"";$("rabZahl").focus();return}
+    S.rab=+e.dataset.r;S.text=null;mxZu();zeichne()})}
+$("wRab").onclick=()=>{rabListe();mxAuf("fRab")};
+$("rabOk").onclick=()=>{S.rab=Math.min(90,Math.max(0,Math.round(+$("rabZahl").value||0)));S.text=null;mxZu();zeichne()};
+function pakAuto(){const c=gewaehlt()[0]||(D&&D.cars[0]);return c}
+function pakListe(){$("pakInd").classList.add("versteckt");const c=pakAuto();if(!c)return;
+  $("pakInfo").textContent=nameV(c)+", einmal für die ganze Miete. Mehrkilometer sonst "+(+c.kmPreis||0).toLocaleString("de-DE",{minimumFractionDigits:2})+" €."+(gewaehlt().length>1?" Preise je Auto im Text.":"");
+  const ind=S.pakKm&&!PAK.includes(S.pakKm)||S.pakPr!=null;
+  $("pakListe").innerHTML=PAK.map(k=>'<div data-k="'+k+'" class="'+(!ind&&S.pakKm===k?"an":"")+'"><span>'+(k?"+"+k+" km":"kein Paket")+'</span><i>'+(k?E(paketPreis(c,k)):"")+'</i></div>').join("")+
+    '<div data-k="x" class="'+(ind?"an":"")+'"><span>Individuell …</span><i>'+(ind?"+"+S.pakKm+" km, "+E(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):"")+'</i></div>';
+  $("pakListe").querySelectorAll("[data-k]").forEach(e=>e.onclick=()=>{if(e.dataset.k==="x"){$("pakInd").classList.remove("versteckt");$("pakKm").value=S.pakKm||"";$("pakPr").value=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):"";$("pakKm").focus();return}
+    S.pakKm=+e.dataset.k;S.pakPr=null;S.text=null;mxZu();zeichne()});
+  $("kmInkl").value=kmInkl()}
+$("pakKm").addEventListener("input",()=>{const c=pakAuto();if(c)$("pakPr").value=$("pakKm").value?paketPreis(c,+$("pakKm").value):""});
+$("pakOk").onclick=()=>{const c=pakAuto(),km=Math.max(0,Math.round(+$("pakKm").value||0)),pr=$("pakPr").value.trim();
+  S.pakKm=km;S.pakPr=km&&pr!==""&&c&&+pr!==paketPreis(c,km)?Math.max(0,+pr):null;S.text=null;mxZu();zeichne()};
+$("wPak").onclick=()=>{pakListe();mxAuf("fPak")};
+$("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.kmInkl=v===""?null:Math.max(0,Math.round(+v));S.text=null;zeichne()});
 
-/* --- Gemeinsame Preisdatei: eine Aenderung wirkt in allen Werkzeugen --- */
-(function(){
-  try{
-    fetch("https://barankohler.github.io/mietix-preise/preise.json",{cache:"no-store"})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(p){
-        if(!p||!p.cars||!p.cars.length)return;
-        __uebernehmen(p); if(typeof spAutos==="function")spAutos();
-        var neu=(typeof render==="function")?render:
-                (typeof zeichne==="function")?zeichne:
-                (typeof rechne==="function")?rechne:null;
-        if(neu)neu();
-      }).catch(function(){});
-  }catch(e){}
-})();
+/* ---------- Autos ---------- */
+function gewaehlt(){return D?S.autos.map(n=>D.cars.find(c=>nameV(c)===n)).filter(c=>c&&!belegt(nameV(c)).length):[]}
+function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=Math.round(miete(c,s,d)*(1-S.rab/100)),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
+  return{c,name:nameV(c),liste:Math.round(l),preis:m,paket:pk,summe:m+pk}}
+function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
+  D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:frei).push({c,b})});
+  S.autos=S.autos.filter(n=>frei.some(x=>nameV(x.c)===n));
+  $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
+  const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
+    if(b.length){const bis=b.map(x=>x.bis).sort().pop();return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>belegt, wieder frei '+kurz(bis)+'</i></span><span class="p"></span></div>'}
+    const p=Math.round(miete(c,s,d)*(1-S.rab/100)),l=Math.round(grund(c,s,d));
+    return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i></span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
+  $("autos").innerHTML=frei.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
+  $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;S.autos=S.autos.includes(n)?S.autos.filter(x=>x!==n):S.autos.concat(n);S.text=null;zeichne()})}
 
-/* --- Handynummer des Kunden zwischen den Werkzeugen merken ---
-   Nur zwei Stunden gueltig, damit nie eine alte Nummer aus einem
-   anderen Vorgang vorbelegt wird. */
-(function(){
-  try{
-    var f=document.getElementById("knr")||document.getElementById("nummer")||document.getElementById("tel");
-    if(!f)return;
-    var roh=null;   // nicht mehr vorbelegen: das Angebot landete sonst beim vorigen Kunden (Liste Punkt 2, 30.10.2026)
-    if(roh&&!f.value.trim()){
-      var w=JSON.parse(roh);
-      if(w&&w.nr&&(Date.now()-w.zeit)<2*60*60*1000){
-        f.value=w.nr;
-        f.dispatchEvent(new Event("input",{bubbles:true}));
-        f.dispatchEvent(new Event("change",{bubbles:true}));
-      }
-    }
-    f.addEventListener("input",function(){
-      var v=f.value.trim();
-      if(v.replace(/\D/g,"").length>=8)
-        localStorage.setItem("mietixNummer",JSON.stringify({nr:v,zeit:Date.now()}));
-    });
-  }catch(e){}
-})();
+/* ---------- Text ---------- */
+function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map(posten),k=S.kunde,km=kmInkl();
+  const z=[(k&&k.name?"Hallo "+vorname(k.name)+",":"Guten Tag,"),""];
+  const zr="Für "+(S.von.slice(0,4)===S.bis.slice(0,4)?kurz(S.von):lang(S.von))+(S.vonU?" "+uhr(S.vonU):"")+" bis "+lang(S.bis)+(S.bisU?" "+uhr(S.bisU):"")+" ("+tz(d)+")";
+  z.push((k&&k.anfrage?"vielen Dank für Ihre Anfrage. ":"gerne mache ich Ihnen ein Angebot. ")+zr+(P.length===1?" ist der "+P[0].name+" frei.":" sind diese Fahrzeuge frei."));z.push("");
+  if(P.length===1){const p=P[0];z.push("*"+p.name+": "+E(p.preis)+(p.liste>p.preis?" statt "+E(p.liste):"")+"*");
+    z.push("Inklusive "+km.toLocaleString("de-DE")+" km"+(S.pakKm?", dazu +"+S.pakKm.toLocaleString("de-DE")+" km für "+(p.paket?E(p.paket):"0 €, ein Geschenk von uns"):"")+".");
+    if(+p.c.kaution>0)z.push("Kaution "+E(+p.c.kaution)+", kommt nach der Rückgabe komplett zurück.")}
+  else{P.forEach(p=>{z.push("*"+p.name+": "+E(p.preis)+(p.liste>p.preis?" statt "+E(p.liste):"")+"*");
+      const e=[];if(+p.c.kaution>0)e.push("Kaution "+E(+p.c.kaution));if(S.pakKm)e.push("+"+S.pakKm.toLocaleString("de-DE")+" km für "+E(p.paket));if(e.length)z.push(e.join(", "))});
+    z.push("");z.push("Inklusive "+km.toLocaleString("de-DE")+" km. Die Kaution kommt nach der Rückgabe komplett zurück.")}
+  if(d>1){z.push("");z.push("Der Preis gilt für den kompletten Zeitraum am Stück.")}
+  z.push("");z.push(P.length===1?"Darf ich den Wagen für Sie reservieren?":"Welches Fahrzeug darf ich für Sie reservieren?");
+  z.push("");z.push("Viele Grüße");z.push("B. Köhler vom Mietix-Team");return z.join("\n")}
+const fertigerText=()=>S.text!=null?S.text:text();
 
-/* Preisstand kommt aus der gemeinsamen Preisdatei, nie mehr von Hand */
-function standAnzeigen(){
-  const e=document.getElementById("preisstand");
-  if(!e||!D.stand)return;
-  e.textContent=D.stand.split("-").reverse().join(".");
-}
-standAnzeigen();
-</script>
-<script>/* Mietix Abgleich: Mietverträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
+/* ---------- Zeichnen ---------- */
+function zeichne(){laden();const d=t(),k=S.kunde;
+  [...$("zr").children].forEach(c=>c.classList.toggle("an",c.dataset.z===S.chip));
+  $("zt").innerHTML=esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU))+' <small>'+tz(d)+',</small> <u>ändern</u>';
+  $("werName").textContent=k?(k.name||"ohne Namen"):"Ohne Kunde";$("werInfo").textContent=k?k.info:"Antippen: Anfrage, früherer Mieter oder Nummer";
+  $("rabT").textContent=S.rab?S.rab+" %":"kein";$("pakT").textContent=S.pakKm?"+"+S.pakKm.toLocaleString("de-DE")+" km":"kein";
+  autosZeichnen();const g=gewaehlt(),P=g.map(posten);
+  if(!P.length){$("sumL").textContent=D?"Erst ein Auto antippen":"Preise werden geladen …";$("sumR").textContent="";$("senden").classList.add("aus");$("senden").textContent="Senden";return}
+  const km=kmInkl();
+  $("sumL").textContent=(P.length===1?P[0].name.replace("Mercedes-Benz ","").replace("Mercedes ",""):P.length+" Autos")+", "+tz(d)+", "+km.toLocaleString("de-DE")+(S.pakKm?" + "+S.pakKm.toLocaleString("de-DE"):"")+" km";
+  $("sumR").textContent=P.length===1?E(P[0].summe):"ab "+E(Math.min(...P.map(p=>p.summe)));
+  $("senden").classList.remove("aus");$("senden").textContent=k&&k.nummer?"An "+(k.name?vorname(k.name):"Kunden")+" senden":"Senden";
+  $("fuss").innerHTML="Belegt zählen Mietverträge, gebuchte Anfragen und Sperren. Preisstand: "+esc(D.stand?D.stand.split("-").reverse().join("."):"")}
+
+/* ---------- Merken in der Anfrage (nur mit Kunde, nie leer) ---------- */
+function merken(){const g=gewaehlt(),k=S.kunde;if(!g.length||!k||!(k.name||k.nummer))return;const P=g.map(posten),p=P[0],j=new Date();
+  const l=lies("mietixAnfragen",[]);let x=k.anfrage?l.find(a=>a.id===k.anfrage):null;
+  if(!x){const nz=ziff(k.nummer);x=nz?l.find(a=>!a._weg&&a.status!=="abgesagt"&&!a.vertrag&&ziff(a.nummer)===nz&&a.tag>=iso(plus(heute,-30))):null}
+  if(!x){x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:iso(j),uhr:String(j.getHours()).padStart(2,"0")+":"+String(j.getMinutes()).padStart(2,"0"),
+    name:k.name||"",alter:"",ort:"",nummer:k.nummer||"",notiz:"Angebot",status:"angebot"};l.push(x)}
+  const km=kmInkl(),ang={auto:p.name,von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,preis:p.summe,miete:p.preis,liste:p.liste,rabatt:S.rab,kmInkl:km,kmExtra:S.pakKm||0,
+    paketKm:S.pakKm||0,paketPreis:S.pakKm?p.paket:0,freikm:km+(S.pakKm||0),autos:P.map(q=>({auto:q.name,preis:q.preis,paket:q.paket})),am:j.toISOString()};
+  Object.assign(x,{auto:p.name,von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,angebot:ang});if(k.name&&!x.name)x.name=k.name;if(k.nummer&&!x.nummer)x.nummer=k.nummer;
+  if(x.status==="offen"||!x.status)x.status="angebot";delete x.nachgefasst;
+  schreib("mietixAnfragen",l);S.kunde.anfrage=x.id;S.kunde.info="Anfrage, Angebot gespeichert"+(x.nummer?", "+x.nummer:"")}
+
+/* ---------- Senden, Kopieren, Bild ---------- */
+function bereit(){if(!gewaehlt().length){meld("Erst ein Auto antippen");return false}return true}
+$("senden").onclick=async()=>{if(!bereit())return;const tx=fertigerText(),k=S.kunde;merken();zeichne();
+  if(k&&k.nummer){location.href="https://wa.me/"+waNr(k.nummer)+"?text="+encodeURIComponent(tx);return}
+  if(navigator.share){try{await navigator.share({text:tx});return}catch(e){if(e&&e.name==="AbortError")return}}
+  location.href="https://wa.me/?text="+encodeURIComponent(tx)};
+$("mKopie").onclick=async()=>{if(!bereit())return;const tx=fertigerText();merken();zeichne();
+  try{await navigator.clipboard.writeText(tx);meld("✓ Text kopiert")}catch(e){const a=document.createElement("textarea");a.value=tx;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove();meld("✓ Text kopiert")}};
+$("mText").onclick=()=>{if(!bereit())return;$("text").textContent=fertigerText();$("text").classList.remove("versteckt");$("textEdit").classList.add("versteckt");$("tAendern").textContent="Text ändern";mxAuf("fText")};
+$("tAendern").onclick=()=>{const ed=$("textEdit");if(ed.classList.contains("versteckt")){ed.value=fertigerText();ed.classList.remove("versteckt");$("text").classList.add("versteckt");$("tAendern").textContent="Fertig";ed.focus()}
+  else{S.text=ed.value.trim()===text().trim()?null:ed.value;$("text").textContent=fertigerText();ed.classList.add("versteckt");$("text").classList.remove("versteckt");$("tAendern").textContent="Text ändern"}};
+$("mBild").onclick=()=>{const g=gewaehlt();if(g.length!==1){meld(g.length?"Bild nur mit einem Auto":"Erst ein Auto antippen");return}merken();zeichne();
+  const p=posten(g[0]),d=t(),B=1080,H=1350,kv=document.createElement("canvas");kv.width=B;kv.height=H;
+  const x=kv.getContext("2d"),F=(gr,w)=>{x.font=(w||800)+" "+gr+"px -apple-system,Helvetica,Arial,sans-serif"},HELL="#F4F1EC",LEISE="rgba(244,241,236,.45)";
+  const dd=t0=>{const q=ausISO(t0);return["SO","MO","DI","MI","DO","FR","SA"][q.getDay()]+" "+String(q.getDate()).padStart(2,"0")+"."+String(q.getMonth()+1).padStart(2,"0")+"."};
+  const gr=x.createLinearGradient(0,0,B*.35,H);gr.addColorStop(0,"#1C1C20");gr.addColorStop(.55,"#131316");gr.addColorStop(1,"#0A0A0C");x.fillStyle=gr;x.fillRect(0,0,B,H);
+  x.textAlign="center";F(30,700);x.fillStyle=LEISE;x.fillText("MIETIX SPORTWAGENVERMIETUNG",B/2,120);
+  x.font="300 74px -apple-system,Helvetica,Arial,sans-serif";x.fillStyle=HELL;x.fillText(p.name.toUpperCase(),B/2,226);x.fillStyle="rgba(196,22,28,.85)";x.fillRect(B/2-52,264,104,3);
+  F(34,500);x.fillStyle=LEISE;x.fillText(dd(S.von)+" "+S.vonU+"   BIS   "+dd(S.bis)+" "+S.bisU,B/2,340);x.fillText(d+(d===1?" TAG":" TAGE"),B/2,392);
+  let y=520;const proz=p.liste>p.preis?Math.round((1-p.preis/p.liste)*100):0;
+  if(proz>0){F(46,700);x.fillStyle="#C4161C";x.fillText(proz+" % RABATT",B/2,y);F(40,600);x.fillStyle=LEISE;const alt="statt "+E(p.liste);x.fillText(alt,B/2,y+72);
+    const aw=x.measureText(alt).width,zb=x.measureText("statt ").width;x.strokeStyle=LEISE;x.lineWidth=3;x.beginPath();x.moveTo(B/2-aw/2+zb-2,y+58);x.lineTo(B/2+aw/2+2,y+58);x.stroke();y+=140}else y+=40;
+  F(140,800);x.fillStyle=HELL;x.fillText(E(p.preis),B/2,y+90);F(34,500);x.fillStyle=LEISE;x.fillText("für den kompletten Zeitraum",B/2,y+146);y+=230;
+  [["Kilometer",kmInkl().toLocaleString("de-DE")+" km inklusive"]].concat(S.pakKm?[["Kilometerpaket","+"+S.pakKm.toLocaleString("de-DE")+" km, "+E(p.paket)]]:[],[["Kaution",+p.c.kaution>0?E(+p.c.kaution)+", kommt zurück":"auf Anfrage"]]).forEach(([a,b])=>{
+    x.textAlign="left";x.fillStyle="rgba(244,241,236,.14)";x.fillRect(96,y-34,B-192,1);F(30,600);x.fillStyle=LEISE;x.fillText(a.toUpperCase(),96,y+10);
+    x.textAlign="right";F(34,700);x.fillStyle=HELL;x.fillText(b,B-96,y+10);y+=76});
+  x.textAlign="center";F(30,500);x.fillStyle=LEISE;x.fillText(d>1?"Preis gilt nur für den kompletten Zeitraum am Stück":"Preis gilt für den genannten Tag",B/2,H-92);
+  const name="Mietix_Angebot_"+p.name.replace(/[^A-Za-z0-9]+/g,"_")+".jpg";
+  kv.toBlob(async b=>{const f=new File([b],name,{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){}}
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},"image/jpeg",.92)};
+
+/* ---------- Start: Preise laden, Aufruf aus Anfrage oder Kalender ---------- */
+function vonAdresse(){const q=new URLSearchParams(location.search);if(!q.toString())return;
+  const id=q.get("anfrage"),x=id?lies("mietixAnfragen",[]).find(a=>a.id===id):null;
+  if(x)anfrageNehmen(x);
+  if(q.get("von")&&q.get("bis")&&tage(q.get("von"),q.get("bis"))>0){S.von=q.get("von");S.bis=q.get("bis");S.chip=""}
+  if(q.get("vonU"))S.vonU=q.get("vonU");if(q.get("bisU"))S.bisU=q.get("bisU");
+  const a=q.get("auto");if(a&&D&&D.cars.some(c=>nameV(c)===a))S.autos=[a];
+  const nr=q.get("knr");if(nr&&!x)S.kunde={name:"",nummer:nr,anfrage:null,info:nr};
+  history.replaceState(null,"",location.pathname)}
+fetch("https://barankohler.github.io/mietix-preise/preise.json",{cache:"no-store"}).then(r=>r.json()).then(j=>{D=j;vonAdresse();zeichne()})
+  .catch(()=>{$("autos").innerHTML='<div class="leer">Preise konnten nicht geladen werden. Internet prüfen und neu laden.</div>'});
+window.addEventListener("mietix-abgleich",()=>zeichne());window.addEventListener("storage",()=>zeichne());
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)zeichne()});
+zeichne();
+</script><script>/* Mietix Abgleich: Mietverträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
    Wird von tools/vertrag/build_html.py und tools/anfragen/build_html.py in die Seite eingebaut.
    - Die Werkzeuge arbeiten weiter nur mit localStorage. Dieser Baustein merkt jede Änderung an den vier Speichern,
      schickt sie hoch und holt neue Stände der anderen Geräte (beim Start, beim Zurückkehren zur Seite, jede Minute).
@@ -1031,317 +675,18 @@ window.addEventListener("online",abgleichen);window.addEventListener("offline",z
 setInterval(abgleichen,60000);
 zeigen();abgleichen();auslagernBald();
 })();
-</script>
-<script>
-/* Angebot an einem Ort (30.10.2026, Baran): Die Kachel Angebot und "Angebot schicken" in der Anfrage kommen hierher.
-   Was verschickt wird (ein Auto, Preis mit Rabatt und Kilometern, Uhrzeiten), wird in der Anfrage gespeichert
-   und wandert von dort in den Mietvertrag. Ohne Anfrage und ohne Nummer wird nur gerechnet, nichts gespeichert. */
-let ANG_ANFRAGE=null;
-function angebotDaten(){const von=$("von").value,bis=$("bis").value,dauer=tage(von,bis);if(!von||!bis||dauer<1)return null;
-  const start=wtIndex(ausISO(von)),extra=Math.min(90,Math.max(0,+($("rab").value)||0))/100,vonZ=ZEIT(von,$("vonU").value),bisZ=ZEIT(bis,$("bisU").value);
-  const autos=D.cars.filter(c=>!belegtZeit(c.n,vonZ,bisZ).length&&AUSWAHL&&AUSWAHL.has(c.n));if(autos.length!==1)return null;
-  const c=autos[0],p=preis(c,start,dauer);if(p===null)return null;
-  return{auto:c.n,von:von,bis:bis,vonU:$("vonU").value,bisU:$("bisU").value,preis:Math.round((p*(1-extra)+kmZusatz(c,dauer))*100)/100,
-    kmExtra:KM_EXTRA,kmInkl:kmInkl(dauer),freikm:kmGesamt(dauer),rabatt:Math.round(extra*100),am:new Date().toISOString()}}
-function angebotMerken(){const d=angebotDaten(),nr=$("knr").value.trim();if(!d)return;
-  let l=[];try{l=JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")}catch(e){}
-  let x=ANG_ANFRAGE?l.find(a=>a.id===ANG_ANFRAGE):null;
-  // andere Nummer als in der Anfrage = anderer Kunde: neue Anfrage statt die des vorigen Kunden überschreiben (Liste Punkt 2)
-  const zif=t=>String(t||"").replace(/\D/g,"").replace(/^(00)?49/,"0");
-  if(x&&nr&&x.nummer&&zif(x.nummer)!==zif(nr)){x=null;ANG_ANFRAGE=null}
-  if(!x&&!nr)return;
-  if(!x){const j=new Date();x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(j),uhr:String(j.getHours()).padStart(2,"0")+":"+String(j.getMinutes()).padStart(2,"0"),
-    name:"",alter:"",ort:"",nummer:nr,notiz:"Angebot aus dem Kalender",status:"angebot"};l.push(x);ANG_ANFRAGE=x.id}
-  Object.assign(x,{auto:d.auto,von:d.von,bis:d.bis,vonU:d.vonU,bisU:d.bisU,angebot:d});if(nr&&!x.nummer)x.nummer=nr;if(x.status==="offen")x.status="angebot";
-  localStorage.setItem("mietixAnfragen",JSON.stringify(l));
-  let m=document.getElementById("angGespeichert");if(!m){m=document.createElement("p");m.id="angGespeichert";m.className="klein";m.style.cssText="text-align:center;color:#1E9E5A;font-weight:800;margin-top:8px";$("kopieren").after(m)}
-  m.innerHTML='In Anfragen gespeichert: '+d.auto+', '+EUR.format(d.preis)+'. <a href="https://barankohler.github.io/mietix-anfragen/?zeige=alle" style="color:inherit">ansehen</a>'}
-function artZeigen(){[...$("wahlArt").children].forEach(c=>c.classList.toggle("an",(c.dataset.w==="1")===EINZEL))}
-[...$("wahlArt").children].forEach(c=>c.onclick=()=>{EINZEL=c.dataset.w==="1";try{localStorage.setItem("mietixAngebotArt",EINZEL?"ein":"alle")}catch(e){}
-  if(EINZEL){const eins=EIN_AUTO&&AUSWAHL&&AUSWAHL.has(EIN_AUTO)?EIN_AUTO:(AUSWAHL&&AUSWAHL.size===1?[...AUSWAHL][0]:"");EIN_AUTO=eins;AUSWAHL=new Set(eins?[eins]:[])}else AUSWAHL=null;
-  artZeigen();textAngefasst=false;zeichne()});
-artZeigen();
-function angebotFuer(auto){EINZEL=true;EIN_AUTO=auto;artZeigen();textAngefasst=false;reiter("ang");AUSWAHL=new Set([auto]);zeichne()}
-/* Angebot als Bild (aus dem alten Preisrechner, Liste Punkt 9): nur bei einem Auto */
-function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.find(x=>x.n===d.auto);if(!c)return null;
-  const dauer=tage(d.von,d.bis),liste=preis(c,wtIndex(ausISO(d.von)),dauer)||d.preis,B=1080,H=1350,k=document.createElement("canvas");k.width=B;k.height=H;
-  const g=k.getContext("2d"),S=(gr,w)=>{g.font=(w||800)+" "+gr+"px -apple-system,Helvetica,Arial,sans-serif"},HELL="#F4F1EC",LEISE="rgba(244,241,236,.45)",E0=n=>Math.round(n).toLocaleString("de-DE")+" €";
-  const WT=["SO","MO","DI","MI","DO","FR","SA"],dd=t=>{const x=ausISO(t);return WT[x.getDay()]+" "+String(x.getDate()).padStart(2,"0")+"."+String(x.getMonth()+1).padStart(2,"0")+"."};
-  const gr=g.createLinearGradient(0,0,B*.35,H);gr.addColorStop(0,"#1C1C20");gr.addColorStop(.55,"#131316");gr.addColorStop(1,"#0A0A0C");g.fillStyle=gr;g.fillRect(0,0,B,H);
-  const li=g.createRadialGradient(B*.86,-140,60,B*.86,-140,980);li.addColorStop(0,"rgba(255,240,220,.15)");li.addColorStop(1,"rgba(255,236,212,0)");g.fillStyle=li;g.fillRect(0,0,B,1000);
-  g.textAlign="center";S(30,700);g.fillStyle=LEISE;g.fillText("MIETIX SPORTWAGENVERMIETUNG",B/2,120);
-  g.font="300 74px -apple-system,Helvetica,Arial,sans-serif";g.fillStyle=HELL;g.fillText(c.n.toUpperCase(),B/2,226);
-  g.fillStyle="rgba(196,22,28,.85)";g.fillRect(B/2-52,264,104,3);
-  S(34,500);g.fillStyle=LEISE;g.fillText(dd(d.von)+" "+d.vonU+"   BIS   "+dd(d.bis)+" "+d.bisU,B/2,340);g.fillText(dauer+(dauer===1?" TAG":" TAGE"),B/2,392);
-  let y=520;const proz=liste>d.preis+0.5?Math.round((1-d.preis/liste)*100):0;
-  if(proz>0){S(46,700);g.fillStyle="#C4161C";g.fillText(proz+" % RABATT",B/2,y);S(40,600);g.fillStyle=LEISE;const alt="statt "+E0(liste);g.fillText(alt,B/2,y+72);
-    const aw=g.measureText(alt).width,zb=g.measureText("statt ").width;g.strokeStyle=LEISE;g.lineWidth=3;g.beginPath();g.moveTo(B/2-aw/2+zb-2,y+58);g.lineTo(B/2+aw/2+2,y+58);g.stroke();y+=140}else y+=40;
-  S(140,800);g.fillStyle=HELL;g.fillText(E0(d.preis),B/2,y+90);S(34,500);g.fillStyle=LEISE;g.fillText("für den kompletten Zeitraum",B/2,y+146);y+=230;
-  [["Kilometer",(+d.freikm||0).toLocaleString("de-DE")+" km inklusive"],["Kaution",+c.kaution>0?E0(+c.kaution)+", kommt zurück":"auf Anfrage"]].forEach(([a,b])=>{
-    g.textAlign="left";g.fillStyle="rgba(244,241,236,.14)";g.fillRect(96,y-34,B-192,1);S(30,600);g.fillStyle=LEISE;g.fillText(a.toUpperCase(),96,y+10);
-    g.textAlign="right";S(34,700);g.fillStyle=HELL;g.fillText(b,B-96,y+10);y+=76});
-  g.textAlign="center";S(30,500);g.fillStyle=LEISE;g.fillText(dauer>1?"Preis gilt nur für den kompletten Zeitraum am Stück":"Preis gilt für den genannten Tag",B/2,H-92);return k}
-(function(){const kn=document.createElement("button");kn.className="knopf hell";kn.type="button";kn.id="bildKnopf";kn.textContent="Angebot als Bild";$("kopieren").after(kn);
-  kn.onclick=()=>{const k=angebotBild();if(!k){alert("Für ein Bild bitte genau ein freies Auto und den Zeitraum wählen.");return}angebotMerken();
-    const name="Mietix_Angebot_"+angebotDaten().auto.replace(/[^A-Za-z0-9]+/g,"_")+".jpg";
-    k.toBlob(async b=>{const f=new File([b],name,{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){}}
-      const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},"image/jpeg",.92)}})();
-(function(){const s=$("senden").onclick,k=$("kopieren").onclick;
-  // Ohne gewähltes Auto steht nur ein Hinweis in der Vorschau: der darf nie beim Kunden landen (31.10.2026, Prüfbericht)
-  const leer=kn=>{if(/^Bitte oben/.test(($("vorschau").value||"").trim())){rueckmeldung(kn,"Erst oben ein Auto antippen");return true}return false};
-  $("senden").onclick=async()=>{if(leer($("senden")))return;angebotMerken();await s()};$("kopieren").onclick=async()=>{if(leer($("kopieren")))return;angebotMerken();await k()}})();
-// ?zeige=angebot&anfrage=ID&auto=&von=&bis=&vonU=&bisU=&knr= öffnet das Angebot schon ausgefüllt
-(function(){const q=new URLSearchParams(location.search);if(q.get("zeige")!=="angebot")return;history.replaceState(null,"",location.pathname);
-  ANG_ANFRAGE=q.get("anfrage")||null;let x=null;try{x=(JSON.parse(localStorage.getItem("mietixAnfragen")||"[]")).find(a=>a.id===ANG_ANFRAGE)||null}catch(e){}
-  const g=k=>q.get(k)||(x&&(x[k]||(x.angebot&&x.angebot[k])))||"";
-  let n=0;const setzen=()=>{if(!D||!D.cars||!D.cars.length){if(++n<40)setTimeout(setzen,250);return}
-    if(g("von"))$("von").value=g("von");if(g("bis"))$("bis").value=g("bis");
-    ["vonU","bisU"].forEach(id=>{const u=q.get(id)||(x&&(x[id]||(x.angebot&&x.angebot[id])));if(u&&[...$(id).options].some(o=>o.value===u||o.textContent===u))$(id).value=u});
-    const nr=q.get("knr")||(x&&x.nummer)||"";if(nr)$("knr").value=nr;
-    if(x&&x.angebot){KM_EXTRA=+x.angebot.kmExtra||0;if(x.angebot.kmInkl!=null){KM_INKL=+x.angebot.kmInkl;KM_TAGE=tage(g("von"),g("bis"))}if(x.angebot.rabatt)$("rab").value=x.angebot.rabatt}
-    const a=g("auto");if(a){EINZEL=true;EIN_AUTO=a;artZeigen()}AUSWAHL=a?new Set([a]):null;textAngefasst=false;reiter("ang");zeichne();if(a)AUSWAHL=new Set([a]);zeichne()};
-  setzen()})();
-</script>
-<div class="fenster" id="fBuchen" role="dialog" aria-label="Neue Buchung"><div class="fKopf"><h3>Neue Buchung</h3><button class="fZu" type="button" aria-label="Schließen">✕</button></div>
-  <div class="bZr"><div><label class="bL">von</label><input type="date" id="bVon"><select id="bVonU"></select></div>
-    <div><label class="bL">bis</label><input type="date" id="bBis"><select id="bBisU"></select></div></div>
-  <div class="bInfo" id="bZeit"></div>
-  <label class="bL">Fahrzeug</label><select id="bAuto"></select>
-  <div class="bWarn" id="bWarn"></div>
-  <label class="bL">Vor- und Nachname *</label><input id="bName" autocomplete="off">
-  <label class="bL">Telefon</label><input id="bTel" inputmode="tel">
-  <label class="bL">Straße und Hausnummer</label><input id="bStr" autocomplete="off">
-  <label class="bL">PLZ und Wohnort</label><input id="bOrt" autocomplete="off" data-anschrift="plzort">
-  <div class="bZr"><div><label class="bL">Geburtsdatum</label><input type="date" id="bGeb"></div>
-    <div><label class="bL">Geburtsort</label><input id="bGebOrt" autocomplete="off"></div></div>
-  <div class="bTipp" style="margin-top:6px">Was du hier einträgst, steht später schon im Mietvertrag.</div>
-  <label class="bL">Mietpreis für den ganzen Zeitraum €</label><input id="bPreis" inputmode="decimal">
-  <label class="bL">Inklusive Kilometer, gesamt</label><input id="bKm" inputmode="numeric">
-  <label class="bL">Zusatzfahrer, Vor- und Nachname</label><input id="bZf" autocomplete="off" placeholder="leer lassen, wenn keiner">
-  <div class="bFrage"><b>Anzahlung erhalten?</b><div class="bJn" id="bAnzJn"><div data-jn="nein" class="an">Nein</div><div data-jn="ja">Ja</div></div></div>
-  <div id="bAnzW" class="versteckt"><div class="bZr"><div><label class="bL">Betrag €</label><input id="bAnz" inputmode="decimal"></div>
-    <div><label class="bL">Bezahlt am</label><input type="date" id="bAnzAm"></div></div>
-    <label class="bL">Wie bezahlt?</label><div class="bJn" id="bArt"><div data-art="bar" class="an">Bar</div><div data-art="ec">EC-Karte</div><div data-art="kredit">Kreditkarte</div><div data-art="ueberweisung">Überweisung</div></div></div>
-  <label class="bL">Notiz (nur für uns)</label><input id="bNotiz">
-  <button class="bOk" id="bOk" type="button">Buchung speichern</button>
-  <div class="bTipp">Die Buchung steht danach im Kalender, unter „Gebucht“ in den Anfragen und füllt später den Mietvertrag aus.</div>
-</div>
-<style>
-#werFrei{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(0,0,0,.045);margin-bottom:12px}
-#werFrei h2{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin:0 0 10px}
-#werFrei .tPruef{padding:0;margin-top:8px}#werFrei .tChips{padding:0}
-.nBuch{display:block;width:100%;margin:0 0 12px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:14px;font:800 16px Inter,system-ui,sans-serif;cursor:pointer}
-#freiKopf{font-weight:800;margin:12px 0 6px;font-size:15px}
-.fZeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #EFEFF1}
-.fZeile b{display:block;font-size:15px}.fZeile i{display:block;font-style:normal;font-size:12px;color:#6F6F72;margin-top:2px}
-.fZeile.belegt>div:first-child{opacity:.45}.fKn{display:flex;gap:6px;flex:0 0 auto}
-.fZeile button.hellK{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}.fZeile .fRot{flex:0 0 auto;max-width:55%;text-align:right;color:var(--red);font-weight:800;font-size:14px}
-.fZeile i.fRaus{color:var(--red);font-weight:700}#werFrei #tagInfo{display:none}.fZeile button{flex:0 0 auto;background:var(--red);color:#fff;border:0;border-radius:999px;padding:9px 16px;font:800 14px Inter,system-ui,sans-serif;cursor:pointer}
-.bInfo{background:#F6F6F7;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;margin-top:10px}
-.bZr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bZr>div{min-width:0}
-#fBuchen .bZr select{margin-top:6px}
-.bL{display:block;font-size:13px;font-weight:700;color:#6F6F72;margin:12px 0 4px}
-#fBuchen input,#fBuchen select{width:100%;border:1.5px solid #E4E4E7;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit;background:#fff}
-.bFrage{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.bJn{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.bJn div{border:1.5px solid #E4E4E7;border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px;cursor:pointer}.bJn div.an{background:var(--red);border-color:var(--red);color:#fff}
-.bWarn{color:var(--red);font-weight:800;font-size:13px;margin-top:6px}
-.bOk{display:block;width:100%;margin-top:16px;background:var(--red);color:#fff;border:0;border-radius:14px;padding:15px;font:800 17px Inter,system-ui,sans-serif;cursor:pointer}
-.bTipp{font-size:12px;color:#6F6F72;margin-top:10px}
-.bMeld{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1B8A4B;color:#fff;padding:12px 18px;border-radius:999px;font-weight:800;z-index:60}
-</style>
-<script>
-/* Wer ist frei? und Neue Buchung (30.10.2026, Baran: am Telefon sofort sehen, was frei ist, und gleich buchen) */
-(function(){
-  const sk=$("sKal");if(!sk)return;
-  const box=document.createElement("div");box.id="werFrei";
-  box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
-  const kal=$("tafelKarte")&&$("tafelKarte").closest(".block");if(kal&&kal.parentNode===sk)sk.insertBefore(box,kal.nextSibling);else sk.insertBefore(box,sk.firstChild);
-  const z=$("werZeit");const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)z.appendChild(tc);if(tp)z.appendChild(tp);
-})();
-const bTage=()=>tage($("von").value,$("bis").value);
-// Inklusive Kilometer (31.10.2026, Baran): Vorschlag Freikilometer je Tag mal Tage, als Gesamtzahl, von Hand änderbar
-let B_KM_HAND=false;
-function bKmVorschlag(){if(!B_KM_HAND){const t=bTage();$("bKm").value=t>0?String((D.freiKm||150)*t):""}}
-function bZeitText(){const v=$("von").value,b=$("bis").value,t=bTage();if(!v||!b||t<1)return"";
-  return wtKurz(ausISO(v))+" "+kurzD(ausISO(v))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(b))+" "+kurzD(ausISO(b))+" "+uhr($("bisU").value)+" ("+t+(t===1?" Tag":" Tage")+")"}
-function bPreis(n){const c=D.cars.find(x=>x.n===n);const v=$("von").value,t=bTage();if(!c||!v||t<1)return null;const p=preis(c,wtIndex(ausISO(v)),t);return p===null?null:Math.round(p)}
-function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,b0=b,t=bTage();
-  if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
-  const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
-  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl.slice().sort((a,b)=>bZ(a).bis-bZ(b).bis)[bl.length-1];
-      const rot=x.notiz==="Sperre"?"gesperrt bis "+kurzD(ausISO(x.bis)):"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
-      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
-    // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
-    const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
-    n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
-  $("freiKopf").textContent="";   // 1.11.2026 Baran: Zeile weg, die Liste zeigt es
-  $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
-  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch));
-  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>angebotFuer(x.dataset.ang))}
-{const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
-function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
-  $("bWarn").textContent=bl.length?"Achtung: in dem Zeitraum schon belegt"+(bl[0].kunde?" ("+vorname(bl[0].kunde)+")":"")+".":""}
-function bZeitrFuellen(){["vonU","bisU"].forEach(i=>{const z=$("b"+i[0].toUpperCase()+i.slice(1));z.innerHTML=$(i).innerHTML;z.value=$(i).value});
-  $("bVon").value=$("von").value;$("bBis").value=$("bis").value;$("bZeit").textContent=bZeitText()}
-function bZeitrAendern(){const a=[["bVon","von"],["bVonU","vonU"],["bBis","bis"],["bBisU","bisU"]];
-  a.forEach(([b,o])=>{if($(o).value!==$(b).value){$(o).value=$(b).value;$(o).dispatchEvent(new Event("change"))}});
-  bZeitrFuellen();const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bKmVorschlag();bWarnen()}
-["bVon","bVonU","bBis","bBisU"].forEach(i=>$(i).addEventListener("change",bZeitrAendern));
-function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
-  bZeitrFuellen();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
-  $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"].forEach(i=>$(i).value="");B_KM_HAND=false;bKmVorschlag();$("bAnzAm").value=nachISO(new Date());
-  const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";
-  bJn("nein");bWarnen();fAuf("fBuchen");setTimeout(()=>$("bName").focus(),250)}
-function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.dataset.jn===w));$("bAnzW").classList.toggle("versteckt",w!=="ja");
-  if(w==="ja"&&!$("bAnz").value){const p=parseFloat(String($("bPreis").value).replace(/\./g,"").replace(",","."));if(p)$("bAnz").value=String(Math.round(p*0.3))}}
-[...$("bAnzJn").children].forEach(c=>c.onclick=()=>bJn(c.dataset.jn));
-[...$("bArt").children].forEach(c=>c.onclick=()=>[...$("bArt").children].forEach(x=>x.classList.toggle("an",x===c)));
-$("bAuto").onchange=()=>{const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()};
-$("nBuch").onclick=()=>buchenAuf("");
-$("bKm").addEventListener("input",()=>{B_KM_HAND=$("bKm").value.trim()!==""});
-// Doppeltippen legt keine zweite Buchung an (30.10.2026)
-let B_SPERRE=0;
-$("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").value.trim();if(!name){alert("Bitte den Namen eintragen.");$("bName").focus();return}
-  // Doppel-Schutz: derselbe Kunde, dasselbe Auto, überlappender Zeitraum schon als Buchung oder Mietvertrag da
-  {const nG=t=>String(t||"").toLowerCase().replace(/\s+/g,""),au=$("bAuto").value,v0=$("von").value,b0=$("bis").value,ueber=(a1,b1,a2,b2)=>a1<b2&&b1>a2;
-   const da=lies("mietixAnfragen",[]).find(x=>x.status==="gebucht"&&nG(x.name)===nG(name)&&x.auto===au&&x.von&&x.bis&&ueber(v0,b0,x.von,x.bis))
-     ||lies("mietixVorgaenge",[]).find(x=>x.status!=="zurück"&&nG(x.name)===nG(name)&&x.auto===au&&x.vonD&&x.bisD&&ueber(v0,b0,x.vonD,x.bisD));
-   if(da){alert(name+" hat für "+kurzAuto(au)+" in diesem Zeitraum schon "+(da.nr?"den Mietvertrag "+da.nr:"eine Buchung")+". Es wird keine zweite angelegt.");return}}
-  if($("bWarn").textContent&&!confirm($("bWarn").textContent+"\n\nTrotzdem buchen?"))return;
-  const zahl=x=>parseFloat(String(x||"").replace(/\./g,"").replace(",","."))||0;const v=$("von").value,b=$("bis").value,t=bTage(),h=new Date();
-  const km=Math.max(0,Math.round(zahl($("bKm").value)))||(D.freiKm||150)*t;
-  const anzJa=[...$("bAnzJn").children].some(c=>c.dataset.jn==="ja"&&c.classList.contains("an"))&&zahl($("bAnz").value)>0;
-  const art=([...$("bArt").children].find(c=>c.classList.contains("an"))||{dataset:{}}).dataset.art||"bar";
-  const x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:nachISO(h),uhr:String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0"),
-    name,alter:"",ort:$("bOrt").value.trim(),nummer:$("bTel").value.trim(),
-    anschrift:[$("bStr").value.trim(),$("bOrt").value.trim()].filter(Boolean).join(", "),geb:$("bGeb").value,gebort:$("bGebOrt").value.trim(),auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,
-    notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",zusatzfahrer:$("bZf").value.trim(),
-    angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:km,freikm:km,kmExtra:0,rabatt:0,am:h.toISOString()}};
-  if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:$("bAnzAm").value||nachISO(h)};
-  B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
-  const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
-</script>
-<script>/* Mietix Kundenstamm (seit 28.10.2026): ein Kunde, einmal gespeichert, überall gefunden.
-   Quelle: mietixKunden (Name -> Daten, abgeglichen über alle Geräte), dazu alles, was in Mietverträgen (mietixVorgaenge)
-   und Anfragen (mietixAnfragen) steht. Nichts wird doppelt eingetippt: Suche nach Name, Telefon, Geburtsdatum, Ort.
-   window.mietixKunden.alle()               alle Kunden mit Verlauf (Mietverträge, Anfragen, Schäden)
-   window.mietixKunden.finde(text)          Treffer zu einem Suchtext
-   window.mietixKunden.anhaengen(feld, auf)  Trefferliste unter einem Eingabefeld, antippen ruft auf(kunde)
-   window.mietixKunden.merken(name, werte)  Felder eines Kunden im gemeinsamen Speicher ändern */
-(function(){
-const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
-const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-const norm=s=>String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();   // Çelik findet man auch als celik
-const ziffern=n=>String(n||"").replace(/\D/g,"").replace(/^0049/,"0").replace(/^49/,"0");
-const de=s=>s&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s.split("-").reverse().join("."):String(s||"");
-const heute=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const zahl=s=>{if(typeof s==="number")return s;s=String(s||"").replace(/[^\d,.-]/g,"");if(!s)return 0;
-  if(s.includes(",")){s=s.replace(/\./g,"").replace(",",".")}else if((s.match(/\./g)||[]).length>1||/\.\d{3}$/.test(s))s=s.replace(/\./g,"");return +s||0};
-const leer=n=>({name:n,telefon:"",anschrift:"",geb:"",gebort:"",email:"",ort:"",notiz:"",keineAngebote:false,gesperrt:false,angeschrieben:"",
-  rechtsstreit:false,schadenOffen:0,schadenFaelle:0,schaeden:[],vertraege:[],anfragen:[],quelle:""});
-function alle(){
-  const K=lies("mietixKunden",{}),V=lies("mietixVorgaenge",[]),A=lies("mietixAnfragen",[]),m={},h=heute();
-  const hol=(name,quelle)=>{const k=norm(name);if(!k)return null;if(!m[k]){m[k]=leer(String(name).trim());m[k].quelle=quelle}return m[k]};
-  Object.keys(K).forEach(n=>{const d=K[n];if(!d||d._weg)return;const e=hol(n,"kunden");if(!e)return;
-    ["telefon","anschrift","geb","gebort","email","ort","notiz","angeschrieben"].forEach(f=>{if(d[f])e[f]=String(d[f])});
-    e.keineAngebote=!!d.keineAngebote;e.gesperrt=!!d.gesperrt;e.rechtsstreit=!!d.rechtsstreit;
-    e.schadenOffen=+d.schadenOffen||0;e.schadenFaelle=+d.schadenFaelle||0;if(Array.isArray(d.schaeden))e.schaeden=d.schaeden});
-  V.forEach(v=>{if(!v||!v.name)return;const e=hol(v.name,"vertrag");if(!e)return;
-    if(!e.gesperrt)["telefon","anschrift","geb","gebort","email"].forEach(f=>{if(!e[f]&&v[f])e[f]=String(v[f])});
-    const z=v.zahlung||{},rest=z.rest||{};
-    e.vertraege.push({nr:v.nr,auto:v.auto||"",von:v.vonD||"",bis:v.bisD||"",preis:zahl(v.gesamt||v.preis1),status:v.status||"",
-      mieteOffen:!!(v.vonD&&v.vonD<h&&!rest.am&&zahl(rest.betrag))})});
-  A.forEach(a=>{if(!a||!a.name)return;const e=hol(a.name,"anfrage");if(!e)return;
-    if(!e.gesperrt){if(!e.telefon&&a.nummer)e.telefon=String(a.nummer);if(!e.ort&&a.ort)e.ort=String(a.ort)}
-    e.anfragen.push({tag:a.tag||"",auto:a.auto||"",von:a.von||"",bis:a.bis||"",status:a.status||""})});
-  // Ältere Mieten aus der Excel (Reiter Geld, 31.10.2026): kommen über die Brücke als mietixStand.statistik.verlauf.
-  // Gleicher Kunde über Telefon oder Namen (auch Nachname zuerst), gleiche Miete wie ein Mietvertrag (Auto, ±3 Tage) zählt nur einmal.
-  const S=(lies("mietixStand",{})||{}).statistik,VL=S&&Array.isArray(S.verlauf)?S.verlauf:[];
-  if(VL.length){const dreh=n=>norm(n).split(" ").sort().join(" "),nachTel={},nachName={};
-    Object.values(m).forEach(e=>{const z=ziffern(e.telefon);if(z.length>=6)nachTel[z]=e;nachName[dreh(e.name)]=e});
-    VL.forEach(x=>{if(!x||!x.name)return;const z=ziffern(x.tel);
-      let e=(z.length>=6&&nachTel[z])||nachName[dreh(x.name)];
-      if(!e){e=hol(x.name,"excel");if(!e)return;nachName[dreh(x.name)]=e;if(z.length>=6)nachTel[z]=e}
-      if(e.gesperrt)return;if(!e.telefon&&x.tel)e.telefon=String(x.tel);
-      const tage=(a,b)=>Math.abs((new Date(a)-new Date(b))/864e5);
-      (Array.isArray(x.liste)?x.liste:[]).forEach(r=>{if(!r||!r.d)return;
-        if(e.vertraege.some(v=>!v.alt&&v.von&&tage(v.von,r.d)<=3&&(!r.auto||!v.auto||v.auto===r.auto)))return;
-        // Anzahlung und Rest stehen in der Excel als zwei Zeilen: selbes Auto, höchstens 1 Tag auseinander = eine Miete
-        const gl=e.vertraege.find(v=>v.alt&&tage(v.von,r.d)<=1&&v.auto===(r.auto||""));if(gl){gl.preis+=+r.b||0;return}
-        e.vertraege.push({nr:"",auto:r.auto||"",von:r.d,bis:"",preis:+r.b||0,status:"",alt:true})})})}
-  return Object.values(m).map(e=>{
-    e.vertraege.sort((a,b)=>(a.von||"")<(b.von||"")?-1:1);e.anfragen.sort((a,b)=>(a.tag||"")<(b.tag||"")?-1:1);
-    e.mieten=e.vertraege.length;e.zuletzt=e.mieten?e.vertraege[e.mieten-1].von:"";e.letztesAuto=e.mieten?e.vertraege[e.mieten-1].auto:"";
-    e.umsatz=e.vertraege.reduce((s,v)=>s+(v.preis||0),0);
-    if(!e.ort&&e.anschrift){const t=e.anschrift.match(/\b\d{5}\s+(.+)$/);if(t)e.ort=t[1].trim()}
-    const w=[];if(e.rechtsstreit)w.push("Rechtsstreit");if(e.schadenOffen)w.push("Schaden offen "+e.schadenOffen.toLocaleString("de-DE",{style:"currency",currency:"EUR"}));
-    const mo=e.vertraege.filter(v=>v.mieteOffen);if(mo.length)w.push("Miete nicht bezahlt ("+mo.map(v=>v.auto).join(", ")+")");
-    e.warn=w;e.alter=alter(e.geb);return e})}
-function alter(geb){if(!/^\d{4}-\d{2}-\d{2}$/.test(geb||""))return null;const g=new Date(geb),h=new Date();
-  let a=h.getFullYear()-g.getFullYear();if(h.getMonth()<g.getMonth()||(h.getMonth()===g.getMonth()&&h.getDate()<g.getDate()))a--;return a>0&&a<120?a:null}
-function passt(e,tok){const t=norm(tok),z=ziffern(tok);
-  if(t&&(norm(e.name).includes(t)||norm(e.ort).includes(t)||norm(e.anschrift).includes(t)||norm(e.email).includes(t)||norm(e.gebort).includes(t)))return true;
-  if(z.length>=3&&ziffern(e.telefon).includes(z))return true;
-  if(e.geb&&(de(e.geb).includes(tok.trim())||e.geb.includes(tok.trim())))return true;
-  if(/^\d{1,2}\.\d{1,2}\.?$/.test(tok.trim())&&e.geb){const p=tok.trim().replace(/\.$/,"").split(".");if(e.geb.slice(5)===p[1].padStart(2,"0")+"-"+p[0].padStart(2,"0"))return true}
-  return false}
-function finde(text,liste){const tok=String(text||"").trim().split(/\s+/).filter(Boolean);if(!tok.length)return[];
-  return (liste||alle()).filter(e=>tok.every(t=>passt(e,t))).sort((a,b)=>b.mieten-a.mieten||norm(a.name).localeCompare(norm(b.name)))}
-function merken(name,werte){const K=lies("mietixKunden",{});const alt=Object.keys(K).find(n=>norm(n)===norm(name))||String(name).trim();
-  const d=Object.assign({},K[alt]||{});Object.keys(werte).forEach(k=>{if(werte[k]===null||werte[k]===undefined||werte[k]==="")delete d[k];else d[k]=werte[k]});
-  K[alt]=d;schreib("mietixKunden",K);return d}
-function zeile(e){const info=[e.geb?"geb. "+de(e.geb):"",e.telefon,e.ort,e.mieten?e.mieten+(e.mieten===1?" Miete":" Mieten"):"noch kein Mietvertrag"].filter(Boolean).join("  |  ");
-  return'<div class="ksT"><b>'+esc(e.name)+(e.warn.length?' <i class="ksWarn">ACHTUNG</i>':"")+'</b><span>'+esc(info)+'</span></div>'}
-const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-let cssDa=false;
-function css(){if(cssDa)return;cssDa=true;const c=document.createElement("style");
-  c.textContent=".ksL{border:1px solid #E4E4E7;border-radius:12px;background:#fff;margin-top:4px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.08)}"+
-    ".ksT{padding:10px 12px;border-bottom:1px solid #F0F0F2;cursor:pointer}.ksT:last-child{border-bottom:0}.ksT:active{background:#FDECEC}"+
-    ".ksT b{display:block;font-size:15px;color:#2E2E30}.ksT span{display:block;font-size:12px;color:#6F6F72;margin-top:2px}"+
-    ".ksWarn{font-style:normal;color:#C4161C;font-size:11px;margin-left:6px}.ksTipp{padding:9px 12px;font-size:12px;color:#6F6F72}";document.head.appendChild(c)}
-function anhaengen(feld,auf,opt){opt=opt||{};css();const box=document.createElement("div");box.className="ksL";box.style.display="none";
-  feld.insertAdjacentElement("afterend",box);let zu=null;
-  const zeichne=()=>{const q=feld.value;if(norm(q).length<2&&ziffern(q).length<3){box.style.display="none";return}
-    const tr=finde(q).slice(0,opt.max||6);
-    if(!tr.length){box.style.display="none";return}
-    box.innerHTML=tr.map(zeile).join("")+'<div class="ksTipp">Antippen: alle Daten werden eingetragen</div>';box.style.display="block";
-    [...box.querySelectorAll(".ksT")].forEach((el,i)=>{el.onmousedown=ev=>ev.preventDefault();el.onclick=()=>{box.style.display="none";auf(tr[i])}})};
-  feld.addEventListener("input",zeichne);feld.addEventListener("focus",zeichne);
-  feld.addEventListener("blur",()=>{zu=setTimeout(()=>box.style.display="none",250)});
-  return{neu:zeichne}}
-window.mietixKunden={alle,finde,anhaengen,merken,norm,ziffern,de,alter,heute};
-window.dispatchEvent(new Event("mietix-kunden-bereit"));
-})();
 </script><script>
-(function(){const f=document.getElementById("bName");if(!f||!window.mietixKunden)return;
-  mietixKunden.anhaengen(f,k=>{f.value=k.name;const g=(id,w)=>{const e=document.getElementById(id);if(e&&w&&!e.value.trim())e.value=w};
-    g("bTel",k.telefon);const a=String(k.anschrift||""),m=a.match(/^(.*?),?\s*(\d{5}\s+.+)$/);
-    if(m){g("bStr",m[1].trim());g("bOrt",m[2].trim())}else g("bStr",a);if(!m&&k.ort)g("bOrt",k.ort);
-    g("bGeb",k.geb);g("bGebOrt",k.gebort);
-    if(k.warn&&k.warn.length)setTimeout(()=>alert("Achtung bei "+k.name+": "+k.warn.join(", ")),50)})})();
+/* Fenster (30.10.2026): Knopf mit data-fenster öffnet, ✕, Tipp daneben oder Esc schließt */
+(function(){if(window.mxAuf)return;
+  let bg=document.querySelector(".mxBg");if(!bg){bg=document.createElement("div");bg.className="mxBg";document.body.appendChild(bg)}
+  window.mxAuf=function(id){const f=document.getElementById(id);if(!f)return;mxZu();bg.classList.add("auf");f.classList.add("auf");
+    document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden";f.scrollTop=0};
+  window.mxZu=function(){document.querySelectorAll(".mxFenster.auf").forEach(f=>f.classList.remove("auf"));bg.classList.remove("auf");
+    document.documentElement.style.overflow="";document.body.style.overflow=""};
+  document.addEventListener("click",function(e){const k=e.target.closest("[data-fenster]");if(k){e.preventDefault();mxAuf(k.dataset.fenster);return}
+    if(e.target.closest(".mxZu")||e.target===bg)mxZu()});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")mxZu()})})();
 </script><script>
-/* Zwei Seiten aus einem Bauplan (30.10.2026, Baran): index.html = Kalender, angebot.html = Angebot.
-   Gleiche Preisrechnung, gleiche Daten, nur anders aufgeteilt. */
-(function(){const SEITE="ang";
-  const r0=reiter;reiter=function(){return r0(SEITE)};
-  $("reiter2").classList.add("versteckt");
-  const titel=document.querySelector("h1 span");
-  if(SEITE==="kal"){if(titel)titel.textContent="KALENDER";document.title="Mietix Kalender";
-    // Angebot für ein Auto: auf die Angebot-Seite, Auto und Zeitraum schon ausgefüllt
-    angebotFuer=function(auto){const q=new URLSearchParams({zeige:"angebot",auto,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value});location.href="angebot.html?"+q};
-    return}
-  if(titel)titel.textContent="ANGEBOT";document.title="Mietix Angebot";
-  // Reihenfolge: Zeitraum, Auto, Kilometer, Rabatt, Nachricht
-  const blk=id=>$(id)&&$(id).closest(".block");const zb=blk("angZeitraum"),fz=blk("liste");
-  $("angZeitraum").classList.add("versteckt");
-  const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)zb.appendChild(tc);if(tp)zb.appendChild(tp);
-  if(fz&&zb)zb.after(fz);
-  const k=document.createElement("a");k.href="./";k.className="zumKal";k.textContent="Zum Kalender ›";$("sAng").appendChild(k);
-  try{reiter("ang")}catch(e){}
-})();
-</script>
-<style>.zumKal{display:block;text-align:center;margin:18px 0 6px;color:var(--grey);font-weight:700}
-#sAng .tChips{padding:0}#sAng .tChips div{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 10px rgba(0,0,0,.05)}#sAng .tChips div.an{background:var(--red)}#sAng .tPruef{margin:10px 0 0;padding-top:10px}#sAng #tagInfo{display:none}</style><script>
 /* Mietix App-Gefühl (31.10.2026) */
 (function(){if(window.mxApp)return;window.mxApp=1;
   const pfad=location.pathname,istStart=/mietix-zentrale\/(index\.html)?$/.test(pfad)||/\/zentrale$/.test(pfad);
@@ -1484,5 +829,4 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
   window.mxAnschrift=setzen;
   const alle=w=>(w||document).querySelectorAll("input[data-anschrift]").forEach(setzen);alle();
   new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1){if(n.matches&&n.matches("input[data-anschrift]"))setzen(n);else if(n.querySelectorAll)alle(n)}}).observe(document.body,{childList:true,subtree:true})})();
-</script></body>
-</html>
+</script></body></html>
