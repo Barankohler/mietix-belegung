@@ -212,8 +212,8 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
     <p class="feldname">Antwort an den Kunden</p>
     <div class="karte">
       <textarea id="vorschau" rows="11"></textarea>
-      <input type="tel" id="knr" inputmode="tel" autocomplete="off" placeholder="Handynummer (optional)">
-      <div id="nrinfo"></div>
+      <input type="tel" id="knr" class="versteckt" inputmode="tel" autocomplete="off" placeholder="Handynummer (optional)">
+      <div id="nrinfo" class="versteckt"></div>
       <button class="knopf gruen" id="senden" type="button">Nachricht teilen</button>
       <button class="knopf hell" id="kopieren" type="button">Text kopieren</button>
     </div>
@@ -1154,7 +1154,7 @@ function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.f
 (function(){
   const sk=$("sKal");if(!sk)return;
   const box=document.createElement("div");box.id="werFrei";
-  box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><h2>Wer ist frei?</h2><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
+  box.innerHTML='<button class="nBuch" id="nBuch" type="button">+ Neue Buchung</button><div id="werZeit"></div><div id="freiKopf"></div><div id="freiListe"></div>';
   const kal=$("tafelKarte")&&$("tafelKarte").closest(".block");if(kal&&kal.parentNode===sk)sk.insertBefore(box,kal.nextSibling);else sk.insertBefore(box,sk.firstChild);
   const z=$("werZeit");const tc=$("tChips"),tp=document.querySelector(".tPruef");if(tc)z.appendChild(tc);if(tp)z.appendChild(tp);
 })();
@@ -1174,7 +1174,7 @@ function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=
     // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
     const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
     n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
-  $("freiKopf").textContent=bZeitText()+": "+n+" von "+D.cars.length+" frei";
+  $("freiKopf").textContent="";   // 1.11.2026 Baran: Zeile weg, die Liste zeigt es
   $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
   $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch));
   $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>angebotFuer(x.dataset.ang))}
