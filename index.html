@@ -1115,7 +1115,8 @@ function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.f
   <div class="bZr"><div><label class="bL">Geburtsdatum</label><input type="date" id="bGeb"></div>
     <div><label class="bL">Geburtsort</label><input id="bGebOrt" autocomplete="off"></div></div>
   <div class="bTipp" style="margin-top:6px">Was du hier einträgst, steht später schon im Mietvertrag.</div>
-  <label class="bL">Mietpreis für den ganzen Zeitraum €</label><input id="bPreis" inputmode="decimal">
+  <label class="bL">Rabatt %</label><input id="bRab" inputmode="numeric" placeholder="0" data-einheit="%">
+  <label class="bL">Mietpreis für den ganzen Zeitraum €</label><input id="bPreis" inputmode="decimal"><div id="bPreisHin" style="font-size:13px;color:#8A8A8E;font-weight:600;margin:4px 2px 0"></div>
   <label class="bL">Inklusive Kilometer, gesamt</label><input id="bKm" inputmode="numeric">
   <label class="bL">Zusatzfahrer, Vor- und Nachname</label><input id="bZf" autocomplete="off" placeholder="leer lassen, wenn keiner">
   <div class="bFrage"><b>Anzahlung erhalten?</b><div class="bJn" id="bAnzJn"><div data-jn="nein" class="an">Nein</div><div data-jn="ja">Ja</div></div></div>
@@ -1160,7 +1161,14 @@ function angebotBild(){const d=angebotDaten();if(!d)return null;const c=D.cars.f
 })();
 const bTage=()=>tage($("von").value,$("bis").value);
 // Inklusive Kilometer (31.10.2026, Baran): Vorschlag Freikilometer je Tag mal Tage, als Gesamtzahl, von Hand änderbar
-let B_KM_HAND=false;
+let B_KM_HAND=false,B_PREIS_HAND=false;
+// Preis ist nur ein Vorschlag (1.11.2026, Baran: „gib mir die Chance, den Preis zu ändern“): von Hand getippt bleibt er stehen,
+// auch wenn Auto oder Zeitraum wechseln. Rabatt % senkt den Vorschlag. Ein Tipp holt den Vorschlag zurück.
+function bPreisVorschlag(){const p=bPreis($("bAuto").value),r=Math.min(90,Math.max(0,+String($("bRab").value||"").replace(",",".")||0));
+  const v=p!==null?Math.round(p*(1-r/100)):null;
+  if(!B_PREIS_HAND){$("bPreis").value=v!==null?String(v):"";$("bPreisHin").textContent=v!==null?"Vorschlag aus dem Preisrechner"+(r?", mit "+r+" % Rabatt":"")+". Einfach überschreiben, wenn ihr etwas anderes abmacht.":""}
+  else $("bPreisHin").innerHTML=v!==null?'Von Hand. <a href="#" id="bPreisZur" style="color:#C4161C;font-weight:800">Vorschlag '+v+' € übernehmen</a>':"Von Hand.";
+  const z=document.getElementById("bPreisZur");if(z)z.onclick=e=>{e.preventDefault();B_PREIS_HAND=false;bPreisVorschlag()}}
 function bKmVorschlag(){if(!B_KM_HAND){const t=bTage();$("bKm").value=t>0?String((D.freiKm||150)*t):""}}
 function bZeitText(){const v=$("von").value,b=$("bis").value,t=bTage();if(!v||!b||t<1)return"";
   return wtKurz(ausISO(v))+" "+kurzD(ausISO(v))+" "+uhr($("vonU").value)+" bis "+wtKurz(ausISO(b))+" "+kurzD(ausISO(b))+" "+uhr($("bisU").value)+" ("+t+(t===1?" Tag":" Tage")+")"}
@@ -1185,22 +1193,23 @@ function bZeitrFuellen(){["vonU","bisU"].forEach(i=>{const z=$("b"+i[0].toUpperC
   $("bVon").value=$("von").value;$("bBis").value=$("bis").value;$("bZeit").textContent=bZeitText()}
 function bZeitrAendern(){const a=[["bVon","von"],["bVonU","vonU"],["bBis","bis"],["bBisU","bisU"]];
   a.forEach(([b,o])=>{if($(o).value!==$(b).value){$(o).value=$(b).value;$(o).dispatchEvent(new Event("change"))}});
-  bZeitrFuellen();const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bKmVorschlag();bWarnen()}
+  bZeitrFuellen();bPreisVorschlag();bKmVorschlag();bWarnen()}
 ["bVon","bVonU","bBis","bBisU"].forEach(i=>$(i).addEventListener("change",bZeitrAendern));
 let B_ENT=null;
 function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
   bZeitrFuellen();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
   $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"].forEach(i=>$(i).value="");
   // Angefangene Buchung kommt wieder (1.11.2026, Baran: nichts darf verloren gehen)
-  B_ENT=B_ENT||(window.mxEntwurf?mxEntwurf("#fBuchen","kalenderBuchung",["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"]):null);if(B_ENT)B_ENT.holen();B_KM_HAND=false;bKmVorschlag();$("bAnzAm").value=nachISO(new Date());
-  const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";
+  B_ENT=B_ENT||(window.mxEntwurf?mxEntwurf("#fBuchen","kalenderBuchung",["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"]):null);if(B_ENT)B_ENT.holen();B_KM_HAND=false;B_PREIS_HAND=false;$("bRab").value="";bKmVorschlag();$("bAnzAm").value=nachISO(new Date());
+  bPreisVorschlag();
   bJn("nein");bWarnen();fAuf("fBuchen");setTimeout(()=>$("bName").focus(),250)}
 function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.dataset.jn===w));$("bAnzW").classList.toggle("versteckt",w!=="ja");
   if(w==="ja"&&!$("bAnz").value){const p=parseFloat(String($("bPreis").value).replace(/\./g,"").replace(",","."));if(p)$("bAnz").value=String(Math.round(p*0.3))}}
 [...$("bAnzJn").children].forEach(c=>c.onclick=()=>bJn(c.dataset.jn));
 [...$("bArt").children].forEach(c=>c.onclick=()=>[...$("bArt").children].forEach(x=>x.classList.toggle("an",x===c)));
-$("bAuto").onchange=()=>{const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bWarnen()};
+$("bAuto").onchange=()=>{bPreisVorschlag();bWarnen()};
 $("nBuch").onclick=()=>buchenAuf("");
+$("bPreis").addEventListener("input",()=>{B_PREIS_HAND=true;bPreisVorschlag()});$("bRab").addEventListener("input",()=>{B_PREIS_HAND=false;bPreisVorschlag()});
 $("bKm").addEventListener("input",()=>{B_KM_HAND=$("bKm").value.trim()!==""});
 // Doppeltippen legt keine zweite Buchung an (30.10.2026)
 let B_SPERRE=0;
@@ -1219,7 +1228,7 @@ $("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").v
     name,alter:"",ort:$("bOrt").value.trim(),nummer:$("bTel").value.trim(),
     anschrift:[$("bStr").value.trim(),$("bOrt").value.trim()].filter(Boolean).join(", "),geb:$("bGeb").value,gebort:$("bGebOrt").value.trim(),auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,
     notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",zusatzfahrer:$("bZf").value.trim(),
-    angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:km,freikm:km,kmExtra:0,rabatt:0,am:h.toISOString()}};
+    angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:km,freikm:km,kmExtra:0,rabatt:Math.round(+String($("bRab").value||"").replace(",",".")||0),am:h.toISOString()}};
   if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:$("bAnzAm").value||nachISO(h)};
   B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);if(!schreib("mietixAnfragen",l))return;if(B_ENT)B_ENT.weg();fZu();laden();
   const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
@@ -1450,7 +1459,7 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
 
   // ‹ Start und Symbol in der Kopfzeile
   const ziel=document.querySelector("header h1")||document.querySelector(".topbar");
-  const TITEL={anfragen:"Anfragen",angebot:"Angebot",kalender:"Kalender",vertrag:"Mietverträge",kunden:"Kunden",autos:"Autos",geld:"Geld",
+  const TITEL={anfragen:"Anfragen",angebot:"Angebot",kalender:"Kalender",vertrag:"Buchungen",kunden:"Kunden",autos:"Autos",geld:"Geld",
     schaeden:/schadensformular/.test(pfad)?"Schadensmeldung":/schadensklaerung/.test(pfad)?"Schadensklärung":"Schäden",nachrichten:"Nachrichten",zahlen:"Zahlen",story:"Story",papierkorb:"Papierkorb",einstellungen:"Einstellungen"};
   if(ziel&&!istStart&&!document.querySelector(".mxStart")){
     const a=document.createElement("a");a.className="mxStart";a.href="https://barankohler.github.io/mietix-zentrale/";a.innerHTML="<b>‹</b>Start";a.setAttribute("aria-label","Zur Startseite");
