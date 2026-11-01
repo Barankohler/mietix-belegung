@@ -1196,7 +1196,11 @@ function bZeitrAendern(){const a=[["bVon","von"],["bVonU","vonU"],["bBis","bis"]
   bZeitrFuellen();bPreisVorschlag();bKmVorschlag();bWarnen()}
 ["bVon","bVonU","bBis","bBisU"].forEach(i=>$(i).addEventListener("change",bZeitrAendern));
 let B_ENT=null;
-function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
+function buchenAuf(auto){const t=bTage();
+  // Ein Formular für alle Wege (1.11.2026, Baran: „überall gleich“): Neue Buchung öffnet das Formular in Buchungen, Auto und Zeitraum schon drin
+  {const q=new URLSearchParams({neu:"1"});if(auto)q.set("auto",auto);if($("von").value&&t>0){q.set("von",$("von").value);q.set("bis",$("bis").value);q.set("vonU",$("vonU").value);q.set("bisU",$("bisU").value)}
+   location.href="https://barankohler.github.io/mietix-vertrag/?"+q.toString();return}
+  if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
   bZeitrFuellen();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
   $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"].forEach(i=>$(i).value="");
   // Angefangene Buchung kommt wieder (1.11.2026, Baran: nichts darf verloren gehen)
