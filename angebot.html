@@ -161,7 +161,7 @@ let D=null;
 const nameV=c=>c.anzeige||c.n;
 const wt=t=>(ausISO(t).getDay()+6)%7;   // Montag = 0
 function grund(c,s,d){if(d===1&&s>=4)return c.frSa||c.gp*D.faktor[s];const W=D.faktor.reduce((a,b)=>a+b,0);let x=Math.floor(d/7)*W;for(let k=0;k<d%7;k++)x+=D.faktor[(s+k)%7];return c.gp*x}
-function miete(c,s,d){return grund(c,s,d)*(1-D.rabatt[Math.min(d,D.days||D.rabatt.length)-1])}
+function miete(c,s,d){return Math.round(grund(c,s,d)*(1-D.rabatt[Math.min(d,D.days||D.rabatt.length)-1]))}   // ganze Euro (1.11.2026, Baran: keine Cent)
 window.mxPreis=(c,s,d)=>miete(c,s,d);
 // Kilometerpaket: Excel-Stufen, dazwischen und darüber der Rabatt der nächstkleineren Stufe (Baran 1.11.2026)
 function paketPreis(c,km){km=Math.round(+km||0);if(!km)return 0;const st=D.kmStufen||[50,100,150,200,300],kp=+c.kmPreis||0,pr=(c.km||[]).slice(1);

@@ -255,7 +255,7 @@ const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e
 const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};   // false: nicht gespeichert, roter Hinweis kommt aus stil/schutz.py
 let AUSWAHL=null,EIN_AUTO="",EINZEL=true;try{EINZEL=localStorage.getItem("mietixAngebotArt")!=="alle"}catch(e){}   // Fahrzeuge, die im Kundentext stehen sollen
 const $=id=>document.getElementById(id);
-const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
+const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",minimumFractionDigits:0,maximumFractionDigits:0});   // ganze Euro (1.11.2026, Baran: keine Cent)
 
 function ausISO(s){const[j,m,t]=s.split("-").map(Number);return new Date(j,m-1,t);}
 function nachISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -293,7 +293,7 @@ function grundmiete(auto,start,dauer){
 }
 function preis(auto,start,dauer){
   if(dauer<D.mind[start])return null;
-  return grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]);
+  return Math.round(grundmiete(auto,start,dauer)*(1-D.rabatt[Math.min(dauer,D.days)-1]));   // ganze Euro (1.11.2026, Baran: keine Cent)
 }
 window.mxPreis=preis;
 
