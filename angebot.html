@@ -363,7 +363,7 @@ function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map
       const e=[];if(+p.c.kaution>0)e.push("Kaution "+E(+p.c.kaution));if(S.pakKm)e.push("+"+S.pakKm.toLocaleString("de-DE")+" km für "+E(p.paket));if(e.length)z.push(e.join(", "))});
     z.push("");z.push("Inklusive "+km.toLocaleString("de-DE")+" km. Die Kaution kommt nach der Rückgabe komplett zurück.")}
   if(d>1){z.push("");z.push("Der Preis gilt für den kompletten Zeitraum am Stück.")}
-  z.push("");z.push(P.length===1?"Darf ich den Wagen für Sie reservieren?":"Welches Fahrzeug darf ich für Sie reservieren?");
+  z.push("");z.push(P.length===1?"Soll ich den Wagen für Sie reservieren? Geben Sie mir einfach kurz Bescheid.":"Soll ich Ihnen eines davon reservieren? Sagen Sie mir einfach, welches Ihnen gefällt.");
   z.push("");z.push("Viele Grüße");z.push("B. Köhler vom Mietix-Team");return z.join("\n")}
 const fertigerText=()=>S.text!=null?S.text:text();
 
