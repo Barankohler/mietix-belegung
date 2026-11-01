@@ -87,7 +87,45 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
 .mxKlein{margin-top:8px}.mxKlein>summary{display:inline-flex;align-items:center;gap:6px;list-style:none;cursor:pointer;font-size:14px;font-weight:800;color:#1C1C1E;background:#F2F2F4;border-radius:999px;padding:9px 14px;min-height:40px;box-sizing:border-box}
 .mxKlein>summary::-webkit-details-marker{display:none}.mxKlein>summary em{font-style:normal;color:#C4161C;font-size:18px;line-height:1;transition:transform .15s}.mxKlein[open]>summary em{transform:rotate(90deg)}
 .mxText{font-size:14px;color:#8A8A8E;font-weight:600;margin:0 0 10px;line-height:1.4}
-</style></head><body>
+</style><style>
+/* Preis-Block, überall gleich (01.11.2026) */
+.pbGk{font-size:13px;font-weight:600;color:#6E6E73;text-transform:uppercase;letter-spacing:.3px;margin:20px 16px 7px}
+.pbGr{background:#fff;border-radius:12px;overflow:hidden}
+.pbF{display:flex;align-items:center;gap:12px;padding:7px 16px;min-height:50px;position:relative;box-sizing:border-box}
+.pbF+.pbF:before{content:"";position:absolute;left:16px;right:0;top:0;border-top:.5px solid #D1D1D6}
+.pbF label{flex:0 0 116px;width:116px;margin:0!important;font-size:17px!important;font-weight:400!important;color:#1C1C1E!important;white-space:nowrap;text-transform:none!important;letter-spacing:0!important}
+.pbF input{flex:1;min-width:0;width:auto!important;min-height:40px!important;margin:0!important;padding-top:8px!important;padding-bottom:8px!important;padding-left:11px!important;font-size:17px!important;font-weight:400!important;border-radius:9px!important}
+.pbF input{border:0!important;background-color:#F2F2F7!important;box-shadow:none!important;outline:none}
+.pbF input:focus{box-shadow:0 0 0 2px rgba(196,22,28,.35)!important}
+.pbF input:disabled{opacity:.55}
+.pbF.versteckt{display:none}
+.pbTipp{padding:4px 16px 12px;font-size:13px;color:#6E6E73;line-height:1.4;font-weight:400}
+.pbTipp:empty{display:none}
+.pbTipp b{color:#1C1C1E;font-weight:700;display:inline!important;margin:0!important;font-size:inherit!important}
+.pbTipp a{color:#C4161C;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer}
+.pbFrei{font-size:13px;color:#6E6E73;margin:7px 16px 0;line-height:1.4}
+.pfl{color:#FF3B30}
+/* in einer weißen Karte (Mietvertrag, Angebot, Anfrage): ohne eigenen Kasten, bündig */
+.karte .pbGr,.k .pbGr{background:transparent;border-radius:0;margin-top:2px}
+.karte .pbF,.k .pbF{padding-left:0;padding-right:0}
+.karte .pbF+.pbF:before,.k .pbF+.pbF:before{left:0}
+.karte .pbTipp,.k .pbTipp{padding-left:0;padding-right:0}
+.karte .pbFrei,.k .pbFrei{margin-left:0;margin-right:0}
+@media(max-width:380px){.pbF label{flex-basis:96px;width:96px}}
+</style></head><body><script>
+/* Preis-Block: ein Hinweis-Text für alle Seiten (01.11.2026) */
+(function(){if(window.pbTipp)return;
+  const E=n=>Math.round(n).toLocaleString("de-DE")+" €";
+  window.pbTipp=function(el,vorschlag,rab,preis,hand,uebernehmen){if(!el)return;
+    if(vorschlag==null||!(vorschlag>0)){el.innerHTML="";return}
+    rab=Math.max(0,+rab||0);const mit=Math.round(vorschlag*(1-rab/100));
+    let h="Vorschlag aus dem Preisrechner: <b>"+E(vorschlag)+"</b>"+(rab?", mit "+String(rab).replace(".",",")+" % Rabatt <b>"+E(mit)+"</b>":"")+". Was du selbst tippst, bleibt stehen.";
+    const weicht=hand&&preis>0&&Math.round(preis)!==mit;
+    if(weicht)h+=' <a href="#" data-pb="1">Vorschlag übernehmen</a>';
+    el.innerHTML=h;
+    const a=el.querySelector("[data-pb]");if(a)a.onclick=e=>{e.preventDefault();if(uebernehmen)uebernehmen(mit)}};
+})();
+</script>
 <header><h1><span>Angebot</span></h1></header>
 <main>
   <div id="abgleich" style="margin:0 0 10px"></div>
@@ -97,8 +135,14 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
     <div class="zr" id="zr"><span data-z="d1">1 Tag</span><span data-z="d2">2 Tage</span><span data-z="d3">3 Tage</span><span data-z="d7">1 Woche</span><span data-z="we5,1">Fr bis Sa</span><span data-z="we5,2">Fr bis So</span><span data-z="we6,2">Sa bis Mo</span><span data-z="we5,3">Fr bis Mo</span></div>
     <div class="zt" id="zt"></div></div>
   <div class="k"><div class="lbl" id="autoLbl">Auto antippen</div><div id="autos"><div class="leer">Preise werden geladen …</div></div></div>
-  <div class="zwei"><div class="wahl" id="wRab"><span><small>Rabatt</small><b id="rabT">kein</b></span><em>⌄</em></div>
-    <div class="wahl" id="wPak"><span><small>Kilometerpaket</small><b id="pakT">kein</b></span><em>⌄</em></div></div>
+  <!-- Preis-Block wie überall (01.11.2026, Baran zu einheit_2): Preis, Inklusive, Rabatt; Getipptes bleibt stehen -->
+  <div class="k"><div class="lbl">Preis, Kilometer, Rabatt</div>
+    <div class="pbGr">
+      <div class="pbF"><label for="aPreis">Preis <span class="pfl">*</span></label><input id="aPreis" inputmode="numeric" autocomplete="off" data-einheit="€"></div>
+      <div class="pbF"><label for="kmInkl">Inklusive</label><input id="kmInkl" inputmode="numeric" autocomplete="off" data-einheit="km"></div>
+      <div class="pbF"><label for="aRab">Rabatt</label><input id="aRab" inputmode="numeric" autocomplete="off" placeholder="0" data-einheit="%"></div>
+      <div class="pbTipp" id="aTipp"></div></div></div>
+  <div class="zwei" style="grid-template-columns:1fr"><div class="wahl" id="wPak"><span><small>Kilometerpaket</small><b id="pakT">kein</b></span><em>⌄</em></div></div>
   <div class="fuss" id="fuss"></div>
 </main>
 <div class="leiste"><div class="in">
@@ -129,7 +173,6 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   <p class="mxText" id="pakInfo"></p><div class="rad" id="pakListe"></div>
   <div class="feld versteckt" id="pakInd"><div class="zw"><div><label>Kilometer</label><input id="pakKm" type="number" inputmode="numeric" min="0" step="10" data-einheit="km"></div><div><label>Preis</label><input id="pakPr" type="number" inputmode="decimal" min="0" data-einheit="€"></div></div>
     <button class="knopf" id="pakOk" type="button">Übernehmen</button></div>
-  <div class="feld"><label>Inklusive Kilometer (gesamt)</label><input id="kmInkl" type="number" inputmode="numeric" min="0" step="10" data-einheit="km"></div>
 </div>
 <div class="mxFenster" id="fText" role="dialog" aria-label="Text"><div class="mxKopf"><h3>So kommt es an</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
   <div id="text"></div><textarea id="textEdit" class="versteckt"></textarea>
@@ -181,7 +224,8 @@ const Z=(t,u)=>t+"T"+(u||"10:00");
 function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
 
 /* ---------- Zustand ---------- */
-const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d3",autos:[],rab:0,pakKm:0,pakPr:null,kmInkl:null,
+const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d3",autos:[],rab:0,preisHand:null,   // preisHand: von Hand getippte Miete, bleibt stehen
+  pakKm:0,pakPr:null,kmInkl:null,
   kunde:null,   // {name,nummer,anfrage,info}
   text:null};   // von Hand geänderter Text
 const t=()=>tage(S.von,S.bis);
@@ -222,7 +266,11 @@ function anfrageNehmen(x){const ab=x.angebot||{};S.kunde={name:x.name||"",nummer
   if(x.von&&x.bis&&tage(x.von,x.bis)>0){S.von=x.von;S.bis=x.bis;S.chip=""}S.vonU=x.vonU||ab.vonU||S.vonU;S.bisU=x.bisU||ab.bisU||S.bisU;
   if(ab.rabatt!=null)S.rab=+ab.rabatt||0;if(ab.paketKm){S.pakKm=+ab.paketKm;const pc=D&&D.cars.find(c=>nameV(c)===ab.auto);S.pakPr=ab.paketPreis!=null&&pc&&+ab.paketPreis!==paketPreis(pc,S.pakKm)?+ab.paketPreis:null}
   if(ab.kmInkl!=null&&ab.von===S.von&&ab.bis===S.bis)S.kmInkl=+ab.kmInkl;
-  S.autos=[];const w=ab.auto||x.auto;if(w&&D&&D.cars.some(c=>nameV(c)===w))S.autos=[w];zeichne()}
+  S.autos=[];const w=ab.auto||x.auto;if(w&&D&&D.cars.some(c=>nameV(c)===w))S.autos=[w];
+  // von Hand abgemachte Miete aus dem letzten Angebot bleibt stehen (01.11.2026)
+  {const c=S.autos.length===1&&D?D.cars.find(c=>nameV(c)===S.autos[0]):null;S.preisHand=null;
+   if(c&&+ab.miete&&ab.auto===S.autos[0]&&ab.von===S.von&&ab.bis===S.bis&&+ab.miete!==Math.round(miete(c,wt(S.von),t())*(1-S.rab/100)))S.preisHand=+ab.miete}
+  zeichne()}
 $("wer").onclick=()=>{$("kSuche").value="";$("nNr").value=S.kunde&&!S.kunde.anfrage?S.kunde.nummer||"":"";$("nName").value=S.kunde&&!S.kunde.anfrage?S.kunde.name||"":"";kundeListe();mxAuf("fWer")};
 $("kSuche").oninput=kundeListe;
 $("nOk").onclick=()=>{const nr=$("nNr").value.trim(),nm=$("nName").value.trim();if(!nr&&!nm){$("nNr").focus();return}
@@ -237,7 +285,7 @@ function rabListe(){$("rabInd").classList.add("versteckt");
     '<div data-r="x" class="'+(RAB.includes(S.rab)?"":"an")+'"><span>Individuell …</span><i>'+(RAB.includes(S.rab)?"":S.rab+" %")+'</i></div>';
   $("rabListe").querySelectorAll("[data-r]").forEach(e=>e.onclick=()=>{if(e.dataset.r==="x"){$("rabInd").classList.remove("versteckt");$("rabZahl").value=S.rab||"";$("rabZahl").focus();return}
     S.rab=+e.dataset.r;S.text=null;mxZu();zeichne()})}
-$("wRab").onclick=()=>{rabListe();mxAuf("fRab")};
+// Rabatt jetzt als Feld im Preis-Block (01.11.2026); das alte Rabatt-Fenster hat keinen Knopf mehr
 $("rabOk").onclick=()=>{S.rab=Math.min(90,Math.max(0,Math.round(+$("rabZahl").value||0)));S.text=null;mxZu();zeichne()};
 function pakAuto(){const c=gewaehlt()[0]||(D&&D.cars[0]);return c}
 function pakListe(){$("pakInd").classList.add("versteckt");const c=pakAuto();if(!c)return;
@@ -252,11 +300,14 @@ $("pakKm").addEventListener("input",()=>{const c=pakAuto();if(c)$("pakPr").value
 $("pakOk").onclick=()=>{const c=pakAuto(),km=Math.max(0,Math.round(+$("pakKm").value||0)),pr=$("pakPr").value.trim();
   S.pakKm=km;S.pakPr=km&&pr!==""&&c&&+pr!==paketPreis(c,km)?Math.max(0,+pr):null;S.text=null;mxZu();zeichne()};
 $("wPak").onclick=()=>{pakListe();mxAuf("fPak")};
+$("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim();S.preisHand=v===""?null:Math.max(0,Math.round(+v.replace(",",".")||0));S.text=null;zeichne()});
+$("aRab").addEventListener("input",()=>{S.rab=Math.min(90,Math.max(0,Math.round(+$("aRab").value.replace(",",".")||0)));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
+["aPreis","aRab"].forEach(i=>$(i).addEventListener("change",()=>zeichne()));
 $("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.kmInkl=v===""?null:Math.max(0,Math.round(+v));S.text=null;zeichne()});
 
 /* ---------- Autos ---------- */
 function gewaehlt(){return D?S.autos.map(n=>D.cars.find(c=>nameV(c)===n)).filter(c=>c&&!belegt(nameV(c)).length):[]}
-function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=Math.round(miete(c,s,d)*(1-S.rab/100)),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
+function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=S.preisHand!=null&&S.autos.length===1?S.preisHand:Math.round(miete(c,s,d)*(1-S.rab/100)),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
   return{c,name:nameV(c),liste:Math.round(l),preis:m,paket:pk,summe:m+pk}}
 function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
   D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:frei).push({c,b})});
@@ -264,7 +315,7 @@ function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
   $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
     if(b.length){const bis=b.map(x=>x.bis).sort().pop();return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>belegt, wieder frei '+kurz(bis)+'</i></span><span class="p"></span></div>'}
-    const p=Math.round(miete(c,s,d)*(1-S.rab/100)),l=Math.round(grund(c,s,d));
+    const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:Math.round(miete(c,s,d)*(1-S.rab/100)),l=Math.round(grund(c,s,d));
     return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i></span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
   $("autos").innerHTML=frei.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
   $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;S.autos=S.autos.includes(n)?S.autos.filter(x=>x!==n):S.autos.concat(n);S.text=null;zeichne()})}
@@ -290,8 +341,15 @@ function zeichne(){laden();const d=t(),k=S.kunde;
   [...$("zr").children].forEach(c=>c.classList.toggle("an",c.dataset.z===S.chip));
   $("zt").innerHTML=esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU))+' <small>'+tz(d)+',</small> <u>ändern</u>';
   $("werName").textContent=k?(k.name||"ohne Namen"):"Ohne Kunde";$("werInfo").textContent=k?k.info:"Antippen: Anfrage, früherer Mieter oder Nummer";
-  $("rabT").textContent=S.rab?S.rab+" %":"kein";$("pakT").textContent=S.pakKm?"+"+S.pakKm.toLocaleString("de-DE")+" km":"kein";
+  $("pakT").textContent=S.pakKm?"+"+S.pakKm.toLocaleString("de-DE")+" km":"kein";
   autosZeichnen();const g=gewaehlt(),P=g.map(posten);
+  // Preis-Block (01.11.2026): Preis nur mit genau einem Auto, sonst steht er je Auto in der Liste
+  {const pi=$("aPreis"),c1=g.length===1?g[0]:null,vor=c1?Math.round(miete(c1,wt(S.von),d)):null;
+   pi.disabled=!c1;pi.placeholder=g.length>1?"je Auto, siehe oben":c1?"":"erst Auto antippen";
+   if(document.activeElement!==pi)pi.value=c1?String(P[0].preis):"";
+   if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl();
+   if(document.activeElement!==$("aRab"))$("aRab").value=S.rab||"";
+   pbTipp($("aTipp"),vor,S.rab,c1?P[0].preis:0,S.preisHand!=null,()=>{S.preisHand=null;S.text=null;zeichne()})}
   if(!P.length){$("sumL").innerHTML="<i>"+(D?"Erst ein Auto antippen":"Preise werden geladen …")+"</i>";$("sumR").innerHTML="";$("senden").classList.add("aus");$("senden").textContent="Senden";return}
   const km=kmInkl();
   $("sumL").innerHTML="<b>"+esc(P.length===1?P[0].name:P.length+" Autos zur Auswahl")+"</b><i>"+esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU)+", "+tz(d))+"</i>";
