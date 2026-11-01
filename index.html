@@ -580,7 +580,7 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
   if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
       b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=uebergabe"}:null,
-      b.aid?{t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?anfrage="+encodeURIComponent(b.aid)}:null,   // Liste Punkt 18
+      b.aid?{t:"Mietvertrag anlegen",voll:true,href:A+"mietix-vertrag/?anfrage="+encodeURIComponent(b.aid)}:null,   // Liste Punkt 18
       b.aid?{t:"Anfrage im Anfragen-Buch",href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
       b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
       {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=b.bis;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
@@ -596,7 +596,7 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
   const vonZ=ZEIT(nv,$("vonU").value),bisZ=ZEIT(nb,$("bisU").value),frei=!belegtZeit(auto,vonZ,bisZ).length;
   const knapp=belegtVon(auto,nv,nb).filter(b=>!belegtZeit(auto,vonZ,bisZ).includes(b)).map(b=>b.bis===nv?" Frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt zurück.":" Bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab.").join("");
   blatt(kurzAuto(auto)+(frei?" ist frei":" ist nicht frei"),lang(ausISO(nv))+" "+uhr($("vonU").value)+" bis "+lang(ausISO(nb))+" "+uhr($("bisU").value)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(frei&&p!==null?", "+EUR.format(p):"")+"."+knapp+" Ein späterer Tag in derselben Zeile verlängert.",[
-      {t:"Mietvertrag machen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
+      {t:"Mietvertrag anlegen",voll:true,href:A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       {t:"Anfrage eintragen",href:A+"mietix-anfragen/?auto="+encodeURIComponent(auto)+"&von="+nv+"&bis="+nb+UHR_Q()},
       frei?{t:"Angebot nur für "+kurzAuto(auto),f:()=>angebotFuer(auto)}:null,
       rueck&&(rueck.nr||rueck.aid)?{t:"Miete von "+esc(vorname(rueck.kunde)||"Kunde")+" ansehen",href:rueck.nr?A+"mietix-vertrag/?nr="+encodeURIComponent(rueck.nr)+"&zeige=uebergabe":A+"mietix-anfragen/?zeige="+encodeURIComponent(rueck.aid)}:null,
