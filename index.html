@@ -252,7 +252,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 const D={"weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"], "faktor": [1.0, 1.0, 1.0, 1.175, 1.35, 1.35, 1.35], "mind": [1, 1, 1, 1, 1, 1, 1], "days": 30, "rabatt": [0.0, 0.12, 0.17, 0.18, 0.18, 0.18, 0.2, 0.2, 0.2, 0.22, 0.22, 0.22, 0.22, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25], "freiKm": 150, "cars": [{"n": "Audi RS Q8", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Audi RS 5 ABT", "gp": 249.0, "kaution": 1450, "frSa": 349}, {"n": "Audi RS 3 Limousine", "gp": 199.0, "kaution": 1450, "frSa": 249}, {"n": "VW Golf 8 GTI Clubsport", "gp": 149.0, "kaution": 1000, "frSa": 199}, {"n": "Audi RS 6", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "Mercedes GLC 63 S AMG", "gp": 269.0, "kaution": 1450, "frSa": 349}, {"n": "Mercedes C 63 S AMG", "gp": 289.0, "kaution": 1450, "frSa": 349}, {"n": "Audi R8 performance", "gp": 399.0, "kaution": 2500, "frSa": 499}, {"n": "VW Golf 8 2.0 Diesel", "gp": 99.0, "kaution": 1000, "frSa": 129}, {"n": "Mercedes-Benz S580L AMG Chauffeur-Paket", "gp": 349.0, "kaution": 1950, "frSa": 450}, {"n": "BMW M 850i", "gp": 249.0, "kaution": 1450, "frSa": 349}], "url": "", "stand": "2026-10-19"};
 let BUCHUNGEN=[];
 const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
-const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};   // false: nicht gespeichert, roter Hinweis kommt aus stil/schutz.py
 let AUSWAHL=null,EIN_AUTO="",EINZEL=true;try{EINZEL=localStorage.getItem("mietixAngebotArt")!=="alle"}catch(e){}   // Fahrzeuge, die im Kundentext stehen sollen
 const $=id=>document.getElementById(id);
 const EUR=new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
@@ -1187,9 +1187,12 @@ function bZeitrAendern(){const a=[["bVon","von"],["bVonU","vonU"],["bBis","bis"]
   a.forEach(([b,o])=>{if($(o).value!==$(b).value){$(o).value=$(b).value;$(o).dispatchEvent(new Event("change"))}});
   bZeitrFuellen();const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";bKmVorschlag();bWarnen()}
 ["bVon","bVonU","bBis","bBisU"].forEach(i=>$(i).addEventListener("change",bZeitrAendern));
+let B_ENT=null;
 function buchenAuf(auto){const t=bTage();if(!$("von").value||t<1){alert("Bitte oben zuerst den Zeitraum wählen.");return}
   bZeitrFuellen();$("bAuto").innerHTML=D.cars.map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join("");
-  $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"].forEach(i=>$(i).value="");B_KM_HAND=false;bKmVorschlag();$("bAnzAm").value=nachISO(new Date());
+  $("bAuto").value=auto||D.cars[0].n;["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"].forEach(i=>$(i).value="");
+  // Angefangene Buchung kommt wieder (1.11.2026, Baran: nichts darf verloren gehen)
+  B_ENT=B_ENT||(window.mxEntwurf?mxEntwurf("#fBuchen","kalenderBuchung",["bName","bTel","bStr","bOrt","bGeb","bGebOrt","bNotiz","bAnz","bZf"]):null);if(B_ENT)B_ENT.holen();B_KM_HAND=false;bKmVorschlag();$("bAnzAm").value=nachISO(new Date());
   const p=bPreis($("bAuto").value);$("bPreis").value=p!==null?String(p).replace(".",","):"";
   bJn("nein");bWarnen();fAuf("fBuchen");setTimeout(()=>$("bName").focus(),250)}
 function bJn(w){[...$("bAnzJn").children].forEach(c=>c.classList.toggle("an",c.dataset.jn===w));$("bAnzW").classList.toggle("versteckt",w!=="ja");
@@ -1218,7 +1221,7 @@ $("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").v
     notiz:$("bNotiz").value.trim()||"Buchung aus dem Kalender",status:"gebucht",zusatzfahrer:$("bZf").value.trim(),
     angebot:{auto:$("bAuto").value,von:v,bis:b,vonU:$("vonU").value,bisU:$("bisU").value,preis:zahl($("bPreis").value),kmInkl:km,freikm:km,kmExtra:0,rabatt:0,am:h.toISOString()}};
   if(anzJa)x.anzahlung={betrag:zahl($("bAnz").value),quote:0,art,am:$("bAnzAm").value||nachISO(h)};
-  B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);schreib("mietixAnfragen",l);fZu();laden();
+  B_SPERRE=Date.now();const l=lies("mietixAnfragen",[]);l.push(x);if(!schreib("mietixAnfragen",l))return;if(B_ENT)B_ENT.weg();fZu();laden();
   const m=document.createElement("div");m.className="bMeld";m.textContent="Gebucht: "+vorname(name)+", "+kurzAuto(x.auto);document.body.appendChild(m);setTimeout(()=>m.remove(),2600)};
 </script>
 <script>/* Mietix Kundenstamm (seit 28.10.2026): ein Kunde, einmal gespeichert, überall gefunden.
@@ -1230,7 +1233,7 @@ $("bOk").onclick=()=>{if(Date.now()-B_SPERRE<2000)return;const name=$("bName").v
    window.mietixKunden.merken(name, werte)  Felder eines Kunden im gemeinsamen Speicher ändern */
 (function(){
 const lies=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
-const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const schreib=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};   // false: nicht gespeichert, roter Hinweis kommt aus stil/schutz.py
 const norm=s=>String(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();   // Çelik findet man auch als celik
 const ziffern=n=>String(n||"").replace(/\D/g,"").replace(/^0049/,"0").replace(/^49/,"0");
 const de=s=>s&&/^\d{4}-\d{2}-\d{2}$/.test(s)?s.split("-").reverse().join("."):String(s||"");
@@ -1374,9 +1377,9 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
   addEventListener("unhandledrejection",e=>melde(e.reason&&(e.reason.message||e.reason)));
 
   // Entwurf: Felder eines Bereichs beim Tippen sichern
-  window.mxEntwurf=function(bereich,schluessel){const el=typeof bereich==="string"?document.querySelector(bereich):bereich,K="mietixFeld:"+schluessel;
+  window.mxEntwurf=function(bereich,schluessel,nur){const el=typeof bereich==="string"?document.querySelector(bereich):bereich,K="mietixFeld:"+schluessel;
     const leer={holen(){return false},weg(){},merken(){}};if(!el)return leer;
-    const felder=()=>[...el.querySelectorAll("input[id],textarea[id],select[id]")].filter(f=>!/^(password|file|hidden|button|submit|search)$/.test(f.type));
+    const felder=()=>[...el.querySelectorAll("input[id],textarea[id],select[id]")].filter(f=>!/^(password|file|hidden|button|submit|search)$/.test(f.type)&&(!nur||nur.includes(f.id)));
     let aus=false;
     const merken=()=>{if(aus)return;const d={};let etwas=false;felder().forEach(f=>{const v=f.type==="checkbox"?f.checked:f.value;d[f.id]=v;if(v&&v!==true)etwas=true});
       try{if(etwas)localStorage.setItem(K,JSON.stringify(d));else localStorage.removeItem(K)}catch(e){}};
