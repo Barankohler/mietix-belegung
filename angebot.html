@@ -130,11 +130,13 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   const SKO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h2"/></svg>';
   window.nkPaar=function(art){return'<span class="nkPaar'+(art?" "+art:"")+'"><button type="button" class="nkWa" data-nk="wa">'+SWA+'WhatsApp</button><button type="button" class="nkKo" data-nk="ko">'+SKO+'Kopieren</button></span>'};
   window.nkNummer=function(t){let n=String(t||"").replace(/\D/g,"");if(String(t||"").trim().startsWith("+"))return n;if(n.startsWith("00"))return n.slice(2);if(n.startsWith("0"))return"49"+n.slice(1);return n};
-  window.nkWa=function(tel,text){const n=nkNummer(tel);window.open("https://wa.me/"+(n&&n.length>=8?n:"")+"?text="+encodeURIComponent(text||""),"_blank")};
+  // Baran 05.11.2026: keine Anrede am Anfang, kein Gruß am Ende, in jeder Nachricht. Auch selbst gespeicherte Texte laufen hier durch.
+  window.nkOhneGruss=function(t){let s=String(t||"").replace(/^\s*(?:Hallo|Hi|Moin|Guten Tag|Guten Morgen|Guten Abend|Sehr geehrte[^\n,]*|Liebe[rs]?\b[^\n,]*)(?:\s+[^\s,!\n]+){0,2}\s*[,!]\s*/,"").replace(/\s*\n\s*(?:Viele|Liebe|Beste|Freundliche|Mit freundlichen)\s+Grüßen?\s*(?:\n[^\n]*)?\s*$/,"").replace(/\s*\n\s*(?:Ihr|Euer)\s+Mietix[- ]Team\s*$/,"").trim();return s?s.charAt(0).toUpperCase()+s.slice(1):s};
+  window.nkWa=function(tel,text){const n=nkNummer(tel);window.open("https://wa.me/"+(n&&n.length>=8?n:"")+"?text="+encodeURIComponent(nkOhneGruss(text)),"_blank")};
   function meld(t){let m=document.getElementById("nkMeld");if(!m){m=document.createElement("div");m.id="nkMeld";m.setAttribute("role","status");document.body.appendChild(m)}
     m.textContent=t;m.classList.add("an");clearTimeout(meld.z);meld.z=setTimeout(()=>m.classList.remove("an"),1800)}
   window.nkMeldung=meld;
-  window.nkKopieren=async function(text){let ok=false;try{await navigator.clipboard.writeText(text);ok=true}catch(e){}
+  window.nkKopieren=async function(text){text=nkOhneGruss(text);let ok=false;try{await navigator.clipboard.writeText(text);ok=true}catch(e){}
     if(!ok){try{const a=document.createElement("textarea");a.value=text;a.setAttribute("readonly","");a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();ok=document.execCommand("copy");a.remove()}catch(e){}}
     meld(ok?"✓ Kopiert":"Kopieren ging nicht, bitte Text lange antippen");return ok};
   // beide Knöpfe in el verbinden; textFn liefert den Text erst beim Tippen, nachher(art) z. B. zum Merken „gesendet“
@@ -247,7 +249,7 @@ window.mxPaketPreis=(c,km)=>paketPreis(c,km);
 /* ---------- Belegt: Mietverträge, gebuchte Anfragen, Sperren (Anfragen und Angebote blockieren nie) ---------- */
 let BUCH=[];
 function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
-  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg)b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00"})});
+  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg){const ueber=v.ueb&&v.bisD<=iso(heute);b.push({auto:v.auto,von:v.vonD,bis:ueber?iso(plus(heute,1)):v.bisD,vonU:v.vonU||"10:00",bisU:ueber?"23:59":v.bisU||"10:00"})}});   // überfällig bleibt belegt, bis die Rückgabe gemacht ist
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!a._weg&&!(a.vertrag&&V.some(v=>v.nr===a.vertrag))&&!V.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
     b.push({auto:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00"})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00"})});
@@ -300,8 +302,9 @@ function kundeListe(){const q=$("kSuche").value.trim(),qo=q.toLowerCase().replac
   if(!h)h='<div class="leer" style="padding:10px 4px">'+(q?"Nichts gefunden.":"Keine offenen Anfragen der letzten 30 Tage. Oben suchen findet auch frühere Mieter.")+'</div>';
   $("kListe").innerHTML=h;
   $("kListe").querySelectorAll("[data-a]").forEach(e=>e.onclick=()=>{anfrageNehmen(a[+e.dataset.a]);mxZu()});
-  $("kListe").querySelectorAll("[data-m]").forEach(e=>e.onclick=()=>{const x=m[+e.dataset.m];S.kunde={name:x.name,nummer:x.tel,anfrage:null,info:"früherer Mieter"+(x.tel?", "+x.tel:"")};S.text=null;mxZu();zeichne()})}
-function anfrageNehmen(x){const ab=x.angebot||{};S.kunde={name:x.name||"",nummer:x.nummer||"",anfrage:x.id,info:"Anfrage "+wann(x)+(x.nummer?", "+x.nummer:"")};S.text=null;
+  $("kListe").querySelectorAll("[data-m]").forEach(e=>e.onclick=()=>{nachSenden();const x=m[+e.dataset.m];S.kunde={name:x.name,nummer:x.tel,anfrage:null,info:"früherer Mieter"+(x.tel?", "+x.tel:"")};S.text=null;mxZu();zeichne()})}
+function nachSenden(){if(ANG_GESENDET===null)return;ANG_GESENDET=null;S.rab=0;S.preisHand=null;S.pakKm=0;S.pakPr=null;S.kmInkl=null}
+function anfrageNehmen(x){nachSenden();const ab=x.angebot||{};S.kunde={name:x.name||"",nummer:x.nummer||"",anfrage:x.id,info:"Anfrage "+wann(x)+(x.nummer?", "+x.nummer:"")};S.text=null;
   if(x.von&&x.bis&&tage(x.von,x.bis)>0){S.von=x.von;S.bis=x.bis;S.chip=""}S.vonU=x.vonU||ab.vonU||S.vonU;S.bisU=x.bisU||ab.bisU||S.bisU;
   if(ab.rabatt!=null)S.rab=+ab.rabatt||0;if(ab.paketKm){S.pakKm=+ab.paketKm;const pc=D&&D.cars.find(c=>nameV(c)===ab.auto);S.pakPr=ab.paketPreis!=null&&pc&&+ab.paketPreis!==paketPreis(pc,S.pakKm)?+ab.paketPreis:null}
   if(ab.kmInkl!=null&&ab.von===S.von&&ab.bis===S.bis)S.kmInkl=+ab.kmInkl;
@@ -314,7 +317,7 @@ $("wer").onclick=()=>{$("kSuche").value="";$("nNr").value=S.kunde&&!S.kunde.anfr
 $("kSuche").oninput=kundeListe;
 $("nOk").onclick=()=>{const nr=$("nNr").value.trim(),nm=$("nName").value.trim();if(!nr&&!nm){$("nNr").focus();if(window.mxFehler)mxFehler("Erst Nummer oder Name eintippen",3000);return}
   if(nr&&ziff(nr).length<6){meld("Nummer unvollständig");$("nNr").focus();return}
-  S.kunde={name:nm,nummer:nr,anfrage:null,info:nr||"ohne Nummer"};S.text=null;mxZu();zeichne()};
+  nachSenden();S.kunde={name:nm,nummer:nr,anfrage:null,info:nr||"ohne Nummer"};S.text=null;mxZu();zeichne()};
 $("nOhne").onclick=()=>{S.kunde=null;S.text=null;mxZu();zeichne()};
 
 /* ---------- Rabatt und Kilometerpaket ---------- */
@@ -361,7 +364,7 @@ function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
 
 /* ---------- Text ---------- */
 function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map(posten),k=S.kunde,km=kmInkl();
-  const z=[(k&&k.name?"Hallo "+vorname(k.name)+",":"Guten Tag,"),""];
+  const z=[];
   const zr="Für "+(S.von.slice(0,4)===S.bis.slice(0,4)?kurz(S.von):lang(S.von))+(S.vonU?" "+uhr(S.vonU):"")+" bis "+lang(S.bis)+(S.bisU?" "+uhr(S.bisU):"")+" ("+tz(d)+")";
   z.push((k&&k.anfrage?"vielen Dank für Ihre Anfrage. ":"gerne mache ich Ihnen ein Angebot. ")+zr+(P.length===1?" ist der "+P[0].name+" frei.":" sind diese Fahrzeuge frei."));z.push("");
   if(P.length===1){const p=P[0];z.push("*"+p.name+": "+E(p.preis)+(p.liste>p.preis?" statt "+E(p.liste):"")+"*");
@@ -372,7 +375,7 @@ function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map
     z.push("");z.push("Inklusive "+km.toLocaleString("de-DE")+" km. Die Kaution kommt nach der Rückgabe komplett zurück.")}
   if(d>1){z.push("");z.push("Der Preis gilt für den kompletten Zeitraum am Stück.")}
   z.push("");z.push(P.length===1?"Soll ich den Wagen für Sie reservieren? Geben Sie mir einfach kurz Bescheid.":"Soll ich Ihnen eines davon reservieren? Sagen Sie mir einfach, welches Ihnen gefällt.");
-  z.push("");z.push("Viele Grüße");z.push("B. Köhler vom Mietix-Team");return z.join("\n")}
+  const tx=z.join("\n");return tx.charAt(0).toUpperCase()+tx.slice(1)}
 const fertigerText=()=>S.text!=null?S.text:text();
 
 /* ---------- Zeichnen ---------- */
@@ -401,7 +404,7 @@ function zeichne(){angMerken();laden();$("angWieder").classList.toggle("versteck
 function merken(){const g=gewaehlt(),k=S.kunde;if(!g.length||!k||!(k.name||k.nummer))return;const P=g.map(posten),p=P[0],j=new Date();
   const l=lies("mietixAnfragen",[]),gebunden=a=>a.status==="gebucht"||a.vertrag||a.anzahlungAngefordert;   // Buchung, Mietvertrag, wartende Anzahlung: nie überschreiben, das Angebot wird eine neue Anfrage (04.11.2026)
   let x=k.anfrage?l.find(a=>a.id===k.anfrage&&!gebunden(a)):null;const hatBuchung=l.some(a=>!a._weg&&gebunden(a)&&(a.id===k.anfrage||(ziff(k.nummer)&&ziff(a.nummer)===ziff(k.nummer))));
-  if(!x){const nz=ziff(k.nummer);x=nz?l.find(a=>!a._weg&&a.status!=="abgesagt"&&!gebunden(a)&&ziff(a.nummer)===nz&&a.tag>=iso(plus(heute,-30))):null}
+  if(!x){const nz=ziff(k.nummer);const nn=t=>String(t||"").toLowerCase().replace(/\s+/g,"");x=nz?l.find(a=>!a._weg&&a.status!=="abgesagt"&&!gebunden(a)&&ziff(a.nummer)===nz&&a.tag>=iso(plus(heute,-30))&&(!k.name||!a.name||nn(a.name)===nn(k.name))):null}
   if(!x){x={id:String(Date.now())+Math.random().toString(36).slice(2,6),tag:iso(j),uhr:String(j.getHours()).padStart(2,"0")+":"+String(j.getMinutes()).padStart(2,"0"),
     name:k.name||"",alter:"",ort:"",nummer:k.nummer||"",notiz:"Angebot",status:"angebot"};l.push(x)}
   const km=kmInkl(),ang={auto:p.name,von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,preis:p.summe,miete:p.preis,liste:p.liste,rabatt:S.rab,kmInkl:km,kmExtra:S.pakKm||0,
@@ -411,7 +414,7 @@ function merken(){const g=gewaehlt(),k=S.kunde;if(!g.length||!k||!(k.name||k.num
   schreib("mietixAnfragen",l);S.kunde.anfrage=x.id;S.kunde.info="Anfrage, Angebot gespeichert"+(x.nummer?", "+x.nummer:"");ANG_GESENDET=angBild();ANG_WIEDER=false;if(hatBuchung){S.kunde.info="Hat schon eine Buchung, Angebot als neue Anfrage gespeichert";meld("Hat schon eine Buchung, Angebot steht als neue Anfrage")}}
 
 /* ---------- Senden, Kopieren, Bild ---------- */
-function bereit(){if(!gewaehlt().length){meld("Erst ein Auto antippen");return false}return true}
+function bereit(){if(!gewaehlt().length){meld("Erst ein Auto antippen");return false}if(S.von<iso(heute)&&!confirm("Der Zeitraum beginnt in der Vergangenheit ("+S.von.split("-").reverse().join(".")+"). Trotzdem senden?"))return false;return true}
 $("senden").innerHTML=nkPaar("gross");
 $("senden").querySelector('[data-nk="wa"]').onclick=async()=>{if(!bereit())return;const tx=fertigerText(),k=S.kunde;merken();zeichne();
   if(k&&k.nummer){const u="https://wa.me/"+waNr(k.nummer)+"?text="+encodeURIComponent(tx);if(!window.open(u,"_blank"))location.href=u;return}   // die Seite bleibt offen (04.11.2026)

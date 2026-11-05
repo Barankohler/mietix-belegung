@@ -381,7 +381,7 @@ function melde(text,gut){
 function laden(){
   const b=[];
   lies("mietixVorgaenge",[]).forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück")
-    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
+    b.push({id:"v"+v.nr,nr:v.nr,fahrzeug:v.auto,von:v.vonD,bis:v.ueb&&new Date(v.bisD+"T23:59")<new Date()?nachISO(plusTage(heute,1)):v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",kunde:v.name,telefon:v.telefon||"",notiz:"Mietvertrag "+v.nr,fest:true})});
   // Anfrage mit Mietvertrag nicht doppelt zeigen: über die Nummer (a.vertrag) oder den Namen ohne Leerzeichen und Groß/klein (30.10.2026)
   const nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
   // Anfrage mit Mietvertrag zählt nie selbst, auch wenn das Auto schon zurück ist (31.10.2026, Prüfbericht: sonst blieb ein früher
