@@ -260,7 +260,7 @@ function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toL
   V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg){const jetzt=new Date(),jz=iso(jetzt)+"T"+String(jetzt.getHours()).padStart(2,"0")+":"+String(jetzt.getMinutes()).padStart(2,"0"),ueber=v.ueb&&(v.bisD+"T"+(v.bisU||"10:00"))<jz;b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",ueber:!!ueber,name:v.name})}});   // Baran 05.11.2026: überfällig ist ein Hinweis, nichts wird gesperrt
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!a._weg&&!(a.vertrag&&V.some(v=>v.nr===a.vertrag))&&!V.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
     b.push({auto:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00"})});
-  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00"})});
+  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",sperre:true,grund:x.grund||""})});
   BUCH=b}
 const Z=(t,u)=>t+"T"+(u||"10:00");
 function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&!x.ueber&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
@@ -367,7 +367,7 @@ function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
   S.autos=S.autos.filter(n=>frei.some(x=>nameV(x.c)===n));
   $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
-    if(b.length){const bis=b.map(x=>x.bis).sort().pop();return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>belegt, wieder frei '+kurz(bis)+'</i></span><span class="p"></span></div>'}
+    if(b.length){const bis=b.map(x=>x.bis).sort().pop(),sp=b.find(x=>x.sperre&&x.bis===bis);return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>'+(sp?"selbst gesperrt bis "+bis.split("-").reverse().join(".").slice(0,6)+(sp.grund?": "+esc(sp.grund):""):"belegt, wieder frei "+kurz(bis))+'</i></span><span class="p"></span></div>'}
     const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),l=Math.round(grund(c,s,d));
     return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i>'+(()=>{const u=ueberfaellig(n);return u?'<i style="color:#9A6400;font-weight:700">Rückgabe war '+kurz(u.bis)+(u.name?", "+esc(u.name):"")+', noch nicht zurück</i>':""})()+'</span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
   $("autos").innerHTML=frei.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';

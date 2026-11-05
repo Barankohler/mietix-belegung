@@ -213,7 +213,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
     <div id="tafelKarte">
       <div class="tKopf"><b id="tTitel"></b><div class="tNav"><div id="tZurueck">‹</div><div id="tHeute" class="an">Heute</div><div id="tVor">›</div></div></div>
       <div id="tafelRoll"><table id="tafel"></table></div>
-      <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">gesperrt</span></div>
+      <div class="tLegende"><span>frei</span><span class="b">belegt</span><span class="s">selbst gesperrt</span></div>
       <div class="tChips" id="tChips"><span class="tLab">Ab heute:</span><div data-z="d1">1 Tag</div><div data-z="d2">2 Tage</div><div data-z="d3">3 Tage</div><div data-z="d7">1 Woche</div><span class="tLab">Wochenende (nächstes):</span><div data-z="we5,1">Fr bis Sa</div><div data-z="we5,2">Fr bis So</div><div data-z="we6,2">Sa bis Mo</div><div data-z="we5,3">Fr bis Mo</div></div>
       <div class="tPruef">
         <div class="tZeile"><span>von</span><input type="date" id="von" min="2026-01-01" max="2028-12-31"><select id="vonU"></select></div>
@@ -423,7 +423,7 @@ function laden(){
   const alleV=lies("mietixVorgaenge",[]);
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!(a.vertrag&&alleV.some(v=>v.nr===a.vertrag))&&!alleV.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
     b.push({id:"a"+a.id,aid:a.id,fahrzeug:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00",kunde:a.name,telefon:a.nummer||"",notiz:"gebucht, Anfragen-Buch",fest:true})});
-  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"gesperrt",notiz:"Sperre"})});
+  lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis)b.push({id:x.id,fahrzeug:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",kunde:x.grund||"",notiz:"Sperre"})});
   BUCHUNGEN=b;zeichne();
 }
 
@@ -453,7 +453,7 @@ function zeichne(){
     const p=roh===null?null:roh*(1-nach)+kmZusatz(c,t);
     const knapp=amTag.map(b=>b.bis===von?"frei ab "+uhr(b.bisU)+", "+vorname(b.kunde)+" bringt um "+uhr(b.bisU)+" zurück":"bis "+uhr(b.vonU)+", dann holt "+vorname(b.kunde)+" ab").join(". ");
     const info=treffer.length
-      ? "belegt: "+treffer.map(b=>(b.kunde?esc(b.kunde)+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; ")
+      ? [treffer.some(b=>b.notiz!=="Sperre")?"belegt: "+treffer.filter(b=>b.notiz!=="Sperre").map(b=>(b.kunde?esc(b.kunde)+", ":"")+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)).join("; "):""].concat(treffer.filter(b=>b.notiz==="Sperre").map(b=>"selbst gesperrt bis "+kurzD(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""))).filter(Boolean).join("; ")
       : (p===null?"Mindestmietdauer beachten":EUR.format(p)+" für den Zeitraum")+(knapp?". "+knapp:"");
     return '<div class="zeile'+(treffer.length?"":" waehlbar")+(drin?" drin":"")
       +'" data-auto="'+c.n+'"><span><span class="name">'+c.n+'</span>'
@@ -481,7 +481,7 @@ function zeichne(){
   $("buchungen").innerHTML=sortiert.map(b=>
     '<div class="bzeile"><span><span class="bname">'+esc(b.fahrzeug)+'</span>'
     +'<span class="bzeit">'+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))
-    +esc((b.kunde?" | "+b.kunde:"")+(b.notiz?" | "+b.notiz:""))+'</span></span>'
+    +esc(b.notiz==="Sperre"?" | selbst gesperrt"+(b.kunde?": "+b.kunde:""):(b.kunde?" | "+b.kunde:"")+(b.notiz?" | "+b.notiz:""))+'</span></span>'
     +(b.fest?'':'<button class="weg" data-id="'+b.id+'">Löschen</button>')+'</div>').join("");
   $("leer").textContent=sortiert.length?"":"Nichts belegt. Mietverträge und gebuchte Anfragen erscheinen hier von selbst.";
   [...document.querySelectorAll(".weg")].forEach(k=>k.onclick=()=>loeschen(k.dataset.id));
@@ -588,7 +588,7 @@ function zeichneTafel(){if(!D.cars||!D.cars.length)return;
         // Name einmal, am Anfang des Bandes (oder am linken Rand, wenn die Miete vor der Tafel begann), so lang wie das Band
         if(start||i===0){const endeTag=ausISO(b.bis),zellen=Math.min(TAGE-i,Math.round((endeTag-d)/86400000)+1);
           const laenge=Math.max(0.6,(zellen-1)+(b.bis<=nachISO(plusTage(d,zellen-1))?stunden(b.bisU)/24:1)-a);
-          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?(b.kunde||"gesperrt"):vorname(b.kunde)||"belegt")+'</b>'}
+          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?"selbst gesperrt"+(b.kunde?": "+b.kunde:""):vorname(b.kunde)||"belegt")+'</b>'}
         k+=sp?" hatSperre":" hatBelegt"});
       const b0=tr[0];
       html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
@@ -616,7 +616,7 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
     if(!mitte&&a&&!r&&verl){bisUhr=a.vonU||"10:00";b=null}
     else if(!mitte&&r&&stunden(r.bisU)<22){abUhr=r.bisU||"10:00";rueck=r;b=null}}
   const A="https://barankohler.github.io/";
-  if(b&&b.notiz==="Sperre"){blatt(kurzAuto(auto)+" gesperrt","Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),[
+  if(b&&b.notiz==="Sperre"){blatt(esc(auto)+" selbst gesperrt bis "+kurzD(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),"Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis)),[
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
   if(b){const tg=tage(b.von,b.bis);blatt(esc(b.kunde||"Belegt"),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(b.bis))+" "+kurzD(ausISO(b.bis))+" "+uhr(b.bisU)+" ("+tg+(tg===1?" Tag":" Tage")+")"+(b.telefon?". "+esc(b.telefon):""),[
       b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=mappe"}:null,
@@ -1295,8 +1295,8 @@ function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=
   if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
   const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
   const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl.slice().sort((a,b)=>bZ(a).bis-bZ(b).bis)[bl.length-1];
-      const rot=x.notiz==="Sperre"?"gesperrt bis "+kurzD(ausISO(x.bis)):"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
-      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
+      const rot=x.notiz==="Sperre"?"bis "+kurzD(ausISO(x.bis))+(x.kunde?": "+esc(x.kunde):""):"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
+      return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"selbst gesperrt":"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
     // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
     const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
     n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
