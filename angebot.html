@@ -51,7 +51,7 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .feld label{display:block;font-size:13px;font-weight:700;color:#6E6E73;margin:10px 2px 5px}
 .feld input,.feld select{width:100%;border:1.5px solid #E4E4E7;border-radius:12px;padding:12px;font-weight:600;font-size:16px;font-family:inherit;background:#fff;color:#1C1C1E;min-height:48px;-webkit-appearance:none;appearance:none}
 .feld .zw{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
-.knopf{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:800;font-size:16px;font-family:inherit;background:#1C1C1E;color:#fff;margin-top:14px;cursor:pointer}
+.knopf{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:800;font-size:16px;font-family:inherit;background:#C4161C;color:#fff;margin-top:14px;cursor:pointer}
 .knopf.hell{background:#F2F2F4;color:#1C1C1E}
 #kSuche{width:100%;border:0;border-radius:12px;padding:12px 14px;font-weight:600;font-size:16px;font-family:inherit;background:#F2F2F4;margin-bottom:6px}
 .gk{font-size:11.5px;font-weight:800;color:#8A8A8E;text-transform:uppercase;letter-spacing:.6px;margin:12px 4px 6px}
@@ -126,10 +126,17 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
 </style></head><body><script>
 /* Knopf-Paar je Nachricht: WhatsApp und Kopieren (02.11.2026) */
 (function(){if(window.nkPaar)return;
+  // Preise ohne Internet (05.11.2026): jede geladene Preisdatei bleibt auf dem Gerät, ohne Netz oder nach 6 Sekunden Warten gilt die letzte (Tiefgarage)
+  {const netz=window.fetch,K="mietixPreisKopie";window.fetch=function(u,o){const s=typeof u==="string"?u:(u&&u.url)||"";if(s.indexOf("mietix-preise/preise.json")<0)return netz.apply(this,arguments);
+    const kopie=()=>{try{const t=localStorage.getItem(K);return t?new Response(t,{status:200,headers:{"Content-Type":"application/json"}}):null}catch(e){return null}};
+    return new Promise((ok,nein)=>{let da=false;const uhr=setTimeout(()=>{const k=kopie();if(k&&!da){da=true;ok(k)}},6000);
+      netz.call(window,u,o).then(r=>{clearTimeout(uhr);if(r.ok){r.clone().text().then(t=>{try{if(t&&t.charAt(0)==="{"&&localStorage.getItem(K)!==t)localStorage.setItem(K,t)}catch(e){}}).catch(()=>{});if(!da){da=true;ok(r)}return}
+        const k=kopie();if(!da){da=true;ok(k||r)}}).catch(e=>{clearTimeout(uhr);const k=kopie();if(da)return;da=true;if(k)ok(k);else nein(e)})})}}
   const SWA='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg>';
   const SKO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h2"/></svg>';
   window.nkPaar=function(art){return'<span class="nkPaar'+(art?" "+art:"")+'"><button type="button" class="nkWa" data-nk="wa">'+SWA+'WhatsApp</button><button type="button" class="nkKo" data-nk="ko">'+SKO+'Kopieren</button></span>'};
-  window.nkNummer=function(t){let n=String(t||"").replace(/\D/g,"");if(String(t||"").trim().startsWith("+"))return n;if(n.startsWith("00"))return n.slice(2);if(n.startsWith("0"))return"49"+n.slice(1);return n};
+  // Eine Regel für alle Seiten (05.11.2026): + und 00 = Ländervorwahl steht schon da, 0 = deutsche Nummer, 15x/16x/17x ohne 0 = deutsches Handy
+  window.nkNummer=function(t){let n=String(t||"").replace(/\D/g,"");if(!n)return"";if(!String(t||"").trim().startsWith("+")){if(n.startsWith("00"))n=n.slice(2);else if(n.startsWith("0"))n="49"+n.slice(1);else if(/^1[567]\d{8,9}$/.test(n))n="49"+n}return n.replace(/^490/,"49")};
   // Baran 05.11.2026: keine Anrede am Anfang, kein Gruß am Ende, in jeder Nachricht. Auch selbst gespeicherte Texte laufen hier durch.
   window.nkOhneGruss=function(t){let s=String(t||"").replace(/^\s*(?:Hallo|Hi|Moin|Guten Tag|Guten Morgen|Guten Abend|Sehr geehrte[^\n,]*|Liebe[rs]?\b[^\n,]*)(?:\s+[^\s,!\n]+){0,2}\s*[,!]\s*/,"").replace(/\s*\n\s*(?:Viele|Liebe|Beste|Freundliche|Mit freundlichen)\s+Grüßen?\s*(?:\n[^\n]*)?\s*$/,"").replace(/\s*\n\s*(?:Ihr|Euer)\s+Mietix[- ]Team\s*$/,"").trim();return s?s.charAt(0).toUpperCase()+s.slice(1):s};
   window.nkWa=function(tel,text){const n=nkNummer(tel);window.open("https://wa.me/"+(n&&n.length>=8?n:"")+"?text="+encodeURIComponent(nkOhneGruss(text)),"_blank")};
@@ -191,7 +198,7 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   <div id="kListe"></div>
   <div class="gk">Ohne Namen oder neu</div>
   <div class="feld"><div class="zw"><div><label>WhatsApp-Nummer</label><input id="nNr" type="tel" inputmode="tel" autocomplete="off"></div><div><label>Name (freiwillig)</label><input id="nName" autocomplete="off"></div></div></div>
-  <button class="knopf" id="nOk" type="button">Übernehmen</button>
+  <button class="knopf" id="nOk" type="button">Fertig</button>
   <button class="knopf hell" id="nOhne" type="button">Ohne Kunde, nur Preise</button>
 </div>
 <div class="mxFenster" id="fZeit" role="dialog" aria-label="Zeitraum"><div class="mxKopf"><h3>Zeitraum</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
@@ -201,12 +208,12 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
 </div>
 <div class="mxFenster" id="fRab" role="dialog" aria-label="Rabatt"><div class="mxKopf"><h3>Rabatt</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
   <p class="mxText">Zusätzlich zum Mengenrabatt, auf den Mietpreis.</p><div class="rad" id="rabListe"></div>
-  <div class="feld versteckt" id="rabInd"><label>Rabatt in %</label><input id="rabZahl" type="number" inputmode="numeric" min="0" max="90" data-einheit="%"><button class="knopf" id="rabOk" type="button">Übernehmen</button></div>
+  <div class="feld versteckt" id="rabInd"><label>Rabatt in %</label><input id="rabZahl" type="number" inputmode="numeric" min="0" max="90" data-einheit="%"><button class="knopf" id="rabOk" type="button">Fertig</button></div>
 </div>
 <div class="mxFenster" id="fPak" role="dialog" aria-label="Kilometerpaket"><div class="mxKopf"><h3>Kilometerpaket</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
   <p class="mxText" id="pakInfo"></p><div class="rad" id="pakListe"></div>
   <div class="feld versteckt" id="pakInd"><div class="zw"><div><label>Kilometer</label><input id="pakKm" type="number" inputmode="numeric" min="0" step="10" data-einheit="km"></div><div><label>Preis</label><input id="pakPr" type="number" inputmode="decimal" min="0" data-einheit="€"></div></div>
-    <button class="knopf" id="pakOk" type="button">Übernehmen</button></div>
+    <button class="knopf" id="pakOk" type="button">Fertig</button></div>
 </div>
 <div class="mxFenster" id="fText" role="dialog" aria-label="Text"><div class="mxKopf"><h3>So kommt es an</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
   <div id="text"></div><textarea id="textEdit" class="versteckt"></textarea>
@@ -228,7 +235,7 @@ const uhr=u=>{if(!u)return"";const[h,m]=u.split(":");return m==="00"?(+h)+" Uhr"
 const E=n=>Math.round(n).toLocaleString("de-DE")+" €";
 const tz=t=>t+(t===1?" Tag":" Tage");
 const ziff=t=>String(t||"").replace(/\D/g,"");
-const waNr=t=>{let n=ziff(t);if(String(t||"").trim().startsWith("+"))return n;if(n.startsWith("00"))return n.slice(2);if(n.startsWith("0"))return "49"+n.slice(1);return n};
+const waNr=t=>nkNummer(t);   // eine Regel für alle Seiten (05.11.2026)
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
 const heute=new Date();heute.setHours(12,0,0,0);
 function meld(t){const m=$("meld");m.textContent=t;m.style.display="block";clearTimeout(meld.t);meld.t=setTimeout(()=>m.style.display="none",2400)}
@@ -250,13 +257,14 @@ window.mxPaketPreis=(c,km)=>paketPreis(c,km);
 /* ---------- Belegt: Mietverträge, gebuchte Anfragen, Sperren (Anfragen und Angebote blockieren nie) ---------- */
 let BUCH=[];
 function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
-  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg){const ueber=v.ueb&&v.bisD<=iso(heute);b.push({auto:v.auto,von:v.vonD,bis:ueber?iso(plus(heute,1)):v.bisD,vonU:v.vonU||"10:00",bisU:ueber?"23:59":v.bisU||"10:00"})}});   // überfällig bleibt belegt, bis die Rückgabe gemacht ist
+  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg){const jetzt=new Date(),jz=iso(jetzt)+"T"+String(jetzt.getHours()).padStart(2,"0")+":"+String(jetzt.getMinutes()).padStart(2,"0"),ueber=v.ueb&&(v.bisD+"T"+(v.bisU||"10:00"))<jz;b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",ueber:!!ueber,name:v.name})}});   // Baran 05.11.2026: überfällig ist ein Hinweis, nichts wird gesperrt
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!a._weg&&!(a.vertrag&&V.some(v=>v.nr===a.vertrag))&&!V.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
     b.push({auto:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00"})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00"})});
   BUCH=b}
 const Z=(t,u)=>t+"T"+(u||"10:00");
-function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
+function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&!x.ueber&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
+const ueberfaellig=auto=>BUCH.find(x=>x.auto===auto&&x.ueber);
 
 /* ---------- Zustand ---------- */
 const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d3",autos:[],rab:0,preisHand:null,   // preisHand: von Hand getippte Miete, bleibt stehen
@@ -274,15 +282,15 @@ const t=()=>tage(S.von,S.bis);
 const kmInkl=()=>S.kmInkl==null?(D?D.freiKm||150:150)*Math.max(1,t()):S.kmInkl;
 
 /* ---------- Zeitraum ---------- */
-(function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
-  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>"<option>"+x+"</option>").join("");$(id).value="10:00"})})();
 function chip(z){const w=heute.getDay();let v,b;
   if(z[0]==="d"){v=heute;b=plus(heute,+z.slice(1))}else{const[wd,n]=z.slice(2).split(",").map(Number);v=plus(heute,(wd-w+7)%7);b=plus(v,n)}
   S.von=iso(v);S.bis=iso(b);S.chip=z;S.text=null;zeichne()}
 [...$("zr").children].forEach(c=>c.onclick=()=>chip(c.dataset.z));
+(function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
+  ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>"<option>"+x+"</option>").join("");$(id).value="10:00"})})();
 $("zt").onclick=()=>{$("von").value=S.von;$("bis").value=S.bis;$("vonU").value=S.vonU;$("bisU").value=S.bisU;mxAuf("fZeit")};
 ["von","bis","vonU","bisU"].forEach(id=>$(id).addEventListener("change",()=>{const v=$("von").value,b=$("bis").value;
-  if(v)S.von=v;if(b)S.bis=b;if(S.bis<=S.von){S.bis=iso(plus(ausISO(S.von),1));$("bis").value=S.bis}S.vonU=$("vonU").value;S.bisU=$("bisU").value;S.chip="";S.text=null;zeichne()}));
+  if(v)S.von=v;if(b)S.bis=b;if(S.bis<=S.von){S.bis=iso(plus(ausISO(S.von),1));$("bis").value=S.bis}S.vonU=$("vonU").value||S.vonU;S.bisU=$("bisU").value||S.bisU;S.chip="";S.text=null;zeichne()}));
 
 /* ---------- Für wen? ---------- */
 function kundenDaten(){const grenze=iso(plus(heute,-30)),V=lies("mietixVorgaenge",[]),kb=lies("mietixKunden",{});
@@ -330,7 +338,7 @@ function rabListe(){$("rabInd").classList.add("versteckt");
   $("rabListe").querySelectorAll("[data-r]").forEach(e=>e.onclick=()=>{if(e.dataset.r==="x"){$("rabInd").classList.remove("versteckt");$("rabZahl").value=S.rab||"";$("rabZahl").focus();return}
     S.rab=+e.dataset.r;S.text=null;mxZu();zeichne()})}
 // Rabatt jetzt als Feld im Preis-Block (01.11.2026); das alte Rabatt-Fenster hat keinen Knopf mehr
-$("rabOk").onclick=()=>{S.rab=Math.min(90,Math.max(0,+String($("rabZahl").value||"").replace(",",".")||0));S.text=null;mxZu();zeichne()};
+$("rabOk").onclick=()=>{rabHoechstens($("rabZahl").value);S.rab=Math.min(90,Math.max(0,+String($("rabZahl").value||"").replace(",",".")||0));S.text=null;mxZu();zeichne()};
 function pakAuto(){const c=gewaehlt()[0]||(D&&D.cars[0]);return c}
 function pakListe(){$("pakInd").classList.add("versteckt");const c=pakAuto();if(!c)return;
   $("pakInfo").textContent=nameV(c)+", einmal für die ganze Miete. Mehrkilometer sonst "+(+c.kmPreis||0).toLocaleString("de-DE",{minimumFractionDigits:2})+" €."+(gewaehlt().length>1?" Preise je Auto im Text.":"");
@@ -345,7 +353,8 @@ $("pakOk").onclick=()=>{const c=pakAuto(),km=Math.max(0,Math.round(+$("pakKm").v
   S.pakKm=km;S.pakPr=km&&pr!==""&&c&&+pr!==paketPreis(c,km)?Math.max(0,+pr):null;S.text=null;mxZu();zeichne()};
 $("wPak").onclick=()=>{pakListe();mxAuf("fPak")};
 $("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim();S.preisHand=v===""?null:Math.max(0,Math.round(+v.replace(",",".")||0));S.text=null;zeichne()});
-$("aRab").addEventListener("input",()=>{S.rab=Math.min(90,Math.max(0,+$("aRab").value.replace(",",".")||0));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
+function rabHoechstens(w){if(+String(w||"").replace(",",".")>90&&window.mxFehler)mxFehler("Rabatt höchstens 90 %. Gerechnet wird mit 90 %.",6000)}   // roter Hinweis statt still zu kappen (05.11.2026)
+$("aRab").addEventListener("input",()=>{rabHoechstens($("aRab").value);S.rab=Math.min(90,Math.max(0,+$("aRab").value.replace(",",".")||0));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
 ["aPreis","aRab"].forEach(i=>$(i).addEventListener("change",()=>zeichne()));
 $("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.kmInkl=v===""?null:Math.max(0,Math.round(+v));S.text=null;zeichne()});
 
@@ -360,7 +369,7 @@ function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
     if(b.length){const bis=b.map(x=>x.bis).sort().pop();return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>belegt, wieder frei '+kurz(bis)+'</i></span><span class="p"></span></div>'}
     const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),l=Math.round(grund(c,s,d));
-    return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i></span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
+    return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i>'+(()=>{const u=ueberfaellig(n);return u?'<i style="color:#9A6400;font-weight:700">Rückgabe war '+kurz(u.bis)+(u.name?", "+esc(u.name):"")+', noch nicht zurück</i>':""})()+'</span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
   $("autos").innerHTML=frei.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
   $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;S.autos=S.autos.includes(n)?S.autos.filter(x=>x!==n):S.autos.concat(n);S.text=null;zeichne()})}
 
@@ -656,9 +665,11 @@ async function ablageAbgleichen(k,c,h,zeilen,geholt){
       const daten=await bilderRein(m[p]);if(daten===null){ohneBild++;continue}   // nie eine Kennung statt Unterschrift hochschicken
       hoch.push({[c.pk]:p,daten,geaendert:jetzt})}
     // Löschen: viele auf einmal warten auf Baran
-    const frei=h.frei||[];delete h.frei;if(h.halt){h.halt=h.halt.filter(p=>!(p in m));if(!h.halt.length)delete h.halt}
-    const weg=Object.keys(h.hash).filter(p=>!(p in m)&&h.hash[p]!=="weg"&&!frei.includes(p)&&!(h.halt||[]).includes(p));
-    if(k!=="mietixPapierkorb"&&k!=="mietixStand"&&(weg.length>HANDVOLL||(weg.length>=3&&!Object.keys(m).length))){h.halt=(h.halt||[]).concat(weg)}
+    const frei=h.frei||[];delete h.frei;if(k==="mietixAufgaben")delete h.halt;if(h.halt){h.halt=h.halt.filter(p=>!(p in m));if(!h.halt.length)delete h.halt}
+    // Einträge ohne Kennung zählen nie als gelöscht; Aufgaben kommen aus der Excel und fragen nie nach (Baran 05.11.2026)
+    const ohneKennung=c.liste&&(liesAblage(k).w||[]).some(x=>x&&x[c.pk]===undefined);
+    const weg=ohneKennung?[]:Object.keys(h.hash).filter(p=>!(p in m)&&h.hash[p]!=="weg"&&!frei.includes(p)&&!(h.halt||[]).includes(p));
+    if(k!=="mietixPapierkorb"&&k!=="mietixStand"&&k!=="mietixAufgaben"&&(weg.length>HANDVOLL||(weg.length>=3&&!Object.keys(m).length))){h.halt=(h.halt||[]).concat(weg)}
     else weg.concat(frei).forEach(p=>{if(!(p in m)&&h.hash[p]!=="weg")hoch.push({[c.pk]:p,daten:{_weg:true},geaendert:jetzt})});
     const streit=await hochladen(k,c,h,hoch);
     if(!streit.length)return{m,ohneBild};
@@ -809,14 +820,13 @@ function zeigen(){const el=document.getElementById("abgleich");if(!el)return;
   if(!sitzung){el.innerHTML='<div class="abgl rot"><b>Nicht angemeldet</b><div class="abgl-text">Einmal anmelden, dann ist alles gesichert.</div>'+
     '<input id="ablMail" type="email" inputmode="email" autocomplete="username" placeholder="E-Mail">'+
     '<input id="ablPw" type="password" autocomplete="current-password" placeholder="Passwort">'+
-    '<button id="ablLos" type="button">Anmelden</button><div class="abgl-fehler" id="ablFehler">'+linkFehler+'</div>'+
-    '<a href="#" id="ablNeuZugang" class="abgl-link">Noch keinen Zugang? Hier anlegen</a></div>';
+    '<button id="ablLos" type="button">Anmelden</button><div class="abgl-fehler" id="ablFehler">'+linkFehler+'</div></div>';
     const mail=()=>document.getElementById("ablMail").value.trim(),pw=()=>document.getElementById("ablPw").value,f=document.getElementById("ablFehler");
     document.getElementById("ablLos").onclick=async()=>{f.textContent="";
       try{sichern(await auth("token?grant_type=password",{email:mail(),password:pw()}));
         zeigen();abgleichen()}catch(e){f.textContent=/Invalid login/i.test(e.message)?"E-Mail oder Passwort stimmt nicht.":e.message===KEINE_VERBINDUNG?"Keine Verbindung. Bitte Internet prüfen und noch einmal tippen.":e.message}};
     // Zugang selbst anlegen: geht nur, solange Baran die Registrierung in Supabase kurz freigibt
-    document.getElementById("ablNeuZugang").onclick=async e=>{e.preventDefault();f.textContent="";
+    const neuZ=document.getElementById("ablNeuZugang");if(neuZ)neuZ.onclick=async e=>{e.preventDefault();f.textContent="";
       if(!mail()||pw().length<8){f.textContent="Oben E-Mail und ein eigenes Passwort (mindestens 8 Zeichen) eintragen, dann hier tippen.";return}
       try{const j=await auth("signup",{email:mail(),password:pw()});
         if(j.access_token){sichern(j);zeigen();abgleichen()}else f.textContent="Zugang angelegt. Bitte die Mail bestätigen und dann anmelden."}
@@ -1007,10 +1017,12 @@ zeigen();abgleichen();auslagernBald();
     ".mxStart,.abgl a,.abgl-link,#ablNeuZugang,#ablPwNeu,#ablAus,.sZur,.buZurueck,#bZurueck,#sAlle,#mLoesch,#vOrtAendern,#mVerlBez,#mKautWeg,#mEndWeg,#mEndBez,.kurz>a,a.zu,.buVerw,.zurueckA,#kZu,a.loeschen,.aend,.n a.pdf,#entwurfLeeren,#entwurfZurueck,#weiterSpaeter,.mini,.mehr>span,.mehr>a,.unten>a,.pbTipp a[data-pb],#mVerlInfo .vz>a,#uKopf>a,.mxKlein>summary{background:#E9E9EE!important;border:0!important;border-radius:10px!important;padding:6px 12px!important;text-decoration:none!important;display:inline-flex!important;align-items:center;gap:3px;line-height:1.25!important;width:auto!important;max-width:100%;box-shadow:none!important;cursor:pointer;-webkit-tap-highlight-color:transparent}"+
     ".buVerw,.sZur,.buZurueck,#uKopf>a{display:flex!important;width:max-content!important}.buVerw{margin-left:auto!important;margin-right:auto!important}"+
     ".mxStart{color:#C4161C!important;font-size:16px!important;font-weight:700!important;letter-spacing:0!important;padding:6px 12px 6px 9px!important}.mxStart b{margin-top:-1px;font-size:18px!important}"+
+    /* ‹ Start überall gleich groß (05.11.2026), auch wo look.py nicht gilt */
+    "html body header .mxStart,html body .topbar .mxStart{float:none!important;margin:0 10px 0 0!important;border:0!important;padding:5px 12px 5px 9px!important;background:#E9E9EE!important;border-radius:10px!important;color:#C4161C!important;opacity:1!important;font-size:16px!important;font-weight:600!important;gap:3px!important;line-height:1.2!important;min-height:44px!important;box-sizing:border-box;display:inline-flex!important;align-items:center!important}html body .mxStart b{font-size:20px!important;font-weight:400!important;line-height:16px!important;margin-top:-2px!important}"+
     /* PC und Mac (1.11.2026, Baran: auf allen Geräten gleich): Kopfzeile und Inhalt in einer 680-px-Spalte in der Mitte.
        Muss ganz am Ende stehen: header{padding-left:16px!important} weiter oben (und look.py davor im head) würde sonst gewinnen */
     (istStart||art==="kalender"||art==="schaeden"?"":"@media(min-width:760px){header,.topbar{padding-left:max(16px,calc((100% - 680px)/2))!important;padding-right:max(16px,calc((100% - 680px)/2))!important}"+
-      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}header .plus{right:max(16px,calc((100% - 680px)/2))!important}}");
+      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2))!important}}");
   document.head.appendChild(st);
 
   // ‹ Start und Symbol in der Kopfzeile
@@ -1037,15 +1049,25 @@ zeigen();abgleichen();auslagernBald();
       if(history.length>1&&document.referrer.indexOf(location.origin)===0)history.back();else location.href="https://barankohler.github.io/mietix-zentrale/"},{passive:true})}
 
   // Neue Version: die Seite aus dem Netz mit der geladenen vergleichen (ohne Daten, nur der Text der Seite)
+  // Seit 05.11.2026: nur die Kopfzeile abfragen (Stand der Seite im Netz gegen Stand der geladenen Seite), nicht jedes Mal die ganze Seite. Kennt der Server keinen Stand, wie bisher über den Text.
   let alt=null;
-  async function pruefen(){try{const r=await fetch(location.pathname,{cache:"no-store"});if(!r.ok)return;const t=await r.text(),h=t.length+":"+t.slice(-400);
-    if(alt===null){const c=await fetch(location.pathname,{cache:"force-cache"}).then(x=>x.text()).catch(()=>null);alt=c?c.length+":"+c.slice(-400):h}
-    if(h!==alt){let b=document.getElementById("mxNeu");if(!b){b=document.createElement("div");b.id="mxNeu";b.innerHTML="Neue Version da. <b>Tippen zum Aktualisieren</b>";b.onclick=()=>location.reload();
+  async function pruefen(){try{let neu=false;const k=await fetch(location.pathname,{method:"HEAD",cache:"no-store"}).catch(()=>null);
+    const lm=k&&k.ok?k.headers.get("last-modified"):null,tN=lm?Date.parse(lm):NaN,tD=Date.parse(document.lastModified);
+    if(!isNaN(tN)&&!isNaN(tD))neu=tN>tD+1000;
+    else{const r=await fetch(location.pathname,{cache:"no-store"});if(!r.ok)return;const t=await r.text(),h=t.length+":"+t.slice(-400);
+      if(alt===null){const c=await fetch(location.pathname,{cache:"force-cache"}).then(x=>x.text()).catch(()=>null);alt=c?c.length+":"+c.slice(-400):h}
+      neu=h!==alt}
+    if(neu){let b=document.getElementById("mxNeu");if(!b){b=document.createElement("div");b.id="mxNeu";b.innerHTML="Neue Version da. <b>Tippen zum Aktualisieren</b>";b.onclick=()=>location.reload();
       const kopf=document.querySelector("header,.topbar");if(kopf)kopf.after(b);else document.body.prepend(b)}b.classList.add("an")}}catch(e){}}
   setTimeout(pruefen,3000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)pruefen()});
 
   // Ohne Internet: Seite aus dem Speicher (sw.js liegt im Ordner der Seite)
   if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+  // Startseite: wichtige Seiten einmal in den Speicher, damit sie auch ohne Internet aufgehen, selbst wenn sie auf diesem Gerät noch nie offen waren (05.11.2026)
+  if(istStart&&"serviceWorker" in navigator&&"caches" in window&&location.protocol==="https:"&&location.hostname==="barankohler.github.io")setTimeout(async()=>{try{if(!navigator.onLine)return;const c=await caches.open("mietix-seiten-1");
+    for(const p of ["mietix-vertrag/","mietix-anfragen/","mietix-belegung/","mietix-belegung/angebot.html","mietix-autos/","mietix-geld/","mietix-zentrale/kunden.html","mietix-zentrale/nachrichten.html","mietix-zentrale/umsatzbringer.html"]){const u=location.origin+"/"+p;
+      try{if(!await c.match(u))await c.add(u);const o=p.split("/")[0]+"/";if(o!=="mietix-zentrale/")await navigator.serviceWorker.register("/"+o+"sw.js",{scope:"/"+o})}catch(e){}}}catch(e){}},6000);
 
   // Startseite: die meistgenutzten Seiten schon vorladen, dann öffnen sie ohne Wartezeit
   if(istStart)setTimeout(()=>["mietix-vertrag/","mietix-anfragen/","mietix-belegung/","mietix-autos/"].forEach(p=>{const l=document.createElement("link");l.rel="prefetch";l.href="https://barankohler.github.io/"+p;document.head.appendChild(l)}),2500);
