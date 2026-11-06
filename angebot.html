@@ -37,6 +37,10 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .fuss{text-align:center;font-size:12px;color:#8A8A8E;font-weight:600;margin-top:14px;line-height:1.5}.fuss a{color:#8A8A8E}
 .leiste{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid #E5E5EA;padding:10px 14px calc(12px + env(safe-area-inset-bottom))}
 .leiste .in{max-width:680px;margin:0 auto}
+/* Mac und Windows (Prüfung 06.11.2026, Runde 2): Zeitraum-Knöpfe brechen um statt halb abgeschnitten; Kopf und feste Leiste bündig mit der Kartenspalte (Inhalt 648 px) */
+@media(min-width:760px){.zr{flex-wrap:wrap;overflow-x:visible;row-gap:8px}
+  html body header{padding-left:max(16px,calc((100% - 680px)/2 + 16px))!important;padding-right:max(16px,calc((100% - 680px)/2 + 16px))!important}
+  .leiste .in{max-width:648px}}
 /* Zusammenfassung über „Senden“ (01.11.2026, Baran: professioneller): links Auto und Zeitraum, rechts Betrag und inklusive km */
 .sum{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:10px}
 .sum>span{min-width:0}.sum b{display:block;font-size:16px;font-weight:800;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -278,10 +282,12 @@ const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d
 {let _t=null;Object.defineProperty(S,"text",{enumerable:true,get(){return _t},set(v){const alt=_t;_t=v;if(v==null&&alt!=null&&!window.HAND_AUS&&window.mxRueckBar)mxRueckBar("Von Hand geänderter Text ersetzt",()=>{S.text=alt;zeichne()})}})}
 // Angefangenes Angebot sichern: Neuladen oder wenn iOS die Seite räumt verliert nichts, 48 Stunden lang (04.11.2026)
 const ANG_K="mietixEntwurfAngebot";let ANG_GESENDET=null,ANG_WIEDER=false;
-const angBild=()=>JSON.stringify({von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,chip:S.chip,autos:S.autos,rab:S.rab,preisHand:S.preisHand,pakKm:S.pakKm,pakPr:S.pakPr,kmInkl:S.kmInkl,kunde:S.kunde,text:S.text});
+const angBild=()=>JSON.stringify({von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,chip:S.chip,autos:S.autos,rab:S.rab,preisHand:S.preisHand,preisHandAuto:S.preisHandAuto,pakKm:S.pakKm,pakPr:S.pakPr,kmInkl:S.kmInkl,kunde:S.kunde,text:S.text});
 function angMerken(){try{if(!S.autos.length&&!S.kunde&&S.text==null){localStorage.removeItem(ANG_K);return}const j=angBild();if(j===ANG_GESENDET){localStorage.removeItem(ANG_K);return}localStorage.setItem(ANG_K,JSON.stringify({zeit:Date.now(),s:j}))}catch(e){}}
 (()=>{if(location.search)return;try{const d=JSON.parse(localStorage.getItem(ANG_K)||"null");if(!d||Date.now()-d.zeit>48*36e5)return;const w=JSON.parse(d.s);if(w.von<iso(heute))return;window.HAND_AUS=true;Object.assign(S,w);window.HAND_AUS=false;ANG_WIEDER=true}catch(e){}})();
 const t=()=>tage(S.von,S.bis);
+// Getippter Preis gilt für das Auto, für das er getippt wurde, auch wenn ein zweites dazukommt (Prüfung 06.11.2026, Runde 2, Getipptes bleibt)
+const handFuer=n=>S.preisHand!=null&&(S.preisHandAuto?S.preisHandAuto===n:S.autos.length===1);
 const kmInkl=()=>S.kmInkl==null?(D?D.freiKm||150:150)*Math.max(1,t()):S.kmInkl;
 
 /* ---------- Zeitraum ---------- */
@@ -324,7 +330,7 @@ function anfrageNehmen(x){nachSenden();const ab=x.angebot||{};S.kunde={name:x.na
   // von Hand abgemachte Miete aus dem letzten Angebot bleibt stehen (01.11.2026)
   {const c=S.autos.length===1&&D?D.cars.find(c=>nameV(c)===S.autos[0]):null;S.preisHand=null;
    const abM=+ab.miete||(+ab.preis?+ab.preis-(+ab.paketPreis||0):0);   // alte Einträge haben nur den Gesamtpreis
-   if(c&&abM&&ab.auto===S.autos[0]&&ab.von===S.von&&ab.bis===S.bis&&Math.abs(abM-mitRab(c,wt(S.von),t()))>1)S.preisHand=abM}
+   if(c&&abM&&ab.auto===S.autos[0]&&ab.von===S.von&&ab.bis===S.bis&&Math.abs(abM-mitRab(c,wt(S.von),t()))>1){S.preisHand=abM;S.preisHandAuto=S.autos[0]}}
   zeichne()}
 $("wer").onclick=()=>{$("kSuche").value="";$("nNr").value=S.kunde&&!S.kunde.anfrage?S.kunde.nummer||"":"";$("nName").value=S.kunde&&!S.kunde.anfrage?S.kunde.name||"":"";kundeListe();mxAuf("fWer")};
 $("kSuche").oninput=kundeListe;
@@ -355,7 +361,7 @@ $("pakKm").addEventListener("input",()=>{const c=pakAuto();if(c)$("pakPr").value
 $("pakOk").onclick=()=>{const c=pakAuto(),km=Math.max(0,Math.round(+$("pakKm").value||0)),pr=$("pakPr").value.trim();
   S.pakKm=km;S.pakPr=km&&pr!==""&&c&&+pr!==paketPreis(c,km)?Math.max(0,+pr):null;S.text=null;mxZu();zeichne()};
 $("wPak").onclick=()=>{pakListe();mxAuf("fPak")};
-$("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim();S.preisHand=v===""?null:Math.max(0,Math.round(+v.replace(",",".")||0));S.text=null;zeichne()});
+$("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim();S.preisHand=v===""?null:Math.max(0,Math.round(+v.replace(",",".")||0));S.preisHandAuto=S.autos.length===1?S.autos[0]:null;S.text=null;zeichne()});
 function rabHoechstens(w){if(+String(w||"").replace(",",".")>90&&window.mxFehler)mxFehler("Rabatt höchstens 90 %. Gerechnet wird mit 90 %.",6000)}   // roter Hinweis statt still zu kappen (05.11.2026)
 $("aRab").addEventListener("input",()=>{rabHoechstens($("aRab").value);S.rab=Math.min(90,Math.max(0,+$("aRab").value.replace(",",".")||0));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
 ["aPreis","aRab"].forEach(i=>$(i).addEventListener("change",()=>zeichne()));
@@ -363,15 +369,16 @@ $("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.km
 
 /* ---------- Autos ---------- */
 function gewaehlt(){return D?S.autos.map(n=>D.cars.find(c=>nameV(c)===n)).filter(c=>c&&!belegt(nameV(c)).length):[]}
-function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
+function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=handFuer(nameV(c))?S.preisHand:mitRab(c,s,d),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
   return{c,name:nameV(c),liste:miete(c,s,d),preis:m,paket:pk,summe:m+pk}}   // „statt“ = Preis nach den Preisregeln vor dem Rabatt, wie Umsatzbringer und Mietvertrag (06.11.2026)
 function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[],ueb=[];
   D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:ueberIn(nameV(c))?ueb:frei).push({c,b})});
   S.autos=S.autos.filter(n=>frei.concat(ueb).some(x=>nameV(x.c)===n));
   $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
-    if(b.length){const bis=b.map(x=>x.bis).sort().pop(),sp=b.find(x=>x.sperre&&x.bis===bis);return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>'+(sp?"selbst gesperrt bis "+bis.split("-").reverse().join(".").slice(0,6)+(sp.grund?": "+esc(sp.grund):""):"belegt, wieder frei "+kurz(bis))+'</i></span><span class="p"></span></div>'}
-    const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),l=miete(c,s,d),u=ueberIn(n);
+    if(b.length){const bis=b.map(x=>x.bis).sort().pop(),sp=b.find(x=>x.sperre&&x.bis===bis),bu=b.filter(x=>x.bis===bis&&!x.sperre&&x.bisU).map(x=>x.bisU).sort().pop()||"";   // Uhrzeit wie Umsatzbringer und Kalender (Prüfung 06.11.2026, Runde 2)
+      return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>'+(sp?"selbst gesperrt bis "+bis.split("-").reverse().join(".").slice(0,6)+(sp.grund?": "+esc(sp.grund):""):"belegt, wieder frei "+kurz(bis)+(bu?" "+(bu.endsWith(":00")?String(+bu.slice(0,2)):bu)+" Uhr":""))+'</i></span><span class="p"></span></div>'}
+    const p=an&&handFuer(n)?S.preisHand:mitRab(c,s,d),l=miete(c,s,d),u=ueberIn(n);
     return '<div class="auto'+(an?" an":"")+(u?" ueb":"")+'" data-n="'+esc(n)+'"'+(u?' data-ueb="'+esc(ueberText(u))+'"':"")+'><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i>'+(u?'<i style="color:#9A6400;font-weight:700">'+esc(ueberText(u))+'</i>':"")+'</span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
   $("autos").innerHTML=frei.map(zeile).join("")+ueb.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
   $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;if(!S.autos.includes(n)&&e.dataset.ueb&&!confirm(n+" ist "+e.dataset.ueb+". Trotzdem anbieten?"))return;
@@ -407,7 +414,7 @@ function zeichne(){angMerken();laden();$("angWieder").classList.toggle("versteck
    if(document.activeElement!==pi)pi.value=c1?String(P[0].preis):"";
    if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl();
    if(document.activeElement!==$("aRab"))$("aRab").value=S.rab||"";
-   pbTipp($("aTipp"),vor,S.rab,c1?P[0].preis:0,S.preisHand!=null,()=>{S.preisHand=null;S.text=null;zeichne()})}
+   pbTipp($("aTipp"),vor,S.rab,c1?P[0].preis:0,!!c1&&handFuer(nameV(c1)),()=>{S.preisHand=null;S.text=null;zeichne()})}
   if(!P.length){$("sumL").innerHTML="<i>"+(D?"Erst ein Auto antippen":"Preise werden geladen …")+"</i>";$("sumR").innerHTML="";$("senden").classList.add("aus");return}
   const km=kmInkl();
   $("sumL").innerHTML="<b>"+esc(P.length===1?P[0].name:P.length+" Autos zur Auswahl")+"</b><i>"+esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU)+", "+tz(d))+"</i>";
@@ -1039,8 +1046,8 @@ zeigen();abgleichen();auslagernBald();
     "html body header .mxStart,html body .topbar .mxStart{float:none!important;margin:0 10px 0 0!important;border:0!important;padding:5px 12px 5px 9px!important;background:#E9E9EE!important;border-radius:10px!important;color:#C4161C!important;opacity:1!important;font-size:16px!important;font-weight:600!important;gap:3px!important;line-height:1.2!important;min-height:44px!important;box-sizing:border-box;display:inline-flex!important;align-items:center!important}html body .mxStart b{font-size:20px!important;font-weight:400!important;line-height:16px!important;margin-top:-2px!important}"+
     /* PC und Mac (1.11.2026, Baran: auf allen Geräten gleich): Kopfzeile und Inhalt in einer 680-px-Spalte in der Mitte.
        Muss ganz am Ende stehen: header{padding-left:16px!important} weiter oben (und look.py davor im head) würde sonst gewinnen */
-    (istStart||art==="kalender"||art==="schaeden"?"":"@media(min-width:760px){header,.topbar{padding-left:max(16px,calc((100% - 680px)/2))!important;padding-right:max(16px,calc((100% - 680px)/2))!important}"+
-      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2))!important}}");
+    (istStart||art==="kalender"||art==="schaeden"?"":"@media(min-width:760px){header,.topbar{padding-left:max(16px,calc((100% - 680px)/2 + 16px))!important;padding-right:max(16px,calc((100% - 680px)/2 + 16px))!important}"+
+      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2 + 16px))!important}}");
   document.head.appendChild(st);
 
   // ‹ Start und Symbol in der Kopfzeile

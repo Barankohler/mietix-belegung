@@ -629,13 +629,20 @@ function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===
   const A="https://barankohler.github.io/";
   if(b&&b.notiz==="Sperre"){blatt(esc(auto)+" selbst gesperrt bis "+kurzD(ausISO(b.bis))+(b.kunde?": "+esc(b.kunde):""),"Vom "+lang(ausISO(b.von))+" bis "+lang(ausISO(b.bis)),[
       {t:"Sperre aufheben",voll:true,f:()=>loeschen(b.id)}]);return}
-  if(b){const bb=b.bisPlan||b.bis,bu=b.bisUPlan||b.bisU,tg=tage(b.von,bb);blatt(esc(b.kunde||"Belegt")+(b.ueber?", überfällig":""),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(bb))+" "+kurzD(ausISO(bb))+" "+uhr(bu)+" ("+tg+(tg===1?" Tag":" Tage")+")"
+  if(b){const bb=b.bisPlan||b.bis,bu=b.bisUPlan||b.bisU,tg=tage(b.von,bb);
+    // Überfällig: Hinweis und Rückfrage, gesperrt wird nichts (Baran 05.11.2026, Prüfung 06.11.2026 Runde 2), nur wenn sonst nichts den Tag belegt
+    const nachUeb=b.ueber&&t>bb&&!BUCHUNGEN.some(x=>x!==b&&x.fahrzeug===auto&&!x.vorbei&&x.von<=t&&x.bis>=t);
+    const trotz=w=>{if(!confirm(kurzAuto(auto)+" ist seit "+kurzD(ausISO(bb))+" überfällig, noch nicht zurück. Trotzdem "+w+"?"))return false;
+      $("von").value=t;$("bis").value=nachISO(plusTage(d,1));textAngefasst=false;AUSWAHL=null;zeichne();return true};
+    blatt(esc(b.kunde||"Belegt")+(b.ueber?", überfällig":""),kurzAuto(auto)+": "+wtKurz(ausISO(b.von))+" "+kurzD(ausISO(b.von))+" "+uhr(b.vonU)+" bis "+wtKurz(ausISO(bb))+" "+kurzD(ausISO(bb))+" "+uhr(bu)+" ("+tg+(tg===1?" Tag":" Tage")+")"
       +(b.ueber?". Seit "+kurzD(ausISO(bb))+" überfällig, noch nicht zurück. Frei erst nach der Rückgabe":"")+(b.vorbei?". Zurück am "+kurzD(ausISO(b.bis)):"")+(b.telefon?". "+esc(b.telefon):""),[
       b.nr?{t:"Mietvertrag "+b.nr+" öffnen",voll:true,href:A+"mietix-vertrag/?nr="+encodeURIComponent(b.nr)+"&zeige=mappe"}:null,
       b.aid?{t:"Buchung öffnen",voll:true,href:A+"mietix-vertrag/?buchung="+encodeURIComponent(b.aid)}:null,
       b.aid?{t:"Mietvertrag anlegen",href:A+"mietix-vertrag/?anfrage="+encodeURIComponent(b.aid)}:null,   // Liste Punkt 18
       b.aid?{t:"Anfrage im Anfragen-Buch",href:A+"mietix-anfragen/?zeige="+encodeURIComponent(b.aid)}:null,
       b.telefon&&nummer(b.telefon)?{t:"WhatsApp an "+esc(vorname(b.kunde)),href:"https://wa.me/"+nummer(b.telefon)}:null,
+      nachUeb?{t:"Buchen",f:()=>{if(trotz("buchen"))setTimeout(()=>buchenAuf(auto),300)}}:null,
+      nachUeb?{t:"Mietvertrag anlegen",f:()=>{if(trotz("einen Mietvertrag anlegen")){const nb=$("bis").value;setTimeout(()=>{location.href=A+"mietix-vertrag/?auto="+encodeURIComponent(auto)+"&von="+t+"&bis="+nb+UHR_Q()},300)}}}:null,
       {t:"Zeitraum hier prüfen",f:()=>{$("von").value=b.von;$("bis").value=bb;textAngefasst=false;AUSWAHL=null;zeichne()}}].filter(Boolean));return}
   // frei: erster Tipp = dieser Tag, zweiter Tipp auf einen späteren Tag = bis dahin
   const von=$("von").value,bisAlt=$("bis").value;let nv=t,nb=nachISO(plusTage(d,1));
@@ -1309,16 +1316,24 @@ function bPreis(n){const p=bPreisRoh(n);return p===null?null:Math.round(p)}
 function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=$("von").value,b=$("bis").value,b0=b,t=bTage();
   if(!v||!b||t<1){$("freiKopf").textContent="Zeitraum oben wählen.";$("freiListe").innerHTML="";return}
   const vonZ=ZEIT(v,$("vonU").value),bisZ=ZEIT(b,$("bisU").value);let n=0;
-  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ);if(bl.length){const x=bl.find(y=>y.ueber)||bl.slice().sort((a,b)=>bZ(a).bis<bZ(b).bis?-1:bZ(a).bis>bZ(b).bis?1:0)[bl.length-1];
+  const zeilen=D.cars.map(c=>{const bl=belegtZeit(c.n,vonZ,bisZ),nurU=bl.length&&bl.every(y=>y.ueber);
+    // Nur überfällig (Baran 05.11.2026, Prüfung 06.11.2026 Runde 2): Hinweis bleibt, Buchen und Angebot fragen nach, zählt nicht als frei
+    if(nurU){const x=bl[0],p=bPreis(c.n),hw=kurzAuto(c.n)+" ist seit "+kurzD(ausISO(x.bisPlan))+" überfällig, noch nicht zurück";
+      return '<div class="fZeile" data-ueber="1"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i><i class="fRaus" style="color:#9A6400">seit '+kurzD(ausISO(x.bisPlan))+' überfällig, noch nicht zurück'+(x.kunde?" ("+esc(vorname(x.kunde))+")":"")+'</i></div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'" data-hw="'+esc(hw)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'" data-hw="'+esc(hw)+'">Buchen</button></div></div>'}
+    if(bl.length){const x=bl.find(y=>y.ueber)||bl.slice().sort((a,b)=>bZ(a).bis<bZ(b).bis?-1:bZ(a).bis>bZ(b).bis?1:0)[bl.length-1];
       const rot=x.notiz==="Sperre"?"bis "+kurzD(ausISO(x.bis))+(x.kunde?": "+esc(x.kunde):""):x.ueber?"seit "+kurzD(ausISO(x.bisPlan))+" überfällig":"kommt am "+kurzD(ausISO(x.bis))+" um "+uhr(x.bisU)+" zurück";
       return '<div class="fZeile belegt"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(x.notiz==="Sperre"?"selbst gesperrt":x.ueber?"noch nicht zurück"+(x.kunde?", "+esc(vorname(x.kunde)):""):"belegt"+(x.kunde?" von "+esc(vorname(x.kunde)):""))+'</i></div><div class="fRot">'+rot+'</div></div>'}
     // Geht das Auto direkt nach dem Zeitraum wieder raus, steht das rot darunter
     const raus=BUCHUNGEN.filter(b=>b.fahrzeug===c.n&&b.notiz!=="Sperre"&&!b.vorbei&&b.von===b0).map(b=>'<i class="fRaus">geht am '+kurzD(ausISO(b.von))+' um '+uhr(b.vonU)+' raus ('+esc(vorname(b.kunde))+')</i>').join("");
     n++;const p=bPreis(c.n);return '<div class="fZeile"><div><b>'+esc(kurzAuto(c.n))+'</b><i>'+(p!==null?EUR.format(p)+" für "+t+(t===1?" Tag":" Tage"):"an diesem Starttag nicht buchbar")+'</i>'+raus+'</div><div class="fKn"><button type="button" class="hellK" data-ang="'+esc(c.n)+'">Angebot</button><button type="button" data-buch="'+esc(c.n)+'">Buchen</button></div></div>'});
   $("freiKopf").textContent="";   // 1.11.2026 Baran: Zeile weg, die Liste zeigt es
-  $("freiListe").innerHTML=zeilen.filter(z=>!z.includes("belegt")).join("")+zeilen.filter(z=>z.includes("belegt")).join("");
-  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>buchenAuf(x.dataset.buch));
-  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>angebotFuer(x.dataset.ang))}
+  const istB=z=>z.includes("fZeile belegt"),istU=z=>z.includes('data-ueber="1"');
+  $("freiListe").innerHTML=zeilen.filter(z=>!istB(z)&&!istU(z)).join("")+zeilen.filter(istU).join("")+zeilen.filter(istB).join("");
+  const frage=x=>!x.dataset.hw||confirm(x.dataset.hw+". Trotzdem "+(x.dataset.buch?"buchen":"anbieten")+"?");
+  $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>{if(frage(x))buchenAuf(x.dataset.buch)});
+  // Angebot für ein überfälliges Auto: die Seite Angebot kennt die Rückfrage und den Hinweis, das Auto ist dort schon gewählt
+  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>{if(!frage(x))return;if(!x.dataset.hw){angebotFuer(x.dataset.ang);return}
+    location.href="https://barankohler.github.io/mietix-belegung/angebot.html?"+new URLSearchParams({auto:x.dataset.ang,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value}).toString()})}
 {const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
 function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
   $("bWarn").textContent=bl.length?"Achtung: in dem Zeitraum schon belegt"+(bl[0].kunde?" ("+vorname(bl[0].kunde)+")":"")+".":""}
@@ -1651,8 +1666,8 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
     "html body header .mxStart,html body .topbar .mxStart{float:none!important;margin:0 10px 0 0!important;border:0!important;padding:5px 12px 5px 9px!important;background:#E9E9EE!important;border-radius:10px!important;color:#C4161C!important;opacity:1!important;font-size:16px!important;font-weight:600!important;gap:3px!important;line-height:1.2!important;min-height:44px!important;box-sizing:border-box;display:inline-flex!important;align-items:center!important}html body .mxStart b{font-size:20px!important;font-weight:400!important;line-height:16px!important;margin-top:-2px!important}"+
     /* PC und Mac (1.11.2026, Baran: auf allen Geräten gleich): Kopfzeile und Inhalt in einer 680-px-Spalte in der Mitte.
        Muss ganz am Ende stehen: header{padding-left:16px!important} weiter oben (und look.py davor im head) würde sonst gewinnen */
-    (istStart||art==="kalender"||art==="schaeden"?"":"@media(min-width:760px){header,.topbar{padding-left:max(16px,calc((100% - 680px)/2))!important;padding-right:max(16px,calc((100% - 680px)/2))!important}"+
-      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2))!important}}");
+    (istStart||art==="kalender"||art==="schaeden"?"":"@media(min-width:760px){header,.topbar{padding-left:max(16px,calc((100% - 680px)/2 + 16px))!important;padding-right:max(16px,calc((100% - 680px)/2 + 16px))!important}"+
+      "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2 + 16px))!important}}");
   document.head.appendChild(st);
 
   // ‹ Start und Symbol in der Kopfzeile
