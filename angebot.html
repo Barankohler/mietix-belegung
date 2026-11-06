@@ -28,7 +28,7 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .auto .p{text-align:right;font-weight:800;font-size:16px;white-space:nowrap}.auto .p i{text-align:right}
 .auto.an{background:#EEF8F2}.auto.an b{color:#1E8E4E}
 .haken{display:inline-flex;width:22px;height:22px;border-radius:50%;background:#1E8E4E;color:#fff;font-size:13px;font-weight:900;align-items:center;justify-content:center;margin-right:8px;vertical-align:-4px}
-.auto.belegt{opacity:.45;cursor:default}
+.auto.belegt{opacity:.45;cursor:default}.auto.ueb:not(.an){opacity:.6}
 .leer{color:#8A8A8E;font-weight:700;font-size:14px;padding:6px 0}
 .zwei{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .wahl{background:#fff;border-radius:16px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:58px}
@@ -257,7 +257,7 @@ window.mxPaketPreis=(c,km)=>paketPreis(c,km);
 /* ---------- Belegt: Mietverträge, gebuchte Anfragen, Sperren (Anfragen und Angebote blockieren nie) ---------- */
 let BUCH=[];
 function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toLowerCase().replace(/\s+/g,"");
-  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&!v._weg){const jetzt=new Date(),jz=iso(jetzt)+"T"+String(jetzt.getHours()).padStart(2,"0")+":"+String(jetzt.getMinutes()).padStart(2,"0"),ueber=v.ueb&&(v.bisD+"T"+(v.bisU||"10:00"))<jz;b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",ueber:!!ueber,name:v.name})}});   // Baran 05.11.2026: überfällig ist ein Hinweis, nichts wird gesperrt
+  V.forEach(v=>{if(v.auto&&v.vonD&&v.bisD&&v.status!=="zurück"&&v.status!=="storniert"&&!v._weg){const jetzt=new Date(),jz=iso(jetzt)+"T"+String(jetzt.getHours()).padStart(2,"0")+":"+String(jetzt.getMinutes()).padStart(2,"0"),ueber=v.ueb&&(v.bisD+"T"+(v.bisU||"10:00"))<jz;b.push({auto:v.auto,von:v.vonD,bis:v.bisD,vonU:v.vonU||"10:00",bisU:v.bisU||"10:00",ueber:!!ueber,name:v.name})}});   // Baran 05.11.2026: überfällig ist ein Hinweis, nichts wird gesperrt
   lies("mietixAnfragen",[]).forEach(a=>{if(a.auto&&a.von&&a.bis&&a.status==="gebucht"&&!a._weg&&!(a.vertrag&&V.some(v=>v.nr===a.vertrag))&&!V.some(v=>nG(v.name)===nG(a.name)&&v.auto===a.auto&&v.vonD&&v.bisD&&v.vonD<a.bis&&v.bisD>a.von))
     b.push({auto:a.auto,von:a.von,bis:a.bis,vonU:a.vonU||(a.angebot&&a.angebot.vonU)||"10:00",bisU:a.bisU||(a.angebot&&a.angebot.bisU)||"10:00"})});
   lies("mietixSperren",[]).forEach(x=>{if(x.auto&&x.von&&x.bis&&!x._weg)b.push({auto:x.auto,von:x.von,bis:x.bis,vonU:"00:00",bisU:"00:00",sperre:true,grund:x.grund||""})});
@@ -265,6 +265,9 @@ function laden(){const b=[],V=lies("mietixVorgaenge",[]),nG=s=>String(s||"").toL
 const Z=(t,u)=>t+"T"+(u||"10:00");
 function belegt(auto){const v=Z(S.von,S.vonU),b=Z(S.bis,S.bisU);return BUCH.filter(x=>x.auto===auto&&!x.ueber&&v<Z(x.bis,x.bisU)&&b>Z(x.von,x.vonU))}
 const ueberfaellig=auto=>BUCH.find(x=>x.auto===auto&&x.ueber);
+// Überfällig zählt nicht als frei (06.11.2026, gleich wie Kalender und Umsatzbringer). Antippen fragt nach, gesperrt wird nichts (Baran 05.11.2026)
+const ueberIn=auto=>{const u=ueberfaellig(auto);return u&&Z(S.bis,S.bisU)>Z(u.bis,u.bisU)?u:null};
+const ueberText=u=>"seit "+kurz(u.bis)+" überfällig"+(u.name?", "+u.name:"")+", noch nicht zurück";
 
 /* ---------- Zustand ---------- */
 const S={von:iso(heute),bis:iso(plus(heute,3)),vonU:"10:00",bisU:"10:00",chip:"d3",autos:[],rab:0,preisHand:null,   // preisHand: von Hand getippte Miete, bleibt stehen
@@ -361,17 +364,18 @@ $("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.km
 /* ---------- Autos ---------- */
 function gewaehlt(){return D?S.autos.map(n=>D.cars.find(c=>nameV(c)===n)).filter(c=>c&&!belegt(nameV(c)).length):[]}
 function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),pk=S.pakKm?(S.pakPr!=null?S.pakPr:paketPreis(c,S.pakKm)):0;
-  return{c,name:nameV(c),liste:Math.round(l),preis:m,paket:pk,summe:m+pk}}
-function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[];
-  D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:frei).push({c,b})});
-  S.autos=S.autos.filter(n=>frei.some(x=>nameV(x.c)===n));
+  return{c,name:nameV(c),liste:miete(c,s,d),preis:m,paket:pk,summe:m+pk}}   // „statt“ = Preis nach den Preisregeln vor dem Rabatt, wie Umsatzbringer und Mietvertrag (06.11.2026)
+function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[],ueb=[];
+  D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:ueberIn(nameV(c))?ueb:frei).push({c,b})});
+  S.autos=S.autos.filter(n=>frei.concat(ueb).some(x=>nameV(x.c)===n));
   $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
     if(b.length){const bis=b.map(x=>x.bis).sort().pop(),sp=b.find(x=>x.sperre&&x.bis===bis);return '<div class="auto belegt"><span class="n"><b>'+esc(n)+'</b><i>'+(sp?"selbst gesperrt bis "+bis.split("-").reverse().join(".").slice(0,6)+(sp.grund?": "+esc(sp.grund):""):"belegt, wieder frei "+kurz(bis))+'</i></span><span class="p"></span></div>'}
-    const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),l=Math.round(grund(c,s,d));
-    return '<div class="auto'+(an?" an":"")+'" data-n="'+esc(n)+'"><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i>'+(()=>{const u=ueberfaellig(n);return u?'<i style="color:#9A6400;font-weight:700">Rückgabe war '+kurz(u.bis)+(u.name?", "+esc(u.name):"")+', noch nicht zurück</i>':""})()+'</span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
-  $("autos").innerHTML=frei.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
-  $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;S.autos=S.autos.includes(n)?S.autos.filter(x=>x!==n):S.autos.concat(n);S.text=null;zeichne()})}
+    const p=an&&S.preisHand!=null&&S.autos.length===1?S.preisHand:mitRab(c,s,d),l=miete(c,s,d),u=ueberIn(n);
+    return '<div class="auto'+(an?" an":"")+(u?" ueb":"")+'" data-n="'+esc(n)+'"'+(u?' data-ueb="'+esc(ueberText(u))+'"':"")+'><span class="n"><b>'+(an?'<span class="haken">✓</span>':"")+esc(n)+'</b><i>'+E(p/d)+' pro Tag</i>'+(u?'<i style="color:#9A6400;font-weight:700">'+esc(ueberText(u))+'</i>':"")+'</span><span class="p">'+E(p)+(an&&l>p?'<i>statt '+E(l)+'</i>':"")+'</span></div>'};
+  $("autos").innerHTML=frei.map(zeile).join("")+ueb.map(zeile).join("")+weg.map(zeile).join("")||'<div class="leer">Keine Autos</div>';
+  $("autos").querySelectorAll("[data-n]").forEach(e=>e.onclick=()=>{const n=e.dataset.n;if(!S.autos.includes(n)&&e.dataset.ueb&&!confirm(n+" ist "+e.dataset.ueb+". Trotzdem anbieten?"))return;
+    S.autos=S.autos.includes(n)?S.autos.filter(x=>x!==n):S.autos.concat(n);S.text=null;zeichne()})}
 
 /* ---------- Text ---------- */
 function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map(posten),k=S.kunde,km=kmInkl();
