@@ -1329,10 +1329,10 @@ function freiListe(){if(!$("freiListe")||!D.cars||!D.cars.length)return;const v=
   $("freiKopf").textContent="";   // 1.11.2026 Baran: Zeile weg, die Liste zeigt es
   const istB=z=>z.includes("fZeile belegt"),istU=z=>z.includes('data-ueber="1"');
   $("freiListe").innerHTML=zeilen.filter(z=>!istB(z)&&!istU(z)).join("")+zeilen.filter(istU).join("")+zeilen.filter(istB).join("");
-  const frage=x=>!x.dataset.hw||confirm(x.dataset.hw+". Trotzdem "+(x.dataset.buch?"buchen":"anbieten")+"?");
+  const frage=x=>!x.dataset.hw||confirm(x.dataset.hw+". Trotzdem buchen?");
   $("freiListe").querySelectorAll("[data-buch]").forEach(x=>x.onclick=()=>{if(frage(x))buchenAuf(x.dataset.buch)});
-  // Angebot für ein überfälliges Auto: die Seite Angebot kennt die Rückfrage und den Hinweis, das Auto ist dort schon gewählt
-  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>{if(!frage(x))return;if(!x.dataset.hw){angebotFuer(x.dataset.ang);return}
+  // Angebot für ein überfälliges Auto: ohne Rückfrage (Baran 08.11.2026), die Seite Angebot zeigt den Hinweis, das Auto ist dort schon gewählt
+  $("freiListe").querySelectorAll("[data-ang]").forEach(x=>x.onclick=()=>{if(!x.dataset.hw){angebotFuer(x.dataset.ang);return}
     location.href="https://barankohler.github.io/mietix-belegung/angebot.html?"+new URLSearchParams({auto:x.dataset.ang,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value}).toString()})}
 {const _z=zeichne;zeichne=function(){const r=_z.apply(this,arguments);try{freiListe()}catch(e){}return r}}
 function bWarnen(){const v=$("von").value,b=$("bis").value;const bl=v&&b?belegtZeit($("bAuto").value,ZEIT(v,$("vonU").value),ZEIT(b,$("bisU").value)):[];
