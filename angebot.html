@@ -13,7 +13,7 @@ header h1{margin:0;font-size:28px;font-weight:800}
 main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .versteckt{display:none!important}
 .k{background:#fff;border-radius:18px;padding:13px 14px;margin-bottom:10px}
-.lbl{font-size:11.5px;font-weight:800;color:#8A8A8E;text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px}
+.lbl{font-size:15px;font-weight:800;color:#1C1C1E;text-transform:uppercase;letter-spacing:.2px;margin:0 0 8px}
 .wer{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wer b{display:block;font-size:17px;font-weight:800}.wer i{display:block;font-style:normal;font-size:13.5px;color:#8A8A8E;font-weight:600;margin-top:2px}
 .wer em{font-style:normal;color:#C4161C;font-size:26px;font-weight:700;line-height:1}
@@ -58,7 +58,7 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .knopf{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-weight:800;font-size:16px;font-family:inherit;background:#C4161C;color:#fff;margin-top:14px;cursor:pointer}
 .knopf.hell{background:#F2F2F4;color:#1C1C1E}
 #kSuche{width:100%;border:0;border-radius:12px;padding:12px 14px;font-weight:600;font-size:16px;font-family:inherit;background:#F2F2F4;margin-bottom:6px}
-.gk{font-size:11.5px;font-weight:800;color:#8A8A8E;text-transform:uppercase;letter-spacing:.6px;margin:12px 4px 6px}
+.gk{font-size:15px;font-weight:800;color:#1C1C1E;text-transform:uppercase;letter-spacing:.2px;margin:12px 4px 6px}
 .liste{border:1px solid #E4E4E7;border-radius:14px;overflow:hidden}
 .kz{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid #EFEFF2;cursor:pointer}.kz:first-child{border-top:0}.kz:active{background:#F6F6F7}
 .kz .t{flex:1;min-width:0}.kz b{display:block;font-size:16px;font-weight:800}.kz small{display:block;font-size:13px;color:#8A8A8E;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -67,7 +67,7 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 mark{background:#FFF1A8;color:inherit;border-radius:3px}
 #text{white-space:pre-wrap;font-size:15px;line-height:1.45;background:#DCF8C6;border-radius:14px 14px 3px 14px;padding:12px 13px;margin:4px 0 0}
 #textEdit{width:100%;min-height:260px;border:1.5px solid #E4E4E7;border-radius:12px;padding:12px;font-weight:500;font-size:16px;font-family:inherit;line-height:1.45}
-.meld{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1E8E4E;color:#fff;padding:11px 18px;border-radius:999px;font-weight:800;font-size:15px;z-index:95;display:none;white-space:nowrap}
+.meld{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1E8E4E;color:#fff;padding:11px 18px;border-radius:999px;font-weight:800;font-size:15px;z-index:95;display:none;width:max-content;max-width:calc(100vw - 32px);text-align:center}
 @media(max-width:380px){.mehr{gap:12px}.mehr span,.mehr a{font-size:13px!important}}
 
 .mxKnopf,.mxKlapp>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;background:#fff;border:1.5px solid #E4E4E7;border-radius:16px;padding:14px 16px;min-height:60px;text-align:left;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);color:#1C1C1E;margin:0 0 10px;-webkit-tap-highlight-color:transparent}
@@ -241,8 +241,11 @@ const tz=t=>t+(t===1?" Tag":" Tage");
 const ziff=t=>String(t||"").replace(/\D/g,"");
 const waNr=t=>nkNummer(t);   // eine Regel für alle Seiten (05.11.2026)
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
-const heute=new Date();heute.setHours(12,0,0,0);
+let heute=new Date();heute.setHours(12,0,0,0);
 function meld(t){const m=$("meld");m.textContent=t;m.style.display="block";clearTimeout(meld.t);meld.t=setTimeout(()=>m.style.display="none",2400)}
+const fehl=t=>window.mxFehler?mxFehler(t,4000):meld(t);   // geht etwas nicht: rot, grün nur für Erfolg (09.11.2026)
+// Zahl lesen wie in Neue Buchung im Kalender: 1.500 = 1500, 49,5 = 49.5; null = nicht lesbar (09.11.2026)
+function zahlLesen(v){let s=String(v||"").trim();if(!/\d/.test(s)||/[^\d,.\s€km]/i.test(s))return null;s=s.replace(/[^\d,.]/g,"");if(s.includes(",")){s=s.replace(/\./g,"").replace(",",".")}else if((s.match(/\./g)||[]).length>1||/\.\d{3}$/.test(s))s=s.replace(/\./g,"");const n=+s;return isNaN(n)?null:n}
 
 /* ---------- Preise wie im Preisrechner ---------- */
 let D=null;
@@ -326,16 +329,16 @@ function anfrageNehmen(x){nachSenden();const ab=x.angebot||{};S.kunde={name:x.na
   if(x.von&&x.bis&&tage(x.von,x.bis)>0){S.von=x.von;S.bis=x.bis;S.chip=""}S.vonU=x.vonU||ab.vonU||S.vonU;S.bisU=x.bisU||ab.bisU||S.bisU;
   if(ab.rabatt!=null)S.rab=+ab.rabatt||0;if(ab.paketKm){S.pakKm=+ab.paketKm;const pc=D&&D.cars.find(c=>nameV(c)===ab.auto);S.pakPr=ab.paketPreis!=null&&pc&&+ab.paketPreis!==paketPreis(pc,S.pakKm)?+ab.paketPreis:null}
   if(ab.kmInkl!=null&&ab.von===S.von&&ab.bis===S.bis)S.kmInkl=+ab.kmInkl;
-  S.autos=[];const w=ab.auto||x.auto;if(w&&D&&D.cars.some(c=>nameV(c)===w))S.autos=[w];
+  const w=ab.auto||x.auto,wOk=w&&D&&D.cars.some(c=>nameV(c)===w);if(wOk)S.autos=[w];   // Anfrage ohne Auto lässt gewähltes Auto und getippten Preis stehen (09.11.2026)
   // von Hand abgemachte Miete aus dem letzten Angebot bleibt stehen (01.11.2026)
-  {const c=S.autos.length===1&&D?D.cars.find(c=>nameV(c)===S.autos[0]):null;S.preisHand=null;
+  if(wOk){const c=S.autos.length===1&&D?D.cars.find(c=>nameV(c)===S.autos[0]):null;S.preisHand=null;
    const abM=+ab.miete||(+ab.preis?+ab.preis-(+ab.paketPreis||0):0);   // alte Einträge haben nur den Gesamtpreis
    if(c&&abM&&ab.auto===S.autos[0]&&ab.von===S.von&&ab.bis===S.bis&&Math.abs(abM-mitRab(c,wt(S.von),t()))>1){S.preisHand=abM;S.preisHandAuto=S.autos[0]}}
   zeichne()}
 $("wer").onclick=()=>{$("kSuche").value="";$("nNr").value=S.kunde&&!S.kunde.anfrage?S.kunde.nummer||"":"";$("nName").value=S.kunde&&!S.kunde.anfrage?S.kunde.name||"":"";kundeListe();mxAuf("fWer")};
 $("kSuche").oninput=kundeListe;
 $("nOk").onclick=()=>{const nr=$("nNr").value.trim(),nm=$("nName").value.trim();if(!nr&&!nm){$("nNr").focus();if(window.mxFehler)mxFehler("Erst Nummer oder Name eintippen",3000);return}
-  if(nr&&ziff(nr).length<6){meld("Nummer unvollständig");$("nNr").focus();return}
+  if(nr&&ziff(nr).length<6){fehl("Nummer unvollständig");$("nNr").focus();return}
   nachSenden();S.kunde={name:nm,nummer:nr,anfrage:null,info:nr||"ohne Nummer"};S.text=null;mxZu();zeichne()};
 $("nOhne").onclick=()=>{S.kunde=null;S.text=null;mxZu();zeichne()};
 
@@ -359,13 +362,13 @@ function pakListe(){$("pakInd").classList.add("versteckt");const c=pakAuto();if(
   $("kmInkl").value=kmInkl()}
 $("pakKm").addEventListener("input",()=>{const c=pakAuto();if(c)$("pakPr").value=$("pakKm").value?paketPreis(c,+$("pakKm").value):""});
 $("pakOk").onclick=()=>{const c=pakAuto(),km=Math.max(0,Math.round(+$("pakKm").value||0)),pr=$("pakPr").value.trim();
-  S.pakKm=km;S.pakPr=km&&pr!==""&&c&&+pr!==paketPreis(c,km)?Math.max(0,+pr):null;S.text=null;mxZu();zeichne()};
+  const prG=Math.max(0,Math.round(+pr||0));S.pakKm=km;S.pakPr=km&&pr!==""&&c&&prG!==paketPreis(c,km)?prG:null;S.text=null;mxZu();zeichne()};
 $("wPak").onclick=()=>{pakListe();mxAuf("fPak")};
-$("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim();S.preisHand=v===""?null:Math.max(0,Math.round(+v.replace(",",".")||0));S.preisHandAuto=S.autos.length===1?S.autos[0]:null;S.text=null;zeichne()});
+$("aPreis").addEventListener("input",()=>{const v=$("aPreis").value.trim(),z=v===""?0:zahlLesen(v);if(z===null){fehl("Preis nicht lesbar. Bitte nur Zahlen eintippen.");return}S.preisHand=v===""?null:Math.round(z);S.preisHandAuto=S.autos.length===1?S.autos[0]:null;S.text=null;zeichne()});
 function rabHoechstens(w){if(+String(w||"").replace(",",".")>90&&window.mxFehler)mxFehler("Rabatt höchstens 90 %. Gerechnet wird mit 90 %.",6000)}   // roter Hinweis statt still zu kappen (05.11.2026)
-$("aRab").addEventListener("input",()=>{rabHoechstens($("aRab").value);S.rab=Math.min(90,Math.max(0,+$("aRab").value.replace(",",".")||0));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
+$("aRab").addEventListener("input",()=>{if(isNaN(+$("aRab").value.replace(",","."))){fehl("Rabatt nicht lesbar. Bitte nur Zahlen eintippen.");return}rabHoechstens($("aRab").value);S.rab=Math.min(90,Math.max(0,+$("aRab").value.replace(",",".")||0));S.preisHand=null;S.text=null;zeichne()});   // neuer Rabatt rechnet den Preis neu, wie überall
 ["aPreis","aRab"].forEach(i=>$(i).addEventListener("change",()=>zeichne()));
-$("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim();S.kmInkl=v===""?null:Math.max(0,Math.round(+v));S.text=null;zeichne()});
+$("kmInkl").addEventListener("change",()=>{const v=$("kmInkl").value.trim(),z=v===""?0:zahlLesen(v);if(z===null){fehl("Kilometer nicht lesbar. Bitte nur Zahlen eintippen.");$("kmInkl").value=kmInkl();return}S.kmInkl=v===""?null:Math.round(z);S.text=null;zeichne()});
 
 /* ---------- Autos ---------- */
 function gewaehlt(){return D?S.autos.map(n=>D.cars.find(c=>nameV(c)===n)).filter(c=>c&&!belegt(nameV(c)).length):[]}
@@ -373,7 +376,7 @@ function posten(c){const d=t(),s=wt(S.von),l=grund(c,s,d),m=handFuer(nameV(c))?S
   return{c,name:nameV(c),liste:miete(c,s,d),preis:m,paket:pk,summe:m+pk}}   // „statt“ = Preis nach den Preisregeln vor dem Rabatt, wie Umsatzbringer und Mietvertrag (06.11.2026)
 function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[],ueb=[];
   D.cars.forEach(c=>{const b=belegt(nameV(c));(b.length?weg:ueberIn(nameV(c))?ueb:frei).push({c,b})});
-  S.autos=S.autos.filter(n=>frei.concat(ueb).some(x=>nameV(x.c)===n));
+  {const raus=S.autos.filter(n=>!frei.concat(ueb).some(x=>nameV(x.c)===n));if(raus.length){S.autos=S.autos.filter(n=>!raus.includes(n));fehl(raus.join(", ")+(raus.length===1?" ist":" sind")+" in diesem Zeitraum nicht frei und nicht mehr gewählt.")}}
   $("autoLbl").textContent=frei.length?"Auto antippen, "+frei.length+" frei":"Kein Auto frei";
   const zeile=({c,b})=>{const n=nameV(c),an=S.autos.includes(n);
     if(b.length){const bis=b.map(x=>x.bis).sort().pop(),sp=b.find(x=>x.sperre&&x.bis===bis),bu=b.filter(x=>x.bis===bis&&!x.sperre&&x.bisU).map(x=>x.bisU).sort().pop()||"";   // Uhrzeit wie Umsatzbringer und Kalender (Prüfung 06.11.2026, Runde 2)
@@ -388,7 +391,9 @@ function autosZeichnen(){if(!D)return;const d=t(),s=wt(S.von),frei=[],weg=[],ueb
 function text(){const g=gewaehlt();if(!g.length||!D)return"";const d=t(),P=g.map(posten),k=S.kunde,km=kmInkl();
   const z=[];
   const zr="Für "+(S.von.slice(0,4)===S.bis.slice(0,4)?kurz(S.von):lang(S.von))+(S.vonU?" "+uhr(S.vonU):"")+" bis "+lang(S.bis)+(S.bisU?" "+uhr(S.bisU):"")+" ("+tz(d)+")";
-  z.push((k&&k.anfrage?"vielen Dank für Ihre Anfrage. ":"gerne mache ich Ihnen ein Angebot. ")+zr+(P.length===1?" ist der "+P[0].name+" frei.":" sind diese Fahrzeuge frei."));z.push("");
+  // Überfälliges Auto bleibt ohne Rückfrage wählbar, dem Kunden wird aber nicht „frei“ zugesagt (09.11.2026)
+  const ueb=P.some(p=>ueberIn(p.name));
+  z.push((k&&k.anfrage&&!k.ohneAnfrage?"vielen Dank für Ihre Anfrage. ":"gerne mache ich Ihnen ein Angebot. ")+zr+(ueb?" biete ich Ihnen "+(P.length===1?"den "+P[0].name:"diese Fahrzeuge")+" an.":P.length===1?" ist der "+P[0].name+" frei.":" sind diese Fahrzeuge frei."));z.push("");
   if(P.length===1){const p=P[0];z.push("*"+p.name+": "+E(p.preis)+(p.liste>p.preis?" statt "+E(p.liste):"")+"*");
     z.push("Inklusive "+km.toLocaleString("de-DE")+" km"+(S.pakKm?", dazu +"+S.pakKm.toLocaleString("de-DE")+" km für "+(p.paket?E(p.paket):"0 €, ein Geschenk von uns"):"")+".");
     if(+p.c.kaution>0)z.push("Kaution "+E(+p.c.kaution)+", kommt nach der Rückgabe komplett zurück.")}
@@ -433,28 +438,30 @@ function merken(){const g=gewaehlt(),k=S.kunde;if(!g.length||!k||!(k.name||k.num
     paketKm:S.pakKm||0,paketPreis:S.pakKm?p.paket:0,freikm:km+(S.pakKm||0),autos:P.map(q=>({auto:q.name,preis:q.preis,paket:q.paket})),am:j.toISOString()};
   Object.assign(x,{auto:p.name,von:S.von,bis:S.bis,vonU:S.vonU,bisU:S.bisU,angebot:ang});if(k.name&&!x.name)x.name=k.name;if(k.nummer&&!x.nummer)x.nummer=k.nummer;
   if(x.status==="offen"||!x.status)x.status="angebot";delete x.nachgefasst;
-  schreib("mietixAnfragen",l);S.kunde.anfrage=x.id;S.kunde.info="Anfrage, Angebot gespeichert"+(x.nummer?", "+x.nummer:"");ANG_GESENDET=angBild();ANG_WIEDER=false;if(hatBuchung){S.kunde.info="Hat schon eine Buchung, Angebot als neue Anfrage gespeichert";meld("Hat schon eine Buchung, Angebot steht als neue Anfrage")}}
+  schreib("mietixAnfragen",l);if(!S.kunde.anfrage)S.kunde.ohneAnfrage=true;S.kunde.anfrage=x.id;S.kunde.info="Anfrage, Angebot gespeichert"+(x.nummer?", "+x.nummer:"");ANG_GESENDET=angBild();ANG_WIEDER=false;if(hatBuchung){S.kunde.info="Hat schon eine Buchung, Angebot als neue Anfrage gespeichert";meld("Hat schon eine Buchung, Angebot steht als neue Anfrage")}}
 
 /* ---------- Senden, Kopieren, Bild ---------- */
-function bereit(){if(!gewaehlt().length){meld("Erst ein Auto antippen");return false}if(S.von<iso(heute)&&!confirm("Der Zeitraum beginnt in der Vergangenheit ("+S.von.split("-").reverse().join(".")+"). Trotzdem senden?"))return false;return true}
+function bereit(){if(!gewaehlt().length){fehl("Erst ein Auto antippen");return false}if(S.von<iso(heute)&&!confirm("Der Zeitraum beginnt in der Vergangenheit ("+S.von.split("-").reverse().join(".")+"). Trotzdem senden?"))return false;return true}
 $("senden").innerHTML=nkPaar("gross");
-$("senden").querySelector('[data-nk="wa"]').onclick=async()=>{if(!bereit())return;const tx=fertigerText(),k=S.kunde;merken();zeichne();
+const textLeer=tx=>{if(String(tx).trim())return false;fehl("Der Text ist leer. Es wurde nichts gesendet.");return true};
+let waZuletzt=0;
+$("senden").querySelector('[data-nk="wa"]').onclick=async()=>{if(!bereit())return;const tx=fertigerText(),k=S.kunde;if(textLeer(tx))return;if(Date.now()-waZuletzt<1500)return;waZuletzt=Date.now();merken();zeichne();   // zweimal schnell tippen öffnet nur eine Nachricht (09.11.2026)
   if(k&&k.nummer){const u="https://wa.me/"+waNr(k.nummer)+"?text="+encodeURIComponent(tx);if(!window.open(u,"_blank"))location.href=u;return}   // die Seite bleibt offen (04.11.2026)
   if(navigator.share){try{await navigator.share({text:tx});return}catch(e){if(e&&e.name==="AbortError")return}}
   {const u="https://wa.me/?text="+encodeURIComponent(tx);if(!window.open(u,"_blank"))location.href=u}};   // die Seite bleibt offen (04.11.2026)
-$("senden").querySelector('[data-nk="ko"]').onclick=async()=>{if(!bereit())return;const tx=fertigerText();if(await nkKopieren(tx)){merken();zeichne()}};
+$("senden").querySelector('[data-nk="ko"]').onclick=async()=>{if(!bereit())return;const tx=fertigerText();if(textLeer(tx))return;if(await nkKopieren(tx)){merken();zeichne()}};
 $("angNeu").onclick=()=>{try{localStorage.removeItem(ANG_K)}catch(e){}location.href=location.pathname};
 $("textEdit").addEventListener("input",()=>{window.HAND_AUS=true;S.text=$("textEdit").value;window.HAND_AUS=false;angMerken()});   // ✕ im Fenster verliert das Getippte nicht
 $("mText").onclick=()=>{if(!bereit())return;$("text").textContent=fertigerText();$("text").classList.remove("versteckt");$("textEdit").classList.add("versteckt");$("tAendern").textContent="Text ändern";mxAuf("fText")};
 $("tAendern").onclick=()=>{const ed=$("textEdit");if(ed.classList.contains("versteckt")){ed.value=fertigerText();ed.classList.remove("versteckt");$("text").classList.add("versteckt");$("tAendern").textContent="Fertig";ed.focus()}
   else{window.HAND_AUS=true;S.text=ed.value.trim()===text().trim()?null:ed.value;window.HAND_AUS=false;$("text").textContent=fertigerText();ed.classList.add("versteckt");$("text").classList.remove("versteckt");$("tAendern").textContent="Text ändern"}};
-$("mBild").onclick=()=>{const g=gewaehlt();if(g.length!==1){meld(g.length?"Bild nur mit einem Auto":"Erst ein Auto antippen");return}merken();zeichne();
+$("mBild").onclick=()=>{const g=gewaehlt();if(g.length>1){fehl("Bild nur mit einem Auto");return}if(!bereit())return;merken();zeichne();
   const p=posten(g[0]),d=t(),B=1080,H=1350,kv=document.createElement("canvas");kv.width=B;kv.height=H;
   const x=kv.getContext("2d"),F=(gr,w)=>{x.font=(w||800)+" "+gr+"px -apple-system,Helvetica,Arial,sans-serif"},HELL="#F4F1EC",LEISE="rgba(244,241,236,.45)";
   const dd=t0=>{const q=ausISO(t0);return["SO","MO","DI","MI","DO","FR","SA"][q.getDay()]+" "+String(q.getDate()).padStart(2,"0")+"."+String(q.getMonth()+1).padStart(2,"0")+"."};
   const gr=x.createLinearGradient(0,0,B*.35,H);gr.addColorStop(0,"#1C1C20");gr.addColorStop(.55,"#131316");gr.addColorStop(1,"#0A0A0C");x.fillStyle=gr;x.fillRect(0,0,B,H);
   x.textAlign="center";F(30,700);x.fillStyle=LEISE;x.fillText("MIETIX SPORTWAGENVERMIETUNG",B/2,120);
-  x.font="300 74px -apple-system,Helvetica,Arial,sans-serif";x.fillStyle=HELL;x.fillText(p.name.toUpperCase(),B/2,226);x.fillStyle="rgba(196,22,28,.85)";x.fillRect(B/2-52,264,104,3);
+  const nG=p.name.toUpperCase(),nF=g=>"300 "+g+"px -apple-system,Helvetica,Arial,sans-serif";x.font=nF(74);x.font=nF(Math.min(74,Math.floor(74*(B-120)/x.measureText(nG).width)));x.fillStyle=HELL;x.fillText(nG,B/2,226);x.fillStyle="rgba(196,22,28,.85)";x.fillRect(B/2-52,264,104,3);
   F(34,500);x.fillStyle=LEISE;x.fillText(dd(S.von)+" "+S.vonU+"   BIS   "+dd(S.bis)+" "+S.bisU,B/2,340);x.fillText(d+(d===1?" TAG":" TAGE"),B/2,392);
   let y=520;const proz=p.liste>p.preis?Math.round((1-p.preis/p.liste)*100):0;
   if(proz>0){F(46,700);x.fillStyle="#C4161C";x.fillText(proz+" % RABATT",B/2,y);F(40,600);x.fillStyle=LEISE;const alt="statt "+E(p.liste);x.fillText(alt,B/2,y+72);
@@ -480,7 +487,10 @@ function vonAdresse(){const q=new URLSearchParams(location.search);if(!q.toStrin
 fetch("https://barankohler.github.io/mietix-preise/preise.json",{cache:"no-store"}).then(r=>r.json()).then(j=>{D=j;vonAdresse();zeichne()})
   .catch(()=>{$("autos").innerHTML='<div class="leer">Preise konnten nicht geladen werden. Internet prüfen und neu laden.</div>'});
 window.addEventListener("mietix-abgleich",()=>zeichne());window.addEventListener("storage",()=>zeichne());
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)zeichne()});
+// Über Nacht offen: beim Zurückkehren gilt das neue Datum. Ein Zeitraum ab dem alten Heute rückt mit, von Hand geänderter Text bleibt, dann fragt das Senden nach (09.11.2026)
+function neuerTag(){const j=new Date();j.setHours(12,0,0,0);if(iso(j)===iso(heute))return;const alt=iso(heute),n=t();heute=j;
+  if(S.von===alt&&S.text==null){S.von=iso(j);S.bis=iso(plus(j,n));if(S.chip[0]!=="d")S.chip=""}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){neuerTag();zeichne()}});
 zeichne();
 </script><script>/* Mietix Abgleich: Mietverträge, Anfragen, Kunden und Fahrzeuge auf allen Geräten gleich (Supabase Frankfurt, seit 26.10.2026).
    Wird von tools/vertrag/build_html.py und tools/anfragen/build_html.py in die Seite eingebaut.

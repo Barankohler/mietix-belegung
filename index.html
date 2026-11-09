@@ -220,7 +220,7 @@ footer{margin:22px 18px 0;font-size:11px;color:var(--grey);line-height:1.7;}
 .mxKlein{margin-top:8px}.mxKlein>summary{display:inline-flex;align-items:center;gap:6px;list-style:none;cursor:pointer;font-size:14px;font-weight:800;color:#1C1C1E;background:#F2F2F4;border-radius:999px;padding:9px 14px;min-height:40px;box-sizing:border-box}
 .mxKlein>summary::-webkit-details-marker{display:none}.mxKlein>summary em{font-style:normal;color:#C4161C;font-size:18px;line-height:1;transition:transform .15s}.mxKlein[open]>summary em{transform:rotate(90deg)}
 .mxText{font-size:14px;color:#8A8A8E;font-weight:600;margin:0 0 10px;line-height:1.4}
-</style></head>
+</style><style>.feldname{font-size:15px!important;font-weight:800!important;color:#1C1C1E!important;letter-spacing:.2px!important}</style></head>
 <body><script>
 /* Listenkopf: Suche, Auswahlfelder, Trefferzahl, Filter zurücksetzen (04.11.2026) */
 (function(){if(window.mxListenkopf)return;
@@ -468,7 +468,7 @@ function wtKurz(d){return ["Mo","Di","Mi","Do","Fr","Sa","So"][wtIndex(d)];}
 function nachricht(freieAutos,von,bis,dauer,anzFrei){
   const v=ausISO(von), b=ausISO(bis), start=wtIndex(v);
   if(!freieAutos.length && anzFrei>0){
-    return (EINZEL?"Bitte oben das Auto antippen, das Sie anbieten wollen.\n":"Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n")
+    return (EINZEL?"Bitte oben das Auto antippen, das du anbieten willst.\n":"Bitte oben die Fahrzeuge antippen, die im Text stehen sollen.\n")
          + "Im Zeitraum " + wtKurz(v)+" "+kurzD(v)+" bis "+wtKurz(b)+" "+lang(b)
          + " sind " + anzFrei + (anzFrei===1?" Fahrzeug":" Fahrzeuge") + " frei.";
   }
@@ -556,6 +556,7 @@ function laden(){
 }
 
 function zeichne(){
+  datumZurueck();
   const von=$("von").value, bis=$("bis").value;
   if(typeof zeichneTafel==="function")zeichneTafel();
   if(typeof angZeitraum==="function"&&!$("sAng").classList.contains("versteckt")){angZeitraum();kmChips()}
@@ -619,17 +620,19 @@ function zeichne(){
 function loeschen(id){
   const b=BUCHUNGEN.find(x=>x.id===id);
   if(!confirm("Sperre "+(b?b.fahrzeug+" "+lang(ausISO(b.von)):"")+" aufheben?"))return;
-  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));laden();melde("Sperre aufgehoben.",true);
+  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));laden();if(window.nkMeldung)nkMeldung("Sperre aufgehoben");
 }
 
 /* --- Start --- */
-const heute=new Date();
+let heute=new Date();
 $("von").value=nachISO(heute);
 $("bis").value=nachISO(plusTage(heute,3));
-$("von").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
+let VON_OK=$("von").value,BIS_OK=$("bis").value;
+function datumZurueck(){if(!$("von").value)$("von").value=VON_OK;if(!$("bis").value)$("bis").value=BIS_OK;VON_OK=$("von").value;BIS_OK=$("bis").value}   // geleertes Datumsfeld: letzter Wert bleibt, wie im Angebot (09.11.2026)
+$("von").addEventListener("change",()=>{datumZurueck();textAngefasst=false;AUSWAHL=null;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   $("bis").min=nachISO(plusTage(ausISO($("von").value),1));zeichne();});
-$("bis").addEventListener("change",()=>{textAngefasst=false;AUSWAHL=null;
+$("bis").addEventListener("change",()=>{datumZurueck();textAngefasst=false;AUSWAHL=null;
   if(tage($("von").value,$("bis").value)<1)$("bis").value=nachISO(plusTage(ausISO($("von").value),1));
   zeichne();});
 let textAngefasst=false;
@@ -683,21 +686,22 @@ $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
       namen=[...new Set(vo.map(v=>v.name).concat(an.map(a=>a.name||"ohne Namen")))];
     if(!confirm(a0+" von "+von.split("-").reverse().join(".")+" bis "+bis.split("-").reverse().join(".")+" sperren?"+(namen.length?"\n\nAchtung, in der Zeit "+(vo.length&&an.length?"vermietet oder gebucht":vo.length?"vermietet":"gebucht")+": "+namen.join(", "):"")))return}
   const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
-  schreib("mietixSperren",l);$("spGrund").value="";if(window.SP_ENT)SP_ENT.weg();laden();fZu()};
+  schreib("mietixSperren",l);$("spGrund").value="";if(window.SP_ENT)SP_ENT.weg();laden();fZu();if(window.nkMeldung)nkMeldung("Gesperrt")};
 document.addEventListener("DOMContentLoaded",()=>{if(window.mxEntwurf){window.SP_ENT=mxEntwurf("#fSperren","kalSperre",["spAuto","spVon","spBis","spGrund"]);SP_ENT.holen()}});   // Getipptes bleibt beim Neuladen (05.11.2026)
 function fAuf(id){if(!window.FENSTER_V){try{history.pushState({mxBlatt:1},"");window.FENSTER_V=true}catch(e){}}$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
 window.addEventListener("popstate",()=>{if(window.BLATT_V&&window.blattZuV){window.BLATT_V=false;window.blattZuV()}if(window.FENSTER_V){window.FENSTER_V=false;fZu()}});
 function fZu(){if(window.FENSTER_V){window.FENSTER_V=false;try{history.back()}catch(e){}}document.querySelectorAll(".fenster.auf").forEach(f=>f.classList.remove("auf"));$("fBg").classList.remove("auf");document.documentElement.style.overflow="";document.body.style.overflow=""}
 $("oListe").onclick=()=>fAuf("fListe");$("oSperren").onclick=()=>fAuf("fSperren");$("fBg").onclick=fZu;
-document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape")fZu()});
+document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("blatt").classList.contains("auf")&&window.blattZuV)blattZuV();fZu()}});
 
 /* ---------- Tafel: alle Autos, 30 Tage, antippen ---------- */
 let TSTART=plusTage(heute,-1);
+let CHIP_ZR="";   // Zeitraum, für den ein Knopf gerade markiert ist (09.11.2026)
 let TROLL=null;   // Wischposition beim nächsten Zeichnen: null bleibt stehen (neuer Stand vom Abgleich, Rückkehr aus WhatsApp), 0 an den Anfang, Datum JJJJ-MM-TT zu dieser Spalte (09.11.2026)
 const TAGE=30;
 const kurzAuto=n=>n.replace("Mercedes-Benz ","").replace(" Chauffeur-Paket","").replace(" Limousine","").replace(" performance","").replace("Mercedes ","").replace("VW ","").replace(" Clubsport","").replace(" 2.0 Diesel"," Diesel");
 const vorname=n=>String(n||"").trim().split(/\s+/)[0]||"";
-function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","März","Apr","Mai","Juni","Juli","Aug","Sept","Okt","Nov","Dez"];
+function tafelTitel(){const a=TSTART,b=plusTage(TSTART,TAGE-1);const M=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
   $("tTitel").textContent=a.getMonth()===b.getMonth()?M[a.getMonth()]+" "+a.getFullYear():M[a.getMonth()]+" bis "+M[b.getMonth()]+" "+b.getFullYear()}
 const ZEIT=(t,u)=>t+"T"+(u||"10:00");
 const bZ=b=>({von:ZEIT(b.von,b.vonU),bis:ZEIT(b.bis,b.bisU)});
@@ -708,6 +712,7 @@ const stunden=u=>{const [h,m]=(u||"10:00").split(":").map(Number);return h+m/60}
 function zeichneTafel(){if(!D.cars||!D.cars.length)return;
   const roll=$("tafelRoll"),rollAlt=roll.scrollLeft;
   const von=$("von").value,bis=$("bis").value,h=nachISO(heute),tage=[];
+  if(CHIP_ZR!==von+bis){CHIP_ZR="";document.querySelectorAll("#tChips div.an").forEach(c=>c.classList.remove("an"))}
   for(let i=0;i<TAGE;i++)tage.push(plusTage(TSTART,i));
   let html='<tr><th class="auto"></th>'+tage.map(d=>'<th class="tag'+(wtIndex(d)>=5?" we":"")+(nachISO(d)===h?" heute":"")+(nachISO(d)>=von&&nachISO(d)<bis?" gewaehlt":"")+'">'+wtKurz(d)+'<b>'+d.getDate()+'</b></th>').join("")+'</tr>';
   D.cars.forEach(c=>{html+='<tr><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+'</th>';
@@ -722,7 +727,8 @@ function zeichneTafel(){if(!D.cars||!D.cars.length)return;
         // Name einmal, am Anfang des Bandes (oder am linken Rand, wenn die Miete vor der Tafel begann), so lang wie das Band
         if(start||i===0){const endeTag=ausISO(b.bis),zellen=Math.min(TAGE-i,Math.round((endeTag-d)/86400000)+1);
           const laenge=Math.max(0.6,(zellen-1)+(b.bis<=nachISO(plusTage(d,zellen-1))?stunden(b.bisU)/24:1)-a);
-          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+laenge.toFixed(2)+'">'+esc(sp?"selbst gesperrt"+(b.kunde?": "+b.kunde:""):(vorname(b.kunde)||"belegt")+(b.ueber?", seit "+kurzD(ausISO(b.bisPlan))+" überfällig":""))+'</b>'}
+          const nurGrund=sp&&b.kunde&&("selbst gesperrt: "+b.kunde).length*7+12>laenge*34,lBand=nurGrund?Math.min(TAGE-i,Math.max(laenge,(b.kunde.length*7.5+12)/34)):laenge;   // kurzer Sperrbalken: nur der Grund, ganz lesbar (09.11.2026)
+          label+='<b style="left:'+(a*100).toFixed(1)+'%;--l:'+lBand.toFixed(2)+'">'+esc(sp?(nurGrund?b.kunde:"selbst gesperrt"+(b.kunde?": "+b.kunde:"")):(vorname(b.kunde)||"belegt")+(b.ueber?", seit "+kurzD(ausISO(b.bisPlan))+" überfällig":""))+'</b>'}
         k+=sp?" hatSperre":" hatBelegt"});
       const b0=tr[0];
       html+='<td class="'+k.trim()+'" data-auto="'+c.n+'" data-t="'+t+'"'+(b0?' data-b="'+b0.id+'"':"")+'>'+inner+label+'</td>'});
@@ -840,12 +846,16 @@ function chipZeitraum(z){const h=heute,w=h.getDay();let v,b;
   if(z[0]==="d"){v=h;b=plusTage(h,+z.slice(1))}else{const [wd,n]=z.slice(2).split(",").map(Number);v=plusTage(h,(wd-w+7)%7);b=plusTage(v,n)}
   $("von").value=nachISO(v);$("bis").value=nachISO(b);textAngefasst=false;AUSWAHL=null;
   if(nachISO(v)<nachISO(TSTART)||nachISO(b)>nachISO(plusTage(TSTART,TAGE-1)))TSTART=plusTage(v,-1);
-  TROLL=nachISO(v);zeichne();document.querySelectorAll("#tChips div").forEach(c=>c.classList.toggle("an",c.dataset.z===z))}
+  TROLL=nachISO(v);CHIP_ZR=$("von").value+$("bis").value;zeichne();document.querySelectorAll("#tChips div").forEach(c=>c.classList.toggle("an",c.dataset.z===z))}
 document.querySelectorAll("#tChips div").forEach(c=>c.onclick=()=>chipZeitraum(c.dataset.z));
 
 laden();
 window.addEventListener("mietix-abgleich",laden);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)laden()});
+// Über Nacht offen: beim Zurückkehren gilt das neue Datum, ein Zeitraum ab dem alten Heute rückt mit (09.11.2026)
+function neuerTag(){const j=new Date();if(nachISO(j)===nachISO(heute))return;const alt=heute,v=$("von").value,n=tage(v,$("bis").value);heute=j;
+  if(nachISO(TSTART)===nachISO(plusTage(alt,-1))){TSTART=plusTage(j,-1);TROLL=0}
+  if(v===nachISO(alt)){const an=document.querySelector("#tChips div.an"),nv=nachISO(j),nb=nachISO(plusTage(j,n));$("von").value=nv;$("bis").value=nb;$("bis").min=nachISO(plusTage(j,1));textAngefasst=false;AUSWAHL=null;if(an&&an.dataset.z[0]==="d")CHIP_ZR=nv+nb}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){neuerTag();laden()}});
 
 function __uebernehmen(p){
   D.stand=p.stand||D.stand; standAnzeigen();
