@@ -678,7 +678,8 @@ $("kopieren").onclick=async()=>{
   catch(e){const t=$("vorschau");t.select();document.execCommand("copy");t.blur();}
   rueckmeldung($("kopieren"),"Kopiert");
 };
-function spAutos(){$("spAuto").innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("")}
+function spAutos(){const e=$("spAuto");let w=e.value;try{const g=JSON.parse(localStorage.getItem("mietixFeld:kalSperre")||"null");if(g&&g.spAuto)w=g.spAuto}catch(x){}
+  e.innerHTML=D.cars.map(c=>'<option>'+c.n+'</option>').join("");if(w&&D.cars.some(c=>c.n===w))e.value=w}   // gewähltes Auto bleibt, wenn die Preisdatei die Liste neu aufbaut (Prüfung 10.11.2026: sonst würde das falsche Auto gesperrt)
 spAutos();$("spVon").value=nachISO(heute);$("spBis").value=nachISO(plusTage(heute,1));
 $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
   if(!von||!bis||tage(von,bis)<1){let h=$("spHinw");if(!h){h=document.createElement("div");h.id="spHinw";h.style.cssText="color:#C4161C;font-weight:700;font-size:14px;margin:10px 0 0";$("sperren").before(h)}h.textContent="Bitte Von und Bis eintragen (Bis nach Von).";return}{const h=$("spHinw");if(h)h.textContent=""}
@@ -691,8 +692,10 @@ $("sperren").onclick=()=>{const von=$("spVon").value,bis=$("spBis").value;
   const l=lies("mietixSperren",[]);l.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),auto:$("spAuto").value,von,bis,grund:$("spGrund").value.trim()});
   schreib("mietixSperren",l);$("spGrund").value="";if(window.SP_ENT)SP_ENT.weg();laden();fZu();if(window.nkMeldung)nkMeldung("Gesperrt")};
 document.addEventListener("DOMContentLoaded",()=>{if(window.mxEntwurf){window.SP_ENT=mxEntwurf("#fSperren","kalSperre",["spAuto","spVon","spBis","spGrund"]);SP_ENT.holen()}});   // Getipptes bleibt beim Neuladen (05.11.2026)
-function fAuf(id){if(!window.FENSTER_V){try{history.pushState({mxBlatt:1},"");window.FENSTER_V=true}catch(e){}}$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
+function fAuf(id){if(!window.FENSTER_V){try{history.pushState(Object.assign({},history.state||{},{mxBlatt:1}),"");window.FENSTER_V=true}catch(e){}}$("fBg").classList.add("auf");$(id).classList.add("auf");document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden"}
 window.addEventListener("popstate",()=>{if(window.BLATT_V&&window.blattZuV){window.BLATT_V=false;window.blattZuV()}if(window.FENSTER_V){window.FENSTER_V=false;fZu()}});
+// Neu geladen, während Blatt oder Fenster offen war: beides ist zu, der Schritt steht noch im Verlauf. Still zurückgehen, sonst täte das erste Zurück nichts (Prüfung 10.11.2026)
+try{if(history.state&&history.state.mxBlatt&&!window.BLATT_V&&!window.FENSTER_V&&/^(reload|back_forward)$/.test((((performance.getEntriesByType&&performance.getEntriesByType("navigation")[0])||{}).type)||""))history.back()}catch(e){}
 function fZu(){if(window.FENSTER_V){window.FENSTER_V=false;try{history.back()}catch(e){}}document.querySelectorAll(".fenster.auf").forEach(f=>f.classList.remove("auf"));$("fBg").classList.remove("auf");document.documentElement.style.overflow="";document.body.style.overflow=""}
 $("oListe").onclick=()=>fAuf("fListe");$("oSperren").onclick=()=>fAuf("fSperren");$("fBg").onclick=fZu;
 document.querySelectorAll(".fZu").forEach(b=>b.onclick=fZu);document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("blatt").classList.contains("auf")&&window.blattZuV)blattZuV();fZu()}});
@@ -745,7 +748,7 @@ function zeichneTafel(){if(!D.cars||!D.cars.length)return;
 function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><div class="unter">'+unter+'</div>'+
     aktionen.map((a,i)=>'<'+(a.href?'a href="'+a.href+'"':'div')+' class="knopf'+(a.voll?" voll":" hell")+'" data-i="'+i+'">'+a.t+'</'+(a.href?'a':'div')+'>').join("")+'<a href="#" class="zu" id="blattZu">Schließen</a>';
   $("blatt").classList.add("auf");$("blattBg").classList.add("auf");
-  if(!window.BLATT_V)try{history.pushState({mxBlatt:1},"");window.BLATT_V=true}catch(e){}   // Zurück schließt das Blatt, die Seite bleibt (04.11.2026)
+  if(!window.BLATT_V)try{history.pushState(Object.assign({},history.state||{},{mxBlatt:1}),"");window.BLATT_V=true}catch(e){}   // Zurück schließt das Blatt, die Seite bleibt (04.11.2026)
   const zu=()=>{$("blatt").classList.remove("auf");$("blattBg").classList.remove("auf");if(window.BLATT_V){window.BLATT_V=false;try{history.back()}catch(e){}}};window.blattZuV=zu;
   [...$("blatt").querySelectorAll("[data-i]")].forEach(k=>{const a=aktionen[+k.dataset.i];if(a.f)k.onclick=()=>{
     if(a.fenster&&window.BLATT_V&&!window.FENSTER_V){window.BLATT_V=false;window.FENSTER_V=true;$("blatt").classList.remove("auf");$("blattBg").classList.remove("auf");a.f();return}   // 06.11.2026
@@ -1665,6 +1668,20 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
   $("reiter2").classList.add("versteckt");
   const titel=document.querySelector("h1 span");
   if(SEITE==="kal"){if(titel)titel.textContent="KALENDER";document.title="Mietix Kalender";
+    // Zeitraum, Uhrzeiten und gezeigter Monat bleiben beim Neuladen (Prüfung 10.11.2026). Nur dieser Tab, ein neuer Start beginnt bei heute
+    const ZK="mietixKalZeit";let rollWill=null;
+    const merk=()=>{try{const an=document.querySelector("#tChips div.an");sessionStorage.setItem(ZK,JSON.stringify({von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value,
+      ts:nachISO(TSTART),roll:$("tafelRoll").scrollLeft,chip:an&&CHIP_ZR?an.dataset.z:""}))}catch(e){}};
+    try{const nt=(((performance.getEntriesByType&&performance.getEntriesByType("navigation")[0])||{}).type);const z=/^(reload|back_forward)$/.test(nt)?JSON.parse(sessionStorage.getItem(ZK)||"null"):null;   // nur Neuladen und Zurück, ein neuer Aufruf beginnt bei heute
+      if(z&&z.von&&z.bis&&z.bis>nachISO(heute)&&tage(z.von,z.bis)>=1){$("von").value=z.von;$("bis").value=z.bis;$("bis").min=nachISO(plusTage(ausISO(z.von),1));
+        ["vonU","bisU"].forEach(id=>{if(z[id]&&[...$(id).options].some(o=>o.value===z[id]))$(id).value=z[id]});
+        if(z.ts&&!isNaN(ausISO(z.ts)))TSTART=ausISO(z.ts);rollWill=+z.roll||0;datumZurueck();textAngefasst=false;AUSWAHL=null;
+        if(z.chip){CHIP_ZR=z.von+z.bis;const c=document.querySelector('#tChips div[data-z="'+z.chip+'"]');if(c)c.classList.add("an")}
+        zeichne()}}catch(e){}
+    const zt0=zeichneTafel;zeichneTafel=function(){zt0.apply(this,arguments);
+      if(rollWill!==null&&$("tafel").querySelector("th.tag")){$("tafelRoll").scrollLeft=rollWill;rollWill=null}merk()};
+    $("tafelRoll").addEventListener("scroll",()=>{clearTimeout(window.KZ_T);window.KZ_T=setTimeout(merk,250)},{passive:true});
+    ["vonU","bisU"].forEach(id=>$(id).addEventListener("change",merk));
     // Angebot für ein Auto: auf die Angebot-Seite, Auto und Zeitraum schon ausgefüllt
     angebotFuer=function(auto){const q=new URLSearchParams({zeige:"angebot",auto,von:$("von").value,bis:$("bis").value,vonU:$("vonU").value,bisU:$("bisU").value});location.href="angebot.html?"+q};
     return}
@@ -1824,12 +1841,19 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
       "main{max-width:680px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box;padding-left:16px!important;padding-right:16px!important}header .plus{right:max(16px,calc((100% - 680px)/2 + 16px))!important}}");
   document.head.appendChild(st);
 
+  // Eigene Schritte zählen (mxI im Verlauf), damit „‹ Start“ genau bis zur Startseite zurückgehen kann
+  (function(){try{const ps=history.pushState.bind(history),rs=history.replaceState.bind(history);
+    if(!(history.state&&"mxI" in history.state))rs(Object.assign({},history.state||{},{mxI:0}),"");
+    history.pushState=function(st,t,u){const i=((history.state&&history.state.mxI)||0)+1;return ps(Object.assign({},st||{},{mxI:i}),t,u)};
+    history.replaceState=function(st,t,u){const i=(history.state&&history.state.mxI)||0;return rs(Object.assign({},st||{},{mxI:(st&&"mxI" in st)?st.mxI:i}),t,u)}}catch(e){}})();
+  window.mxZurStart=function(){try{const r=document.referrer||"",start="https://barankohler.github.io/mietix-zentrale/";if(r&&r.split("#")[0].replace(/index\.html$/,"")===start.split("#")[0].replace(/index\.html$/,"")){history.go(-(((history.state&&history.state.mxI)||0)+1));return true}}catch(e){}return false};
   // ‹ Start und Symbol in der Kopfzeile
   const ziel=document.querySelector("header h1")||document.querySelector(".topbar");
   const TITEL={anfragen:"Anfragen",angebot:"Angebot",kalender:"Kalender",vertrag:"Buchungen",kunden:"Kunden",autos:"Autos",geld:"Geld",
     schaeden:/schadensformular/.test(pfad)?"Schadensmeldung":/schadensklaerung/.test(pfad)?"Schadensklärung":"Schäden",nachrichten:"Nachrichten",zahlen:"Zahlen",story:"Story",papierkorb:"Papierkorb",einstellungen:"Einstellungen"};
   if(ziel&&!istStart&&!document.querySelector(".mxStart")){
     const a=document.createElement("a");a.className="mxStart";a.href="https://barankohler.github.io/mietix-zentrale/";a.innerHTML="<b>‹</b>Start";a.setAttribute("aria-label","Zur Startseite");
+    a.addEventListener("click",function(e){if(mxZurStart()){e.preventDefault()}});   // zurück statt vorwärts: kein Kreis im Verlauf (10.11.2026)
     const top=document.createElement("div");top.className="mxTop";top.appendChild(a);
     const punkt=ziel.querySelector("#abgleichPunkt"),titel=TITEL[art]||(ziel.textContent||"").replace(/^\s*MIETIX\s*/i,"").trim();
     let h=ziel;if(ziel.tagName!=="H1"){h=document.createElement("h1");ziel.appendChild(h)}
@@ -1837,15 +1861,13 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
     h.parentNode.insertBefore(top,h);
     addEventListener("scroll",()=>document.documentElement.classList.toggle("mxKlein",scrollY>40),{passive:true})}
 
-  // Wischen vom linken Rand = zurück (nur als App, im Browser macht das Safari)
+  // Wischen vom linken Rand = genau dasselbe wie Zurück (10.11.2026, Prüfung: eigener Weg sprang zu weit)
   const alsApp=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
   if(alsApp){let x0=null,y0=0;
     document.addEventListener("touchstart",e=>{const t=e.touches[0];x0=(t.clientX<=24&&e.touches.length===1&&!e.target.closest("canvas,.pad,#ug,input,textarea,select"))?t.clientX:null;y0=t.clientY},{passive:true});
     document.addEventListener("touchend",e=>{if(x0===null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);x0=null;if(dx<80||dy>60)return;
-      if(document.querySelector(".mxFenster.auf")&&window.mxZu){mxZu();return}
-      if(typeof window.mxZurueck==="function"&&window.mxZurueck())return;
-      if(istStart)return;
-      if(history.length>1&&document.referrer.indexOf(location.origin)===0)history.back();else location.href="https://barankohler.github.io/mietix-zentrale/"},{passive:true})}
+      if(istStart&&!(history.state&&(history.state.mxI||history.state.mxF)))return;
+      if(history.length>1)history.back();else location.href="https://barankohler.github.io/mietix-zentrale/"},{passive:true})}
 
   // Neue Version: die Seite aus dem Netz mit der geladenen vergleichen (ohne Daten, nur der Text der Seite)
   // Seit 05.11.2026: nur die Kopfzeile abfragen (Stand der Seite im Netz gegen Stand der geladenen Seite), nicht jedes Mal die ganze Seite. Kennt der Server keinen Stand, wie bisher über den Text.
@@ -1934,17 +1956,26 @@ window.dispatchEvent(new Event("mietix-kunden-bereit"));
     document.documentElement.style.overflow="";document.body.style.overflow=""};
   window.mxAuf=function(id){const f=document.getElementById(id);if(!f)return;schliessen();bg.classList.add("auf");f.classList.add("auf");
     document.documentElement.style.overflow="hidden";document.body.style.overflow="hidden";f.scrollTop=0;
-    if(!imVerlauf){try{history.pushState(Object.assign({},history.state||{},{mxF:id}),"");imVerlauf=true}catch(e){}}};
+    if(!imVerlauf){try{history.pushState(Object.assign({},history.state||{},{mxF:id}),"");imVerlauf=true}catch(e){}}
+    snapF=f;snap=f.classList.contains("mxSchutz")?werte(f):null};
+  // Fenster mit Geld (Klasse mxSchutz, 10.11.2026): Schließen durch ✕, Tipp daneben, Esc oder Zurück fragt bei Änderungen nach. Speichern schließt ohne Frage.
+  let snap=null,snapF=null;
+  const werte=function(f){return[...f.querySelectorAll("input,textarea,select")].map(function(i){return i.type==="checkbox"||i.type==="radio"?i.checked:i.value}).join("~")+"|"+[...f.querySelectorAll(".an,.chip.an")].map(function(x){return x.textContent}).join("~")};
+  const darfZu=function(){if(!snap||!snapF||!snapF.classList.contains("auf"))return true;if(werte(snapF)===snap)return true;if(confirm("Änderungen verwerfen?\n\nDas Getippte in diesem Fenster geht verloren.")){snap=null;return true}return false};
+  window.mxGeaendertWeg=function(){snap=null};
   // ✕ nimmt den Eintrag wieder weg. Springt die Seite im selben Moment weiter, bleibt er als „überspringen“ im Verlauf stehen.
   let still=false,skipT=null;
   window.mxSkipNimm=function(){if(skipT){clearTimeout(skipT);skipT=null;return 1}return 0};   // die Seite springt selbst zurück und nimmt den Eintrag gleich mit
   window.mxZu=function(){schliessen();if(!imVerlauf)return;imVerlauf=false;try{history.replaceState(Object.assign({},history.state||{},{mxSkip:1}),"")}catch(e){}
     skipT=setTimeout(function(){skipT=null;if(history.state&&history.state.mxSkip){still=true;history.back()}},0)};
   addEventListener("popstate",function(e){if(still){still=false;e.stopImmediatePropagation();return}
-    if(imVerlauf){imVerlauf=false;schliessen();e.stopImmediatePropagation();return}
+    if(imVerlauf){e.stopImmediatePropagation();if(!darfZu()){try{history.pushState(Object.assign({},history.state||{},{mxF:snapF&&snapF.id}),"")}catch(x){}return}imVerlauf=false;schliessen();return}
     if(e.state&&e.state.mxSkip){e.stopImmediatePropagation();history.back()}},true);
   document.addEventListener("click",function(e){const k=e.target.closest("[data-fenster]");if(k){e.preventDefault();mxAuf(k.dataset.fenster);return}
-    if(e.target.closest(".mxZu")||e.target===bg)mxZu()});
-  document.addEventListener("keydown",function(e){if(e.key==="Escape")mxZu()})})();
+    if((e.target.closest(".mxZu")||e.target===bg)&&darfZu())mxZu()});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&darfZu())mxZu()});
+  // Neu geladen, während ein Fenster offen war (zum Beispiel nach WhatsApp): das Fenster ist zu, sein Schritt steht noch im Verlauf.
+  // Ohne Aufräumen täte das erste Zurück nichts (Prüfung 10.11.2026). Den Schritt still zurückgehen, die Seite merkt davon nichts.
+  try{if(history.state&&history.state.mxF&&!document.querySelector(".mxFenster.auf")&&/^(reload|back_forward)$/.test((((performance.getEntriesByType&&performance.getEntriesByType("navigation")[0])||{}).type)||"")){still=true;history.back()}}catch(e){}})();
 </script></body>
 </html>
