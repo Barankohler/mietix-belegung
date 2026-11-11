@@ -6,6 +6,21 @@
 <meta name="apple-mobile-web-app-title" content="Angebot">
 <title>Mietix Angebot</title>
 <style>
+/* Auto und Zeitraum wie bei Neue Buchung (11.11.2026, Baran: „genau das Design wie bei Neue Buchung, sieht dann einheitlich aus“) */
+.buGk{font-size:13px;font-weight:600;color:#6E6E73;text-transform:uppercase;letter-spacing:.3px;margin:20px 16px 7px}
+.buGr{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.buZ{display:flex;align-items:center;gap:12px;padding:11px 16px;min-height:50px;position:relative;cursor:pointer;color:#1C1C1E;text-decoration:none;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.buZ:active{background:#F6F6F7}
+.buZ+.buZ:before{content:"";position:absolute;left:16px;right:0;top:0;border-top:.5px solid #D1D1D6}
+.buZ .t{flex:1;min-width:0}.buZ .t b{display:block;font-size:17px;font-weight:600;color:#1C1C1E;line-height:1.3}
+.buZ .t b.buLeerT{color:#8A8A8E;font-weight:600}.buZ .t b.buLeerT em{font-style:normal;color:#FF3B30}
+.buZ .t i{display:block;font-style:normal;font-size:14px;color:#8A8A8E;margin-top:1px}
+.buOk{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:#34C759;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
+.buNein{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:#FF3B30;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+.buPf{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:#E9E9EE;color:#1C1C1E;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;line-height:1}
+#fZeit .hw{font-size:14px;font-weight:600;color:#6E6E73;margin:2px 0 6px}#fZeit .hw+.zr{margin-bottom:10px}
+#fZeit .zr{display:flex;flex-wrap:wrap;gap:8px}
+
 *{box-sizing:border-box}
 body{margin:0;background:#F2F2F7;color:#1C1C1E;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
 header{background:#fff;border-bottom:3px solid #C4161C;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;position:sticky;top:0;z-index:20}
@@ -176,10 +191,8 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   <div id="abgleich" style="margin:0 0 10px"></div>
   <div class="k" id="werK"><div class="lbl">Für wen? (freiwillig)</div>
     <div class="wer" id="wer"><span><b id="werName">Ohne Kunde</b><i id="werInfo">Antippen: Anfrage, früherer Mieter oder Nummer</i></span><em>›</em></div></div>
-  <div class="k"><div class="lbl">Zeitraum</div>
-    <div class="zr" id="zr"><span data-z="d1">1 Tag</span><span data-z="d2">2 Tage</span><span data-z="d3">3 Tage</span><span data-z="d7">1 Woche</span><span data-z="we5,1">Fr bis Sa</span><span data-z="we5,2">Fr bis So</span><span data-z="we6,2">Sa bis Mo</span><span data-z="we5,3">Fr bis Mo</span></div>
-    <div class="zt" id="zt"></div></div>
-  <div class="k"><div class="lbl" id="autoLbl">Auto antippen</div><div id="autos"><div class="leer">Preise werden geladen …</div></div></div>
+  <div class="buGk">Auto und Zeitraum</div>
+  <div class="buGr"><div class="buZ" id="zeitZ"></div><div class="buZ" id="autoZ"></div></div>
   <!-- Preis-Block wie überall (01.11.2026, Baran zu einheit_2): Preis, Inklusive, Rabatt; Getipptes bleibt stehen -->
   <div class="k"><div class="lbl">Preis, Kilometer, Rabatt</div>
     <div class="pbGr">
@@ -206,8 +219,14 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
   <button class="knopf hell" id="nOhne" type="button">Ohne Kunde, nur Preise</button>
 </div>
 <div class="mxFenster" id="fZeit" role="dialog" aria-label="Zeitraum"><div class="mxKopf"><h3>Zeitraum</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <div class="hw">Ab heute:</div><div class="zr"><span data-z="d1">1 Tag</span><span data-z="d2">2 Tage</span><span data-z="d3">3 Tage</span><span data-z="d7">1 Woche</span></div>
+  <div class="hw">Wochenende (nächstes):</div><div class="zr"><span data-z="we5,1">Fr bis Sa</span><span data-z="we5,2">Fr bis So</span><span data-z="we6,2">Sa bis Mo</span><span data-z="we5,3">Fr bis Mo</span></div>
   <div class="feld"><div class="zw"><div><label>Von</label><input id="von" type="date"></div><div><label>Uhrzeit</label><select id="vonU"></select></div></div>
     <div class="zw"><div><label>Bis</label><input id="bis" type="date"></div><div><label>Uhrzeit</label><select id="bisU"></select></div></div></div>
+  <button class="knopf" type="button" onclick="mxZu()">Fertig</button>
+</div>
+<div class="mxFenster" id="fAuto" role="dialog" aria-label="Auto wählen"><div class="mxKopf"><h3>Auto wählen</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
+  <div class="lbl" id="autoLbl" style="margin:0 2px 8px">Auto antippen</div><div id="autos"><div class="leer">Preise werden geladen …</div></div>
   <button class="knopf" type="button" onclick="mxZu()">Fertig</button>
 </div>
 <div class="mxFenster" id="fRab" role="dialog" aria-label="Rabatt"><div class="mxKopf"><h3>Rabatt</h3><button class="mxZu" type="button" aria-label="Schließen">✕</button></div>
@@ -311,10 +330,11 @@ const kmInkl=()=>S.kmInkl==null?(D?D.freiKm||150:150)*Math.max(1,t()):S.kmInkl;
 function chip(z){const w=heute.getDay();let v,b;
   if(z[0]==="d"){v=heute;b=plus(heute,+z.slice(1))}else{const[wd,n]=z.slice(2).split(",").map(Number);v=plus(heute,(wd-w+7)%7);b=plus(v,n)}
   S.von=iso(v);S.bis=iso(b);S.chip=z;S.text=null;zeichne()}
-[...$("zr").children].forEach(c=>c.onclick=()=>chip(c.dataset.z));
+document.querySelectorAll("#fZeit [data-z]").forEach(c=>c.onclick=()=>chip(c.dataset.z));
 (function(){const o=[];for(let h=6;h<=22;h++)for(const m of ["00","30"])o.push(String(h).padStart(2,"0")+":"+m);
   ["vonU","bisU"].forEach(id=>{$(id).innerHTML=o.map(x=>"<option>"+x+"</option>").join("");$(id).value="10:00"})})();
-$("zt").onclick=()=>{$("von").value=S.von;$("bis").value=S.bis;$("vonU").value=S.vonU;$("bisU").value=S.bisU;mxAuf("fZeit")};
+$("autoZ").onclick=()=>mxAuf("fAuto");
+$("zeitZ").onclick=()=>{$("von").value=S.von;$("bis").value=S.bis;$("vonU").value=S.vonU;$("bisU").value=S.bisU;mxAuf("fZeit")};
 ["von","bis","vonU","bisU"].forEach(id=>$(id).addEventListener("change",()=>{const v=$("von").value,b=$("bis").value;
   if(v)S.von=v;if(b)S.bis=b;if(S.bis<=S.von){S.bis=iso(plus(ausISO(S.von),1));$("bis").value=S.bis}S.vonU=$("vonU").value||S.vonU;S.bisU=$("bisU").value||S.bisU;S.chip="";S.text=null;zeichne()}));
 
@@ -428,11 +448,13 @@ const fertigerText=()=>S.text!=null?S.text:text();
 /* ---------- Zeichnen ---------- */
 function kundeGebucht(k){const nz=ziff(k.nummer);return lies("mietixAnfragen",[]).some(a=>!a._weg&&a.status!=="abgesagt"&&(a.status==="gebucht"||a.vertrag||a.anzahlungAngefordert)&&(a.id===k.anfrage||(nz&&ziff(a.nummer)===nz)))}
 function zeichne(){angMerken();laden();$("angWieder").classList.toggle("versteckt",!ANG_WIEDER);$("angWieder").firstElementChild.textContent=ANG_WIEDER==="gesendet"?"Gesendetes Angebot wieder da":"Angefangenes Angebot wieder da";beiseiteZeigen();const d=t(),k=S.kunde;
-  [...$("zr").children].forEach(c=>c.classList.toggle("an",c.dataset.z===S.chip));
-  $("zt").innerHTML=esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU))+' <small>'+tz(d)+',</small> <u>ändern</u>';
+  document.querySelectorAll("#fZeit [data-z]").forEach(c=>c.classList.toggle("an",c.dataset.z===S.chip));
+  $("zeitZ").innerHTML='<span class="buOk">✓</span><span class="t"><b>'+esc(kurz(S.von)+" "+(S.vonU||"10:00")+" bis "+kurz(S.bis)+" "+(S.bisU||"10:00"))+'</b><i>'+tz(d)+'</i></span><span class="buPf">›</span>';
   $("werName").textContent=k?(k.name||"ohne Namen"):"Ohne Kunde";$("werInfo").textContent=k?(k.info||"")+(kundeGebucht(k)&&!/schon eine Buchung/.test(k.info||"")?", hat schon eine Buchung":""):"Antippen: Anfrage, früherer Mieter oder Nummer";
   $("pakT").textContent=S.pakKm?"+"+S.pakKm.toLocaleString("de-DE")+" km":"kein";
   autosZeichnen();const g=gewaehlt(),P=g.map(posten);
+  // Zeile Auto wie bei Neue Buchung: rotes X „Auto wählen *“, gewählt grüner Haken mit Preis für den Zeitraum
+  $("autoZ").innerHTML=P.length?'<span class="buOk">✓</span><span class="t"><b>'+esc(P.map(p=>p.name).join(", "))+'</b><i>'+(P.length===1?E(P[0].preis)+" für "+tz(d):P.length+" Autos zur Auswahl im Angebot")+'</i></span><span class="buPf">›</span>':'<span class="buNein">✕</span><span class="t"><b class="buLeerT">Auto wählen <em>*</em></b><i>'+esc($("autoLbl").textContent.replace(/^Auto antippen, /,""))+'</i></span><span class="buPf">›</span>';
   // Preis-Block (01.11.2026): Preis nur mit genau einem Auto, sonst steht er je Auto in der Liste
   {const pi=$("aPreis"),c1=g.length===1?g[0]:null,vor=c1?Math.round(miete(c1,wt(S.von),d)):null;
    pi.disabled=!c1;pi.placeholder=g.length>1?"je Auto, siehe oben":c1?"":"erst Auto antippen";
