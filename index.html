@@ -627,7 +627,11 @@ function zeichne(){
 function loeschen(id){
   const b=BUCHUNGEN.find(x=>x.id===id);
   if(!confirm("Sperre "+(b?b.fahrzeug+" "+lang(ausISO(b.von)):"")+" aufheben?"))return;
-  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));laden();if(window.nkMeldung)nkMeldung("Sperre aufgehoben");
+  schreib("mietixSperren",lies("mietixSperren",[]).filter(x=>x.id!==id));
+  /* Sperre eines Termins: der Termin sperrt danach nicht mehr, sonst legt Termine sie beim nächsten Ändern still wieder an (12.11.2026, Prüfung) */
+  if(String(id).indexOf("termin-")===0){const st=lies("mietixStand",{})||{},tt=st.termine,tid=String(id).slice(7);
+    if(tt&&typeof tt==="object"&&tt[tid]){tt[tid]=Object.assign({},tt[tid],{sperren:false,geaendert:new Date().toISOString()});schreib("mietixStand",st)}}
+  laden();if(window.nkMeldung)nkMeldung("Sperre aufgehoben");
 }
 
 /* --- Start --- */
