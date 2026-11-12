@@ -29,6 +29,11 @@ main{max-width:680px;margin:0 auto;padding:12px 14px 190px}
 .versteckt{display:none!important}
 .k{background:#fff;border-radius:18px;padding:13px 14px;margin-bottom:10px}
 .lbl{font-size:15px;font-weight:800;color:#1C1C1E;text-transform:uppercase;letter-spacing:.2px;margin:0 0 8px}
+/* Preise im Angebot (12.11.2026, Baran): bei 2+ Autos je Auto Preis nach Rabatt, „statt“ leicht durchgestrichen, pro Tag */
+.plUnter{font-size:14px;color:#6F6F72;margin:-4px 0 6px}.plZ{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #E7E7EA}
+.plZ b{display:block;font-size:17px;font-weight:700;color:#1C1C1E}.plZ i{display:block;font-style:normal;font-size:14px;color:#6F6F72;margin-top:2px}
+.plR{text-align:right;flex:none}.plR b{font-size:19px;font-weight:800;white-space:nowrap}.plR b span{font-size:15px;font-weight:500;color:#6F6F72}
+.plR s{text-decoration-color:#B5B5BA;text-decoration-thickness:1px}
 .wer{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wer b{display:block;font-size:17px;font-weight:800}.wer i{display:block;font-style:normal;font-size:13.5px;color:#8A8A8E;font-weight:600;margin-top:2px}
 .wer em{font-style:normal;color:#C4161C;font-size:26px;font-weight:700;line-height:1}
@@ -200,6 +205,7 @@ mark{background:#FFF1A8;color:inherit;border-radius:3px}
       <div class="pbF"><label for="kmInkl">Inklusive</label><input id="kmInkl" inputmode="numeric" autocomplete="off" data-einheit="km"></div>
       <div class="pbF"><label for="aRab">Rabatt</label><input id="aRab" inputmode="numeric" autocomplete="off" placeholder="0" data-einheit="%"></div>
       <div class="pbTipp" id="aTipp"></div></div></div>
+  <div class="k versteckt" id="plK"><div class="lbl">Preise im Angebot</div><div class="plUnter" id="plUnter"></div><div id="plListe"></div></div>
   <div class="zwei" style="grid-template-columns:1fr"><div class="wahl" id="wPak"><span><small>Kilometerpaket</small><b id="pakT">kein</b></span><em>⌄</em></div></div>
   <div class="fuss" id="fuss"></div>
 </main>
@@ -457,13 +463,18 @@ function zeichne(){angMerken();laden();$("angWieder").classList.toggle("versteck
   $("autoZ").innerHTML=P.length?'<span class="buOk">✓</span><span class="t"><b>'+esc(P.map(p=>p.name).join(", "))+'</b><i>'+(P.length===1?E(P[0].preis)+" für "+tz(d):P.length+" Autos zur Auswahl im Angebot")+'</i></span><span class="buPf">›</span>':'<span class="buNein">✕</span><span class="t"><b class="buLeerT">Auto wählen <em>*</em></b><i>'+esc($("autoLbl").textContent.replace(/^Auto antippen, /,""))+'</i></span><span class="buPf">›</span>';
   // Preis-Block (01.11.2026): Preis nur mit genau einem Auto, sonst steht er je Auto in der Liste
   {const pi=$("aPreis"),c1=g.length===1?g[0]:null,vor=c1?Math.round(miete(c1,wt(S.von),d)):null;
-   pi.disabled=!c1;pi.placeholder=g.length>1?"je Auto, siehe oben":c1?"":"erst Auto antippen";
+   pi.disabled=!c1;pi.placeholder=g.length>1?"je Auto, siehe unten":c1?"":"erst Auto antippen";
    if(document.activeElement!==pi)pi.value=c1?String(P[0].preis):"";
    if(document.activeElement!==$("kmInkl"))$("kmInkl").value=kmInkl();
    if(document.activeElement!==$("aRab"))$("aRab").value=S.rab||"";
    pbTipp($("aTipp"),vor,S.rab,c1?P[0].preis:0,!!c1&&handFuer(nameV(c1)),()=>{S.preisHand=null;S.text=null;zeichne()})}
+  $("plK").classList.toggle("versteckt",P.length<2);
   if(!P.length){$("sumL").innerHTML="<i>"+(D?"Erst ein Auto antippen":"Preise werden geladen …")+"</i>";$("sumR").innerHTML="";$("senden").classList.add("aus");return}
   const km=kmInkl();
+  {const viele=P.length>1;$("plK").classList.toggle("versteckt",!viele);   // Preise im Angebot (12.11.2026)
+   if(viele){const kmG=(km+(S.pakKm||0)).toLocaleString("de-DE");
+    $("plUnter").textContent=kurz(S.von)+" bis "+kurz(S.bis)+", "+tz(d)+(S.rab?", mit "+S.rab+" % Rabatt":"");
+    $("plListe").innerHTML=P.map(p=>{const statt=p.liste+p.paket;return '<div class="plZ"><span><b>'+esc(p.name)+'</b><i>inklusive '+kmG+' km</i></span><span class="plR"><b>'+E(p.summe)+(statt>p.summe?' <span>statt <s>'+E(statt)+'</s></span>':"")+'</b><i>'+E(Math.round(p.summe/Math.max(1,d)))+' pro Tag</i></span></div>'}).join("")}}
   $("sumL").innerHTML="<b>"+esc(P.length===1?P[0].name:P.length+" Autos zur Auswahl")+"</b><i>"+esc(kurz(S.von)+" "+uhr(S.vonU)+" bis "+kurz(S.bis)+" "+uhr(S.bisU)+", "+tz(d))+"</i>";
   $("sumR").innerHTML="<b>"+(P.length===1?"":"ab ")+E(P.length===1?P[0].summe:Math.min(...P.map(p=>p.summe)))+"</b><i>inklusive "+(km+(S.pakKm||0)).toLocaleString("de-DE")+" km</i>";
   $("senden").classList.remove("aus");
@@ -635,11 +646,23 @@ async function auth(pfad,body){const r=await holeMit(URL_+"/auth/v1/"+pfad,{meth
   const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error_description||j.msg||j.message||"Anmeldung fehlgeschlagen");e.status=r.status;throw e}return j}
 function sichern(j){sitzung={token:j.access_token,neu:j.refresh_token,bis:Date.now()+(j.expires_in||3600)*1000-60000,
   email:(j.user&&j.user.email)||(sitzung&&sitzung.email)||""};merk("mietixSitzung",sitzung)}
-async function token(){if(!sitzung)return null;
-  if(Date.now()>sitzung.bis){try{sichern(await auth("token?grant_type=refresh_token",{refresh_token:sitzung.neu}))}
+/* Anmeldung über alle offenen Mietix-Fenster eines Geräts (12.11.2026, Mietvertrag 000562 ging nie hoch):
+   Jedes Fenster hielt seine eigene Kopie der Anmeldung. Erneuerte ein Fenster sie, schickte ein älteres Fenster später den
+   schon verbrauchten Schlüssel, bekam 4xx und meldete das ganze Gerät still ab. Ab jetzt gilt immer die Anmeldung im
+   localStorage, Erneuern geht nur in einem Fenster gleichzeitig, und vor dem Abmelden wird nachgesehen, ob ein anderes
+   Fenster schon erneuert hat. Wird das Gerät wirklich abgemeldet, kommt ein roter Hinweis. */
+function sitzungFrisch(){const s=lies("mietixSitzung",null);if(JSON.stringify(s)!==JSON.stringify(sitzung)){sitzung=s;if(!pwSetzen)zeigen()}}
+async function erneuern(){const alt=sitzung.neu;
+  try{sichern(await auth("token?grant_type=refresh_token",{refresh_token:alt}))}
     // Abmelden nur, wenn der Speicher die Anmeldung wirklich ablehnt, nicht bei schlechtem Netz (30.10.2026)
-    catch(e){if(e.status>=400&&e.status<500){sitzung=null;localStorage.removeItem("mietixSitzung");zeigen();return null}throw e}}
-  return sitzung.token}
+    catch(e){if(e.status>=400&&e.status<500){const s=lies("mietixSitzung",null);if(s&&s.neu&&s.neu!==alt){sitzung=s;return}   // ein anderes Fenster war schneller
+      sitzung=null;localStorage.removeItem("mietixSitzung");zeigen();
+      hinweis("Dieses Gerät wurde abgemeldet. Ab jetzt wird nichts gesichert. Bitte auf der Startseite neu anmelden.");return}
+    throw e}}
+async function token(){sitzungFrisch();if(!sitzung)return null;
+  if(Date.now()>sitzung.bis){const los=()=>{sitzungFrisch();return sitzung&&Date.now()>sitzung.bis?erneuern():null};
+    if(navigator.locks&&navigator.locks.request)await navigator.locks.request("mietix-anmeldung",los);else await los()}
+  return sitzung?sitzung.token:null}
 async function api(pfad,opt){const t=await token();if(!t)throw new Error("nicht angemeldet");
   const r=await holeMit(URL_+"/rest/v1/"+pfad,Object.assign({},opt,{headers:Object.assign({apikey:KEY,Authorization:"Bearer "+t,"Content-Type":"application/json"},(opt||{}).headers||{})}));
   if(!r.ok)throw new Error("Speicher antwortet "+r.status);const s=await r.text();return s?JSON.parse(s):null}
@@ -815,7 +838,7 @@ async function hochladen(k,c,h,hoch){const streit=[],gelungen=(z,ver)=>{const p=
     if(r[0])gelungen(z,r[0].geaendert);else streit.push(p)}
   return streit}
 async function abgleichen(){
-  if(!sitzung||!navigator.onLine)return;if(laeuft){nochmal=true;return}laeuft=true;const stand0=aenderungen;zeigen();
+  sitzungFrisch();if(!sitzung||!navigator.onLine)return;if(laeuft){nochmal=true;return}laeuft=true;const stand0=aenderungen;zeigen();
   const H=lies("mietixAbgleich",{}),geholt=[],kaputt=[];let warnung="";
   // Einmal je Gerät (31.10.2026, iPad mit vollem Speicher): Mietverträge, Papierkorb und Unterschriften frisch vom gemeinsamen Stand übernehmen.
   // Nur hier Liegendes, das noch nie hochging, bleibt und geht hoch. Kein Doppel in den Papierkorb.
@@ -930,9 +953,15 @@ function altSchutz(k,v){const keys=Object.keys(FREMD).filter(x=>x.indexOf(k+"|")
   return neu?JSON.stringify(arr):v}
 // Jede Änderung an den vier Speichern löst kurz danach einen Abgleich aus
 let warte=null;
+// Ohne Anmeldung gespeichert (12.11.2026): einmal je Seite ein roter Hinweis, damit es niemand übersieht. Nur auf der echten Seite, nicht im Test.
+let ohneGemeldet=false;
+function ohneAnmeldung(){if(ohneGemeldet||!/github\.io$/.test(location.hostname))return;ohneGemeldet=true;
+  setTimeout(()=>{const t="Nicht gesichert: Dieses Gerät ist nicht angemeldet. Was hier gespeichert wird, fehlt auf den anderen Geräten und in der Excel. Bitte auf der Startseite anmelden.";
+    if(window.mxFehler)mxFehler(t);else alert(t)},300)}
 Storage.prototype.setItem=function(k,v){if(this===localStorage&&WACHE[k]&&typeof v==="string"&&!rueckLaeuft&&!EIGEN)v=altSchutz(k,v);
   const alt=(this===localStorage&&SPEICHER[k])?localStorage.getItem(k):null;roh.call(this,k,v);if(this===localStorage&&WACHE[k])GESEHEN[k]=v;
   if(this===localStorage&&(SPEICHER[k]||k==="mietixEntwurfProtokolle")&&typeof v==="string"&&v.indexOf('"data:image/')>=0)auslagernBald();
+  if(this===localStorage&&SPEICHER[k]&&!sitzung&&!localStorage.getItem("mietixSitzung"))ohneAnmeldung();
   if(this===localStorage&&SPEICHER[k]){aenderungen++;if(!ungesichert){ungesichert=true;if(sitzung&&!pwSetzen)zeigen()}clearTimeout(warte);warte=setTimeout(abgleichen,800);if(k!=="mietixStand"&&k!=="mietixPapierkorb")sicherheitsnetz(k,alt,v)}};
 
 /* ---------- Sicherheitsnetz (28.10.2026, Baran: "Verklicken darf nichts verlieren") ----------
@@ -1128,6 +1157,7 @@ css.textContent=".abgl{background:#fff;border:1px solid #E4E4E7;border-radius:16
   "";
 document.head.appendChild(css);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)abgleichen()});
+window.addEventListener("storage",e=>{if(e.key==="mietixSitzung"||e.key===null){sitzungFrisch();if(sitzung)abgleichen()}});   // in einem anderen Fenster an- oder abgemeldet (12.11.2026)
 window.addEventListener("online",abgleichen);window.addEventListener("offline",zeigen);   // Sync-Status sofort auf „Ohne Internet“
 setInterval(abgleichen,60000);
 zeigen();abgleichen();auslagernBald();
