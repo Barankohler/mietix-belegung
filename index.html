@@ -234,67 +234,131 @@ html.nxNeu.knNeu .knZahl:empty{display:none}
 html.nxNeu.knNeu .knKarte{background:var(--rg-karte);border:1px solid var(--rg-rand);border-radius:var(--rg-r-karte);overflow:hidden}
 html.nxNeu.knNeu .knHinw,html.nxNeu.knNeu .knTipps{margin:6px 4px 0;padding:0;font-size:13px;line-height:1.45;color:var(--rg-t2);border:0;background:none}
 
-/* Tafel: eine ruhige Karte, Haarlinien, Balken nach den Zuständen (frei weiß, unterwegs blau, reserviert hellblau, überfällig rot, gesperrt grau) */
-html.nxNeu.knNeu #tafelKarte{background:var(--rg-karte)!important;border:1px solid var(--rg-rand);border-radius:var(--rg-r-karte);overflow:hidden;padding:0!important;box-shadow:none!important;outline:0!important}
-html.nxNeu.knNeu #tafelKarte .tKopf{justify-content:flex-start;padding:8px 10px;border-bottom:1px solid var(--rg-linie);gap:6px;flex-wrap:nowrap}
+/* Tafel wie das freigegebene Vorbild (zentrale-entwurf/ruhig/vorbild_kalender.html, 18.11.2026): feste Fahrzeug-Spalte mit Kennzeichen, Kopf mit Wochentag
+   und Datum, heute rot im Kreis, Jetzt-Linie, Haarlinien je Tag und je Fahrzeug, Wochenende leicht getönt, Balken mit Abstand, rund nur bei echtem Beginn
+   und Ende, kein Gelb für den gewählten Zeitraum. Farben nach Zustand. */
+html.nxNeu.knNeu #sKal #tafelKarte{background:var(--rg-karte)!important;border:1px solid var(--rg-rand);border-radius:var(--rg-r-karte);overflow:hidden;padding:0!important;box-shadow:none!important;outline:0!important}
+html.nxNeu.knNeu #tafelKarte .tKopf{justify-content:flex-start;padding:6px 8px;border-bottom:1px solid var(--rg-rand);gap:6px;flex-wrap:nowrap}
 html.nxNeu.knNeu #tafelKarte .tNav{display:contents}
 html.nxNeu.knNeu #tZurueck,html.nxNeu.knNeu #tVor{order:0;flex:0 0 44px;width:44px;height:44px;padding:0!important;display:flex;align-items:center;justify-content:center;border-radius:50%!important;background:var(--rg-grau-h)!important;border:0;font-size:20px!important;font-weight:400!important;color:var(--rg-text)!important;box-sizing:border-box}
-html.nxNeu.knNeu #tTitel{order:1;flex:0 1 auto;min-width:0;min-height:44px;background:transparent!important;padding:0 2px!important;font-size:15px!important;font-weight:500!important;color:var(--rg-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block!important;line-height:44px!important}
+html.nxNeu.knNeu #tTitel{order:1;flex:0 1 auto;min-width:0;min-height:44px;background:transparent!important;padding:0 4px!important;font-size:15px!important;font-weight:500!important;color:var(--rg-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block!important;line-height:44px!important}
 html.nxNeu.knNeu #tTitel::after{margin-left:4px;color:var(--rg-t3)}
 html.nxNeu.knNeu #tVor{order:2}
-html.nxNeu.knNeu #tHeute{order:3;margin-left:auto;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 14px!important;border-radius:999px!important;background:var(--rg-grau-h)!important;color:var(--rg-text)!important;font-size:13px!important;font-weight:500!important;box-sizing:border-box}
-@media(max-width:359px){html.nxNeu.knNeu #tafelKarte .tKopf{gap:4px;padding:8px}html.nxNeu.knNeu #tTitel{font-size:13px!important}html.nxNeu.knNeu #tTitel::after{display:none}html.nxNeu.knNeu #tHeute{padding:0 11px!important}}
-html.nxNeu.knNeu #tafel th,html.nxNeu.knNeu #tafel td{border-bottom:1px solid var(--rg-linie)}
-html.nxNeu.knNeu #tafel th.auto{font-size:12px;font-weight:500;color:var(--rg-text);box-shadow:none!important;border-right:1px solid var(--rg-linie);background:var(--rg-karte)}
-html.nxNeu.knNeu #tafel th.auto small{font-size:11.5px!important;font-weight:400!important;color:var(--rg-rot-d)!important}
-html.nxNeu.knNeu #tafel th.tag{font-size:12px;font-weight:400;color:var(--rg-t2)}
-html.nxNeu.knNeu #tafel th.tag.we{color:var(--rg-t2)}
-html.nxNeu.knNeu #tafel th.tag b{color:var(--rg-text);font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
-html.nxNeu.knNeu #tafel th.tag.heute b{background:var(--rg-rot-h);color:var(--rg-rot-d);border-radius:8px}
-html.nxNeu.knNeu #tafel th.tag.gewaehlt,html.nxNeu.knNeu #tafel td.gewaehlt{background-color:var(--rg-gelb-h)}
-html.nxNeu.knNeu #tafel td.heute:not(.gewaehlt){background-color:var(--rg-karte)}
-html.nxNeu.knNeu #tafel td{border-left:0;background-image:linear-gradient(to right,var(--rg-linie) 1px,transparent 1px)}   /* Raster als Hintergrund: Balken liegen durchgehend darüber */
+html.nxNeu.knNeu #tHeute{order:3;margin-left:auto;flex:0 0 auto;min-height:44px;display:flex;align-items:center;padding:0 16px!important;border-radius:999px!important;background:var(--rg-grau-h)!important;color:var(--rg-text)!important;font-size:15px!important;font-weight:500!important;box-sizing:border-box}
+@media(max-width:374px){html.nxNeu.knNeu #tTitel{font-size:13px!important}html.nxNeu.knNeu #tHeute{padding:0 12px!important;font-size:13px!important}}
+@media(max-width:359px){html.nxNeu.knNeu #tafelKarte .tKopf{gap:4px;padding:6px}html.nxNeu.knNeu #tTitel::after{display:none}html.nxNeu.knNeu #tHeute{padding:0 10px!important}}
+html.nxNeu.knNeu main{padding-top:10px}
+html.nxNeu.knNeu #abgleich{margin-top:0!important}   /* wie im Vorbild: Karte 10 Punkte unter dem Kopf; die Zeile „Wird gesichert …“ erscheint wie bisher an dieser Stelle */
+html.nxNeu.knNeu #tafelRoll{position:relative;padding-bottom:0}
+html.nxNeu.knNeu #tafel{--knTag:42px}
+html.nxNeu.knNeu #tafel th,html.nxNeu.knNeu #tafel td{border-bottom:1px solid var(--rg-rand)}
+html.nxNeu.knNeu #tafel tr:last-child th,html.nxNeu.knNeu #tafel tr:last-child td{border-bottom:0}
+html.nxNeu.knNeu #sKal #tafel th.auto{width:108px;min-width:108px;max-width:108px;box-sizing:border-box;padding:0 6px 0 12px;font-size:13px;font-weight:500;line-height:1.2;letter-spacing:-.005em;color:var(--rg-text);background:var(--rg-karte);box-shadow:1px 0 0 var(--rg-rand)!important;border-right:0;z-index:4}
+html.nxNeu.knNeu #tafel th.auto .knN{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.nxNeu.knNeu #tafel th.auto .knKz{display:block;font-size:12px;font-weight:400;line-height:1.3;color:var(--rg-t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+html.nxNeu.knNeu #tafel th.auto small{display:block;font-size:12px!important;font-weight:400!important;line-height:1.3;color:var(--rg-rot-d)!important;margin-top:1px}
+html.nxNeu.knNeu #tafel th.tag{width:var(--knTag);min-width:var(--knTag);height:50px;padding:0;vertical-align:middle;text-align:center;font-size:12px;font-weight:400;line-height:1;color:var(--rg-t2);border-radius:0;background-color:var(--rg-karte);background-image:linear-gradient(to right,var(--rg-rand) 1px,transparent 1px)}
+html.nxNeu.knNeu #tafel th.tag b{display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin:4px auto 0;padding:0;border-radius:50%;background:transparent;font-size:15px;font-weight:500;line-height:1;color:var(--rg-text);font-variant-numeric:tabular-nums}
+html.nxNeu.knNeu #tafel th.tag.heute{color:var(--rg-rot);font-weight:500}
+html.nxNeu.knNeu #tafel th.tag.heute b{background:var(--rg-rot);color:var(--rg-karte);border-radius:50%}
+html.nxNeu.knNeu #tafel td{width:var(--knTag);min-width:var(--knTag);height:44px;border-left:0;background-color:var(--rg-karte);background-image:linear-gradient(to right,var(--rg-rand) 1px,transparent 1px)}   /* Raster als Hintergrund: Balken liegen durchgehend darüber */
+html.nxNeu.knNeu #tafel th.tag.we,html.nxNeu.knNeu #tafel td.we{background-color:color-mix(in srgb,var(--rg-fl) 55%,var(--rg-karte))}   /* Wochenende leicht getönt (Fläche und Weiß gemischt) */
+html.nxNeu.knNeu #tafel td.dopZ::after{display:none}
+html.nxNeu.knNeu #tafel td i{top:8px;bottom:auto;height:28px;border-radius:0;z-index:2;box-sizing:border-box;background-clip:padding-box}
+html.nxNeu.knNeu #tafel td i[data-kr~="a"]{border-left:1px solid transparent;border-top-left-radius:8px;border-bottom-left-radius:8px}   /* echter Beginn: rund, mit Abstand */
+html.nxNeu.knNeu #tafel td i[data-kr~="e"]{border-right:1px solid transparent;border-top-right-radius:8px;border-bottom-right-radius:8px}   /* echtes Ende: rund, mit Abstand; sonst gerade Kante: geht weiter */
 html.nxNeu.knNeu #tafel td i.frei{background:transparent!important}
-html.nxNeu.knNeu #tafel td i.belegt.knL{background:var(--rg-blau)}
-html.nxNeu.knNeu #tafel td i.belegt.knR{background:var(--rg-blau-h);border-top:1px solid var(--rg-blau);border-bottom:1px solid var(--rg-blau)}
-html.nxNeu.knNeu #tafel td i.belegt.knR.start{border-left:1px solid var(--rg-blau)}
-html.nxNeu.knNeu #tafel td i.belegt.knR.ende{border-right:1px solid var(--rg-blau)}
-html.nxNeu.knNeu #tafel td i.ueber,html.nxNeu.knNeu #tafel td i.belegt.knU{background:var(--rg-rot)}
-html.nxNeu.knNeu #tafel td i.belegt.knV{background:var(--rg-spur)}
-html.nxNeu.knNeu #tafel td i.sperre{background:repeating-linear-gradient(135deg,var(--rg-spur) 0 6px,var(--rg-grau-h) 6px 12px)}
-html.nxNeu.knNeu #tafel td b{font-size:12px;font-weight:500}
-html.nxNeu.knNeu #tafel td b.knL,html.nxNeu.knNeu #tafel td b.u{color:#fff}
+html.nxNeu.knNeu #tafel td i.belegt.knL{background-color:var(--rg-blau)}
+html.nxNeu.knNeu #sKal #tafel td i.belegt.knR{background-color:var(--rg-blau-h);box-shadow:inset 0 1px 0 rgba(27,91,199,.3),inset 0 -1px 0 rgba(27,91,199,.3)!important}
+html.nxNeu.knNeu #sKal #tafel td i.belegt.knR[data-kr~="a"]{box-shadow:inset 0 1px 0 rgba(27,91,199,.3),inset 0 -1px 0 rgba(27,91,199,.3),inset 1px 0 0 rgba(27,91,199,.3)!important}
+html.nxNeu.knNeu #sKal #tafel td i.belegt.knR[data-kr~="e"]{box-shadow:inset 0 1px 0 rgba(27,91,199,.3),inset 0 -1px 0 rgba(27,91,199,.3),inset -1px 0 0 rgba(27,91,199,.3)!important}
+html.nxNeu.knNeu #sKal #tafel td i.belegt.knR[data-kr="a e"]{box-shadow:inset 0 0 0 1px rgba(27,91,199,.3)!important}
+html.nxNeu.knNeu #sKal #tafel td i.ueber,html.nxNeu.knNeu #sKal #tafel td i.belegt.knU{background-color:var(--rg-rot-h);box-shadow:inset 0 1px 0 rgba(196,22,28,.45),inset 0 -1px 0 rgba(196,22,28,.45)!important}
+html.nxNeu.knNeu #sKal #tafel td i.belegt.knU[data-kr~="a"]{box-shadow:inset 0 1px 0 rgba(196,22,28,.45),inset 0 -1px 0 rgba(196,22,28,.45),inset 1px 0 0 rgba(196,22,28,.45)!important}
+html.nxNeu.knNeu #tafel td i.belegt.knV{background-color:var(--rg-spur)}
+html.nxNeu.knNeu #tafel td i.sperre{background-color:transparent;background-image:repeating-linear-gradient(135deg,var(--rg-grau-h) 0 4.95px,var(--rg-spur) 4.95px 9.9px);background-size:14px 14px}
+html.nxNeu.knNeu #tafel td .knW{position:absolute;top:8px;height:28px;box-sizing:border-box;z-index:1;background:var(--rg-gelb-h);border-top:1px dashed color-mix(in srgb,var(--rg-gelb) 55%,var(--rg-karte));border-bottom:1px dashed color-mix(in srgb,var(--rg-gelb) 55%,var(--rg-karte));cursor:pointer}
+html.nxNeu.knNeu #tafel td .knW[data-kr~="a"]{border-left:1px dashed color-mix(in srgb,var(--rg-gelb) 55%,var(--rg-karte));border-top-left-radius:8px;border-bottom-left-radius:8px}
+html.nxNeu.knNeu #tafel td .knW[data-kr~="e"]{border-right:1px dashed color-mix(in srgb,var(--rg-gelb) 55%,var(--rg-karte));border-top-right-radius:8px;border-bottom-right-radius:8px}
+html.nxNeu.knNeu #tafel td b{top:8px;bottom:auto;height:28px;line-height:28px!important;padding:0 8px;width:calc(var(--l) * var(--knTag));min-width:44px;font-size:12px;font-weight:500;letter-spacing:0;z-index:3;color:var(--rg-text)}
+html.nxNeu.knNeu #tafel td b[data-kn]{font-size:0!important}
+html.nxNeu.knNeu #tafel td b[data-kn]::before{content:attr(data-kn);font-size:12px}
+html.nxNeu.knNeu #tafel td b.knL{color:var(--rg-karte)}
 html.nxNeu.knNeu #tafel td b.knR{color:var(--rg-blau)}
+html.nxNeu.knNeu #tafel td b.u,html.nxNeu.knNeu #tafel td b.knU{color:var(--rg-rot-d)}
 html.nxNeu.knNeu #tafel td b.knS,html.nxNeu.knNeu #tafel td b.knV{color:var(--rg-t2)}
-html.nxNeu.knNeu #tafel td.dopZ::after{height:2px;background:var(--rg-rot-d)}
+html.nxNeu.knNeu #tafel td .knWn{position:absolute;top:8px;height:28px;line-height:28px;padding:0 8px;box-sizing:border-box;font-size:12px;font-weight:500;color:var(--rg-gelb);white-space:nowrap;overflow:hidden;z-index:3;pointer-events:none}
+html.nxNeu.knNeu #tafel td .knAussen{position:absolute;top:8px;height:28px;line-height:28px;font-size:12px;font-weight:400;color:var(--rg-text);white-space:nowrap;z-index:3;pointer-events:none}
+html.nxNeu.knNeu #tafel td .knAussen em{font-style:normal;color:var(--rg-t2)}
+/* Doppelt verplant: zwei Spuren übereinander, die Buchung im Streit rot umrandet */
+html.nxNeu.knNeu #tafel tr.dop th,html.nxNeu.knNeu #tafel tr.dop td{height:calc(12px + var(--spn,2) * 28px)}
+html.nxNeu.knNeu #tafel tr.dop td i[style*="--sp"]{top:calc(7px + var(--sp) * 28px)!important;height:26px!important}
+html.nxNeu.knNeu #tafel tr.dop td b[style*="--sp"],html.nxNeu.knNeu #tafel tr.dop td .knAussen[style*="--sp"]{top:calc(7px + var(--sp) * 28px)!important;height:26px!important;line-height:26px!important}
+html.nxNeu.knNeu #sKal #tafel tr.dop td i.belegt.knR[style*="--sp"]{background-color:var(--rg-rot-h);box-shadow:inset 0 1px 0 var(--rg-rot-d),inset 0 -1px 0 var(--rg-rot-d)!important}
+html.nxNeu.knNeu #sKal #tafel tr.dop td i.belegt.knR[style*="--sp"][data-kr~="a"]{box-shadow:inset 0 1px 0 var(--rg-rot-d),inset 0 -1px 0 var(--rg-rot-d),inset 1px 0 0 var(--rg-rot-d)!important}
+html.nxNeu.knNeu #sKal #tafel tr.dop td i.belegt.knR[style*="--sp"][data-kr~="e"]{box-shadow:inset 0 1px 0 var(--rg-rot-d),inset 0 -1px 0 var(--rg-rot-d),inset -1px 0 0 var(--rg-rot-d)!important}
+html.nxNeu.knNeu #sKal #tafel tr.dop td i.belegt.knR[style*="--sp"][data-kr="a e"]{box-shadow:inset 0 0 0 1px var(--rg-rot-d)!important}
+html.nxNeu.knNeu #tafel tr.dop td b.knR[style*="--sp"]{color:var(--rg-rot-d)}
+html.nxNeu.knNeu .knJetzt{position:absolute;width:1px;background:var(--rg-rot);z-index:1;pointer-events:none}
+html.nxNeu.knNeu .knJetzt::before{content:"";position:absolute;top:-4px;left:-3.5px;width:8px;height:8px;border-radius:50%;background:var(--rg-rot)}
 html.nxNeu.knNeu #tafelKarte .tLegende{display:none}
-html.nxNeu.knNeu .knLeg{display:flex;flex-wrap:wrap;gap:6px 12px;padding:10px 12px;border-top:1px solid var(--rg-linie);font-size:12px;font-weight:400;color:var(--rg-t2)}
-html.nxNeu.knNeu .knLeg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-html.nxNeu.knNeu .knLeg i{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--rg-rand);background:var(--rg-karte);box-sizing:border-box}
-html.nxNeu.knNeu .knLeg i.l{background:var(--rg-blau);border-color:var(--rg-blau)}
-html.nxNeu.knNeu .knLeg i.r{background:var(--rg-blau-h);border-color:var(--rg-blau)}
-html.nxNeu.knNeu .knLeg i.u{background:var(--rg-rot);border-color:var(--rg-rot)}
-html.nxNeu.knNeu .knLeg i.s{background:repeating-linear-gradient(135deg,var(--rg-spur) 0 3px,var(--rg-grau-h) 3px 6px);border-color:var(--rg-spur)}
-html.nxNeu.knNeu .knLeg i.g{background:var(--rg-gelb-h);border-color:var(--rg-gelb-h)}
-html.nxNeu.knNeu .knLeg i.v{background:var(--rg-spur);border-color:var(--rg-spur)}
+html.nxNeu.knNeu .knLeg{display:flex;flex-wrap:wrap;gap:8px 14px;padding:12px 12px 13px;border-top:1px solid var(--rg-rand);font-size:12px;font-weight:400;color:var(--rg-t2)}
+html.nxNeu.knNeu .knLeg span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i{width:16px;height:10px;border-radius:3px;display:inline-block;box-sizing:border-box;background:var(--rg-karte);box-shadow:inset 0 0 0 1px var(--rg-rand)!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.l{background:var(--rg-blau);box-shadow:none!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.r{background:var(--rg-blau-h);box-shadow:inset 0 0 0 1px rgba(27,91,199,.3)!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.w{background:var(--rg-gelb-h);box-shadow:none!important;border:1px dashed color-mix(in srgb,var(--rg-gelb) 55%,var(--rg-karte))}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.u{background:var(--rg-rot-h);box-shadow:inset 0 0 0 1px rgba(196,22,28,.45)!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.s{background:repeating-linear-gradient(135deg,var(--rg-grau-h) 0 3px,var(--rg-spur) 3px 6px);box-shadow:none!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.v{background:var(--rg-spur);box-shadow:none!important}
+html.nxNeu.knNeu #sKal #tafelKarte .knLeg i.j{width:1px;height:12px;border-radius:0;background:var(--rg-rot);box-shadow:none!important}
 html.nxNeu.knNeu #tafelKarte .tLegende:has(#tLegU.versteckt)+.knLeg .knLegU{display:none}
+html.nxNeu.knNeu .knLeg:not(.knMitW) .knLegW{display:none}
 html.nxNeu.knNeu .knTipps b{font-weight:500;color:var(--rg-text)}
-/* Frei im Zeitraum: Bezeichnung, darunter eine Karte mit Zeitraum und freien Autos; danach „Noch nicht zurück“ und „Belegt in dieser Zeit“ */
+/* Zeitraum: Bezeichnung, darunter eine Karte mit Schnellwahl, Von und Bis */
 html.nxNeu.knNeu #werFrei{background:transparent!important;box-shadow:none!important;padding:0!important;margin:14px 0 0!important;border-radius:0!important;outline:0!important}
-html.nxNeu.knNeu #werZeit{background:var(--rg-karte);border:1px solid var(--rg-rand);border-bottom:0;border-radius:var(--rg-r-karte) var(--rg-r-karte) 0 0;padding:12px 12px 10px}
-html.nxNeu.knNeu #freiKopf{background:var(--rg-karte);border-left:1px solid var(--rg-rand);border-right:1px solid var(--rg-rand);padding:0 12px 10px;margin:0;font-size:15px;font-weight:400}
+html.nxNeu.knNeu #werZeit{background:var(--rg-karte);border:1px solid var(--rg-rand);border-radius:var(--rg-r-karte);padding:12px;margin:0 0 14px}
+html.nxNeu.knNeu #freiKopf{margin:0 4px 6px;font-size:15px;font-weight:400;color:var(--rg-t2)}
 html.nxNeu.knNeu #freiKopf:empty{display:none}
 html.nxNeu.knNeu #werZeit .tChips{gap:6px;background:none!important;padding:0!important;border:0!important;border-radius:0!important}
-html.nxNeu.knNeu #werZeit .tChips .tLab{font-size:13px;font-weight:400;color:var(--rg-t2);margin:2px 0 0}
-html.nxNeu.knNeu #werZeit .tChips div{min-height:44px;box-sizing:border-box;display:flex;align-items:center;padding:0 12px;border-radius:999px;background:var(--rg-grau-h);color:var(--rg-text);font-size:13px;font-weight:500}
+html.nxNeu.knNeu #werZeit .tChips .tLab{flex:0 0 100%;font-size:12px;font-weight:400;color:var(--rg-t2);margin:0 0 0 2px}
+html.nxNeu.knNeu #werZeit .tChips .tLab~.tLab{margin-top:6px}
+html.nxNeu.knNeu #werZeit .tChips div{min-height:44px;box-sizing:border-box;display:flex;align-items:center;padding:0 10px;border-radius:999px;background:var(--rg-grau-h);color:var(--rg-text);font-size:13px;font-weight:500}
 html.nxNeu.knNeu #werZeit .tChips div.an{background:var(--rg-blau-h);color:var(--rg-blau)}
-html.nxNeu.knNeu #werZeit .tPruef{border-top:1px solid var(--rg-linie)!important;margin-top:12px!important;padding-top:12px!important}
-html.nxNeu.knNeu #werZeit .tZeile span{font-size:13px;font-weight:400;color:var(--rg-t2)}
-html.nxNeu.knNeu #werZeit .tZeile select,html.nxNeu.knNeu #werZeit .tZeile input[type=date]{min-height:48px;border:1px solid transparent!important;background:var(--rg-grau-h)!important;border-radius:var(--rg-r-feld)!important;font-size:16px!important;font-weight:400!important;color:var(--rg-text)!important;box-shadow:none!important}
-html.nxNeu.knNeu #werZeit .tZeile select:focus,html.nxNeu.knNeu #werZeit .tZeile input[type=date]:focus{background:var(--rg-karte)!important;border-color:var(--rg-rot)!important;outline:0}
-html.nxNeu.knNeu #werZeit #zeitraumtext{font-size:13px;font-weight:400;color:var(--rg-t2)}
+html.nxNeu.knNeu #werZeit .tPruef{border-top:1px solid var(--rg-linie)!important;margin:12px 0 0!important;padding:12px 0 0!important}
+html.nxNeu.knNeu #werZeit .tZeile{gap:8px;margin-bottom:8px}
+html.nxNeu.knNeu #werZeit .tZeile span{width:34px;flex:0 0 34px;font-size:13px;font-weight:400;color:var(--rg-t2);padding-left:2px;text-transform:capitalize}
+html.nxNeu.knNeu #werZeit .tZeile select{width:96px}
+html.nxNeu.knNeu #werZeit .tZeile select,html.nxNeu.knNeu #werZeit .tZeile input[type=date]{min-height:48px;border:1px solid transparent!important;background-color:var(--rg-grau-h)!important;border-radius:var(--rg-r-feld)!important;font-size:16px!important;font-weight:400!important;color:var(--rg-text)!important;box-shadow:none!important}
+html.nxNeu.knNeu #werZeit .tZeile select:focus,html.nxNeu.knNeu #werZeit .tZeile input[type=date]:focus{background-color:var(--rg-karte)!important;border-color:var(--rg-rot)!important;outline:0}
+html.nxNeu.knNeu #werZeit #zeitraumtext{font-size:13px;font-weight:400;color:var(--rg-t2);margin:10px 2px 0}
+/* Tageslisten für das Von- und das Bis-Datum (Vorbild 18.11.2026): wer kommt zurück, wer wird übergeben, nach Uhrzeit */
+html.nxNeu.knNeu .knTk{display:flex;align-items:baseline;gap:8px}
+html.nxNeu.knNeu .knTk b{font-weight:500;color:var(--rg-text);letter-spacing:.02em;font-size:13px}
+html.nxNeu.knNeu .knTk .re{margin-left:auto;letter-spacing:.02em;text-align:right}
+html.nxNeu.knNeu .knTl{margin:0 0 14px}
+html.nxNeu.knNeu .knTz{display:flex;align-items:center;gap:10px;padding:11px 12px;min-height:56px;box-sizing:border-box;border-top:1px solid var(--rg-linie);cursor:pointer;-webkit-tap-highlight-color:transparent}
+html.nxNeu.knNeu .knTz:first-child{border-top:0}
+html.nxNeu.knNeu .knTz:active{background:var(--rg-grau-h)}
+html.nxNeu.knNeu .knTz .zt{width:44px;flex:none;align-self:flex-start;padding-top:1px;font-size:15px;font-weight:500;line-height:1.35;font-variant-numeric:tabular-nums}
+html.nxNeu.knNeu .knTz .zt.rot{color:var(--rg-rot-d)}
+html.nxNeu.knNeu .knTz .zt small{display:block;font-size:12px;font-weight:400;color:var(--rg-t2);margin-top:1px}
+html.nxNeu.knNeu .knTz .mi{flex:1;min-width:0}
+html.nxNeu.knNeu .knTz .t1{font-size:15px;font-weight:500;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.nxNeu.knNeu .knTz .su{font-size:13px;line-height:1.35;color:var(--rg-t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.nxNeu.knNeu .knTz .su svg{width:15px;height:15px;margin:-2px 3px 0 0;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html.nxNeu.knNeu .knTz .st{font-size:12px;line-height:1.35;margin-top:1px}
+html.nxNeu.knNeu .knTz .st.rot{color:var(--rg-rot-d)}
+html.nxNeu.knNeu .knTz .st.gelb{color:var(--rg-gelb)}
+html.nxNeu.knNeu .knTz .st.grau{color:var(--rg-t2)}
+html.nxNeu.knNeu .knTz>svg{width:18px;height:18px;flex:none;color:var(--rg-t3);fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html.nxNeu.knNeu .knTleer{margin:0 4px 16px;font-size:15px;line-height:1.45;color:var(--rg-t2)}
+html.nxNeu.knNeu #knTage>.knHinw{margin:-6px 4px 14px}
+/* Frei im Zeitraum: Bezeichnung mit Zahl, darunter die freien Autos als Karte; danach „Noch nicht zurück“ und „Belegt in dieser Zeit“ */
+html.nxNeu.knNeu .knKopfF .knZahl{color:var(--rg-gruen)}
 html.nxNeu.knNeu .knGr{margin-top:14px}
-html.nxNeu.knNeu .knGrF{margin-top:0;background:var(--rg-karte);border:1px solid var(--rg-rand);border-top:0;border-radius:0 0 var(--rg-r-karte) var(--rg-r-karte);overflow:hidden;min-height:4px}
+html.nxNeu.knNeu .knGrF{margin-top:0;background:var(--rg-karte);border:1px solid var(--rg-rand);border-radius:var(--rg-r-karte);overflow:hidden;min-height:4px}
+html.nxNeu.knNeu .knGrF>.fZeile:first-child{border-top:0!important}
 html.nxNeu.knNeu .knGr .fZeile{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center;min-height:56px;box-sizing:border-box;padding:11px 12px!important;border-top:1px solid var(--rg-linie)!important;margin:0!important}
 html.nxNeu.knNeu .knKarte>.fZeile:first-child{border-top:0!important}
 html.nxNeu.knNeu .knGr .fZeile>div:first-child{display:contents}
@@ -338,7 +402,7 @@ html.nxNeu.knNeu #buchungen .bzeile{border-bottom:1px solid var(--rg-linie)!impo
 html.nxNeu.knNeu #buchungen .bname{font-size:15px!important;font-weight:500!important}
 html.nxNeu.knNeu #buchungen .bzeit{font-size:13px!important;font-weight:400!important;color:var(--rg-t2)!important}
 html.nxNeu.knNeu #buchungen .weg{background:none!important;border:0!important;color:var(--rg-rot-d)!important;font-size:15px!important;font-weight:500!important;min-height:44px;padding:0 4px!important}
-</style><style id="knAeStil">html.nxNeu #blatt .knZeile{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:11px 4px;border-top:1px solid var(--rg-linie);color:var(--rg-text);text-decoration:none;font-size:15px;font-weight:500;box-sizing:border-box}html.nxNeu #blatt .knZeile:last-child{border-bottom:1px solid var(--rg-linie)}html.nxNeu #blatt .knZeile b{color:var(--rg-t3);font-size:22px;font-weight:400}html.nxNeu.knNeu #tafel tr:not(.dop) th,html.nxNeu.knNeu #tafel tr:not(.dop) td{height:44px}html.nxNeu.knNeu #tafel tr:not(.dop) td b{line-height:38px}html.nxNeu .bzeile .knAe{flex:0 0 auto;background:var(--rg-grau-h);color:var(--rg-text);border:0;border-radius:999px;padding:0 14px;min-height:44px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;margin-left:auto}</style><style id="knUmStil">
+</style><style id="knAeStil">html.nxNeu #blatt .knZeile{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:11px 4px;border-top:1px solid var(--rg-linie);color:var(--rg-text);text-decoration:none;font-size:15px;font-weight:500;box-sizing:border-box}html.nxNeu #blatt .knZeile:last-child{border-bottom:1px solid var(--rg-linie)}html.nxNeu #blatt .knZeile b{color:var(--rg-t3);font-size:22px;font-weight:400}html.nxNeu .bzeile .knAe{flex:0 0 auto;background:var(--rg-grau-h);color:var(--rg-text);border:0;border-radius:999px;padding:0 14px;min-height:44px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;margin-left:auto}</style><style id="knUmStil">
 html.nxNeu.knNeu #tafel{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 html.nxNeu.knNeu #tafel i[data-bid]:not(.sperre),html.nxNeu.knNeu #tafel b[data-bid]:not(.knS){cursor:grab}
 html.knZieht,html.knZieht *{cursor:grabbing!important}
@@ -942,8 +1006,8 @@ function zeichneTafel(){if(!D.cars||!D.cars.length)return;
       zb.forEach(x=>{if(x===b||spur[x.id]===undefined||!ueb2(x,b)||(x.vorbei&&b.vorbei))return;besetzt.push(spur[x.id]);streit.add(x.id);streit.add(b.id)});   // zwei schon vorbei: kein „doppelt“ (Herr Köhler 17.11.2026, C 63)
       let l=0;while(besetzt.includes(l))l++;spur[b.id]=l;if(streit.has(b.id))spuren=Math.max(spuren,l+1)});
     const dop=streit.size>0,hS=Math.floor(44/spuren)-1;
-    const lage=b=>dop&&streit.has(b.id)?"top:calc(3px + "+(44/spuren*spur[b.id]).toFixed(1)+"px);bottom:auto;height:"+hS+"px;":"";
-    html+='<tr'+(dop?' class="dop"':'')+'><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+(dop?'<small>doppelt</small>':'')+'</th>';
+    const lage=b=>dop&&streit.has(b.id)?"--sp:"+spur[b.id]+";top:calc(3px + "+(44/spuren*spur[b.id]).toFixed(1)+"px);bottom:auto;height:"+hS+"px;":"";
+    html+='<tr'+(dop?' class="dop" style="--spn:'+spuren+'"':'')+'><th class="auto" title="'+c.n+'">'+kurzAuto(c.n)+(dop?'<small>doppelt</small>':'')+'</th>';
     tage.forEach((d,i)=>{const t=nachISO(d);
       // alle Buchungen, die diesen Tag berühren; am Rückgabetag ist nur bis zur Uhrzeit belegt, danach frei
       const tr=zb.filter(b=>b.von<=t&&b.bis>=t&&!(b.bis===t&&b.von!==t&&stunden(b.bisU)===0));
@@ -979,11 +1043,11 @@ function blatt(titel,unter,aktionen){$("blatt").innerHTML='<h3>'+titel+'</h3><di
     zu();a.f()}});
   $("blattZu").onclick=e=>{e.preventDefault();zu()};$("blattBg").onclick=zu}
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-function zelle(auto,t,bid){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
+function zelle(auto,t,bid,nurMiete){const d=ausISO(t);let b=bid?BUCHUNGEN.find(x=>x.id===bid):null;
   // Rückgabe- und Abholtag (30.10.2026, Baran): Bringt der Kunde den RS Q8 Sonntag um 16:30 zurück, ist er danach frei.
   // Antippen startet die neue Miete ab dieser Uhrzeit. Holt jemand um 17 Uhr ab, endet eine Verlängerung bis dahin.
   let abUhr=null,bisUhr=null,rueck=null;const vonAlt0=$("von").value;
-  if(b&&b.notiz!=="Sperre"){const tr=BUCHUNGEN.filter(x=>x.fahrzeug===auto&&x.von<=t&&x.bis>=t);
+  if(b&&b.notiz!=="Sperre"&&!nurMiete){const tr=BUCHUNGEN.filter(x=>x.fahrzeug===auto&&x.von<=t&&x.bis>=t);
     const r=tr.find(x=>x.bis===t&&x.von!==t),a=tr.find(x=>x.von===t&&x.bis!==t),mitte=tr.find(x=>x.von<t&&x.bis>t);
     const verl=LETZTE_ZELLE===auto&&vonAlt0&&t>vonAlt0&&t<=nachISO(plusTage(ausISO(vonAlt0),30));
     if(!mitte&&a&&!r&&verl){bisUhr=a.vonU||"10:00";b=null}
@@ -2551,11 +2615,130 @@ try{
   const h1=document.querySelector("header h1");if(h1)dazu(h1,"afterend",'<p class="knUnter" data-nxzusatz>Wer hat welches Auto, was ist frei</p>');
   // Legende und Tipps unter der Tafel
   dazu(document.querySelector("#tafelKarte .tLegende"),"afterend",'<div class="knLeg" data-nxzusatz><span><i></i>frei</span><span><i class="l"></i>unterwegs</span>'
-    +'<span><i class="r"></i>reserviert</span><span class="knLegU"><i class="u"></i>überfällig</span><span><i class="s"></i>gesperrt</span><span><i class="v"></i>schon zurück</span><span><i class="g"></i>gewählte Tage</span></div>');
+    +'<span><i class="r"></i>reserviert</span><span class="knLegW"><i class="w"></i>wartet auf Anzahlung</span><span class="knLegU"><i class="u"></i>überfällig</span><span><i class="s"></i>gesperrt</span><span><i class="v"></i>schon zurück</span><span><i class="j"></i>jetzt</span></div>');
   dazu($k("tafelKarte"),"afterend",'<div class="knTipps" data-nxzusatz><b>Freies Feld</b> antippen: Zeitraum ab dem Tag, dann Mietvertrag, Anfrage oder Angebot.<br><b>Balken</b> antippen: Miete ansehen, von dort Buchung oder Mietvertrag öffnen.<br>'
     +'<b>Grauen Balken</b> antippen: Sperre aufheben.</div>');
-  // Frei im Zeitraum: Kopf über Zeitraum und Liste
-  const kopfF=dazu($k("werZeit"),"beforebegin",'<div class="knKopf knKopfF gruen" data-nxzusatz>Frei im Zeitraum<span class="knZahl" id="knZahlF"></span></div>');
+  // Gemeinsame Helfer für Tafel und Tageslisten (nur lesen, nie schreiben)
+  const T=$k("tafel"),RO=$k("tafelRoll"),A0="https://barankohler.github.io/mietix-vertrag/",TAGB=42;
+  const e2=x=>String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  const lsj=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||"")||d}catch(e){return d}};
+  const uz=u=>String(u||"10:00").slice(0,5),tagNr=t=>{const d=ausISO(t);return wtKurz(d)+" "+kurzD(d)};
+  const datumJ=t=>{const d=ausISO(t);return d.getFullYear()===heute.getFullYear()?kurzD(d):lang(d)};
+  const nameK=n=>{const p=String(n||"").trim().split(/\s+/);return p.length>1?p[0]+" "+p[p.length-1].charAt(0)+".":p[0]||""};
+  const vorn=n=>String(n||"").trim().split(/\s+/)[0]||"";
+  const buchung=id=>typeof BUCHUNGEN==="undefined"?null:BUCHUNGEN.find(x=>String(x.id)===String(id))||null;
+  // Wartet auf Anzahlung (wie Buchungen: Anfrage im Stand „angebot“ mit angeforderter Anzahlung). Blockt das Auto nicht, steht nur gestrichelt da.
+  const wartende=()=>(lsj("mietixAnfragen",[])||[]).filter(a=>a&&!a._weg&&a.status==="angebot"&&a.anzahlungAngefordert&&a.auto&&a.von&&a.bis&&a.bis>=a.von);
+  const wU=(a,k)=>a[k]||(a.angebot&&a.angebot[k])||"10:00";
+  const cv=document.createElement("canvas").getContext("2d");
+  const breite=(t,gew,fam)=>{cv.font=(gew||500)+" 12px "+fam;return cv.measureText(t).width};
+  // Tafel wie das Vorbild: Kennzeichen am Auto, runde Ecken nur bei echtem Beginn und Ende, Name im Balken (kurz daneben), wartende Anfragen, Jetzt-Linie
+  function schmuck(){if(!T||typeof BUCHUNGEN==="undefined")return;
+    const FZ=lsj("mietixFahrzeuge",{})||{},AU=lsj("mietixAutos",{})||{},fam=getComputedStyle(T).fontFamily;
+    T.querySelectorAll(".knW,.knWn,.knAussen").forEach(x=>x.remove());
+    T.querySelectorAll("th.auto").forEach(th=>{const n=th.getAttribute("title");if(!n)return;
+      if(!th.querySelector(".knN")){const tx=[...th.childNodes].find(x=>x.nodeType===3);if(tx){const s=document.createElement("span");s.className="knN";th.insertBefore(s,tx);s.appendChild(tx)}}
+      const k=(FZ[n]&&!FZ[n]._weg&&FZ[n].kz)||(AU[n]&&!AU[n]._weg&&AU[n].kz)||"";
+      if(k&&!th.querySelector(".knKz")){const s=document.createElement("span");s.className="knKz";s.setAttribute("data-nxzusatz","");s.textContent=String(k);th.insertBefore(s,th.querySelector("small"))}});
+    const ende={};
+    T.querySelectorAll("tr").forEach(tr=>{const g={};tr.querySelectorAll("i[data-bid]").forEach(i=>{(g[i.dataset.bid]=g[i.dataset.bid]||[]).push(i)});
+      Object.keys(g).forEach(id=>{const l=g[id],b=buchung(id);if(!b)return;const t0=l[0].parentNode.dataset.t,t1=l[l.length-1].parentNode.dataset.t;
+        const a=ZEIT(b.von,b.vonU)>=t0+"T00:00",e=!b.ueber&&ZEIT(b.bis,b.bisU)<=nachISO(plusTage(ausISO(t1),1))+"T00:00";
+        l.forEach((i,j)=>{const k=[j===0&&a?"a":"",j===l.length-1&&e?"e":""].filter(Boolean).join(" ");if(k)i.setAttribute("data-kr",k);else i.removeAttribute("data-kr")});
+        ende[id+"|"+tr.rowIndex]={i:l[l.length-1],sichtbar:e}})});
+    // Wartet auf Anzahlung: gestrichelter gelber Balken über freien Tagen (Zusatz, blockt nichts)
+    const W=wartende(),leg=document.querySelector(".knLeg");
+    W.forEach(a=>{const vu=wU(a,"vonU"),bu=wU(a,"bisU");let erst=true;
+      T.querySelectorAll("td[data-auto]").forEach(td=>{const t=td.dataset.t;if(td.dataset.auto!==a.auto||t<a.von||t>a.bis)return;
+        const x0=t===a.von?stunden(vu)/24:0,x1=t===a.bis?stunden(bu)/24:1;if(x1<=x0)return;
+        const s=document.createElement("span");s.className="knW";s.setAttribute("data-nxzusatz","");s.dataset.wid=a.id;
+        const naechst=nachISO(plusTage(ausISO(t),1)),k=[t===a.von?"a":"",t===a.bis||(naechst===a.bis&&stunden(bu)===0)?"e":""].filter(Boolean).join(" ");if(k)s.setAttribute("data-kr",k);
+        s.style.left=(x0*100).toFixed(1)+"%";s.style.right=((1-x1)*100).toFixed(1)+"%";td.appendChild(s);
+        if(erst){erst=false;const tage=(ausISO(a.bis)-ausISO(t))/864e5+stunden(bu)/24-x0,w=Math.max(30,tage*TAGB)-16,nm=String(a.name||a.nummer||"Anfrage").trim();
+          const txt=[nm,nameK(nm),vorn(nm)].find(x=>breite(x,500,fam)<=w)||vorn(nm);
+          const n=document.createElement("span");n.className="knWn";n.setAttribute("data-nxzusatz","");n.textContent=txt;n.style.left=(x0*100).toFixed(1)+"%";n.style.width=Math.max(30,tage*TAGB).toFixed(0)+"px";td.appendChild(n)}})});
+    if(leg)leg.classList.toggle("knMitW",W.length>0);
+    // Namen: voller Name, wenn er passt, sonst kürzer; bei kurzen Balken daneben, wenn dort Platz ist
+    T.querySelectorAll("td b[data-bid]").forEach(el=>{const b=buchung(el.dataset.bid);if(!b)return;
+      const l=parseFloat(el.style.getPropertyValue("--l"))||1,platz=Math.max(44,l*TAGB)-16,sp=b.notiz==="Sperre",nm=String(b.kunde||"").trim(),passt=t=>breite(t,500,fam)<=platz;
+      let wahl=null,aus=null;
+      if(sp)wahl=["selbst gesperrt bis "+datumJ(b.bis)+(nm?": "+nm:""),nm||"selbst gesperrt","gesperrt"].find(passt)||"gesperrt";
+      else{const p0=nm.split(/\s+/),n0=!nm?"belegt":p0.length>2?p0[0]+" "+p0[p0.length-1]:nm;let zus="";
+        if(b.ueber){const bp=b.bisPlan,dt=Math.round((ausISO(nachISO(heute))-ausISO(bp))/864e5);zus=", seit "+(dt<7?wtKurz(ausISO(bp))+" "+uz(b.bisUPlan):kurzD(ausISO(bp)))+" überfällig"}
+        else if(!b.vorbei&&l>=5)zus=", bis "+tagNr(b.bis)+" "+uz(b.bisU);
+        wahl=[n0+zus,n0,nameK(n0),vorn(n0)].find(passt)||null;
+        if(!wahl){const tr=el.closest("tr"),en=ende[el.dataset.bid+"|"+tr.rowIndex];
+          if(en){const r=en.i.getBoundingClientRect(),rechts=r.right;let bis=T.getBoundingClientRect().right;
+            tr.querySelectorAll("i[data-bid],.knW").forEach(x=>{if(x.dataset.bid===el.dataset.bid)return;const q=x.getBoundingClientRect();if(q.left>=rechts-1&&q.left<bis&&Math.abs(q.top-r.top)<20)bis=q.left});
+            const raum=bis-rechts-12,zeit=en.sichtbar?" bis "+uz(b.bisU):"";
+            const c=[[n0,zeit],[n0,""],[vorn(n0),""]].find(([x,y])=>breite(x,400,fam)+breite(y,400,fam)<=raum);
+            if(c){const td=en.i.parentNode,s=document.createElement("span");s.className="knAussen";s.setAttribute("data-nxzusatz","");
+              s.innerHTML=e2(c[0])+(c[1]?"<em>"+e2(c[1])+"</em>":"");const sp0=en.i.style.getPropertyValue("--sp");if(sp0!=="")s.style.setProperty("--sp",sp0);
+              s.style.left=(rechts-td.getBoundingClientRect().left+6).toFixed(0)+"px";td.appendChild(s);aus=c}}
+          if(!aus)wahl=vorn(n0)}}
+      el.setAttribute("data-kn",aus?"":wahl)});
+    jetzt()}
+  function jetzt(){const th=T&&T.querySelector("th.tag.heute");let j=RO&&RO.querySelector(":scope>.knJetzt");
+    if(!th){if(j)j.remove();return}
+    if(!j){j=document.createElement("div");j.className="knJetzt";j.setAttribute("data-nxzusatz","");RO.appendChild(j)}
+    const n=new Date(),f=(n.getHours()*60+n.getMinutes())/1440,oben=T.offsetTop+th.offsetTop+th.offsetHeight;
+    j.style.left=(T.offsetLeft+th.offsetLeft+f*th.offsetWidth).toFixed(1)+"px";j.style.top=oben+"px";j.style.height=Math.max(0,T.offsetTop+T.offsetHeight-oben)+"px"}
+  if(T&&RO){const o=new MutationObserver(sicher(schmuck));o.observe(T,{childList:true});beob.push(o);
+    const iv=setInterval(sicher(jetzt),60000);undo.push(()=>{clearInterval(iv);if(typeof zeichneTafel==="function")zeichneTafel()});
+    T.addEventListener("click",e=>{if(aus||!H.classList.contains("knNeu"))return;const w=e.target&&e.target.closest?e.target.closest(".knW"):null;if(!w)return;
+      e.stopPropagation();e.preventDefault();location.href=A0+"?buchung="+encodeURIComponent(w.dataset.wid)},true);   // wartende Anfrage: Buchung öffnen
+    schmuck();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(sicher(schmuck))}
+  // Zeitraum: Bezeichnung über der Karte mit Schnellwahl, Von und Bis; darunter die Tageslisten
+  dazu($k("werZeit"),"beforebegin",'<div class="knKopf" data-nxzusatz>Zeitraum</div>');
+  const tageBox=dazu($k("werZeit"),"afterend",'<div id="knTage" data-nxzusatz></div>');
+  // Frei im Zeitraum: Bezeichnung mit Zahl über der Liste
+  const kopfF=dazu($k("freiKopf"),"beforebegin",'<div class="knKopf knKopfF" data-nxzusatz>Frei im Zeitraum<span class="knZahl" id="knZahlF"></span></div>');
+  // Tageslisten (Vorbild 18.11.2026): für das Von- und das Bis-Datum, wer zurückkommt und wer übergeben wird, nach Uhrzeit, mit Hinweis aus den Daten
+  const PF='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',RK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>',UG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 10l4 4-4 4"/><path d="M19 14H8a4 4 0 0 1 0-8h1"/></svg>';
+  // Offenes Geld: dieselbe Rechnung wie „noch offen“ auf Heute (zentrale/start_neu.py offenB)
+  const zahlW=v=>{if(v==null)return 0;const s=String(v).trim();if(!s)return 0;return parseFloat(s.indexOf(",")>=0?s.replace(/\./g,"").replace(",","."):s.replace(/\.(?=\d{3}(\D|$))/g,""))||0};
+  const verlOffen=x=>(x.verlaengerungen||[]).reduce((s,y)=>s+(!y.bezahlt?(+y.aufpreis||0):Math.max(0,y.gezahlt!=null?(+y.aufpreis||0)-y.gezahlt:0)),0);
+  const offenB=x=>Math.max(0,(!((x.zahlung||{}).rest||{}).am?zahlW(((x.zahlung||{}).rest||{}).betrag):0)+verlOffen(x)-(x.teilzahlungen||[]).filter(t=>t&&!t.verrechnet).reduce((q,t)=>q+(+t.betrag||0),0));
+  const eur=n=>Math.round(+n||0).toLocaleString("de-DE")+" €";
+  // Doppelt verplant: dieselbe Regel wie die Tafel (überfällig endet beim Beginn der nächsten Miete, zwei vergangene zählen nicht)
+  function streit(){const s=new Set(),h=nachISO(heute),jd=new Date(),jz=h+"T"+String(jd.getHours()).padStart(2,"0")+":"+String(jd.getMinutes()).padStart(2,"0");
+    (D.cars||[]).forEach(c=>{const eig=BUCHUNGEN.filter(b=>b.fahrzeug===c.n);
+      const zb=eig.map(b=>{if(!b.ueber)return b;const ab=ZEIT(b.bisPlan,b.bisUPlan),nx=eig.filter(x=>x!==b&&!x.vorbei&&ZEIT(x.von,x.vonU)>ab).sort((x,y)=>ZEIT(x.von,x.vonU)<ZEIT(y.von,y.vonU)?-1:1)[0];
+        if(!nx)return b;return ZEIT(nx.von,nx.vonU)>jz?Object.assign({},b,{bis:nx.von,bisU:nx.vonU||"10:00"}):Object.assign({},b,{bis:h,bisU:"23:59"})});
+      const iv=b=>[ZEIT(b.von,b.vonU),ZEIT(b.bis,b.bisU)];
+      zb.forEach((x,i)=>zb.forEach((y,j)=>{if(j<=i||(x.vorbei&&y.vorbei))return;const p=iv(x),q=iv(y);if(p[0]<q[1]&&p[1]>q[0]){s.add(x.id);s.add(y.id)}}))});
+    return s}
+  function eintraege(T0){const h=nachISO(heute),st=streit(),V=lsj("mietixVorgaenge",[])||[],out=[];
+    BUCHUNGEN.forEach(b=>{if(b.notiz==="Sperre")return;const v=b.nr?V.find(x=>x&&x.nr===b.nr):null,bp=b.ueber?b.bisPlan:b.bis,bu=b.ueber?b.bisUPlan:b.bisU,dop=st.has(b.id)&&!b.vorbei;
+      if(bp===T0||(b.ueber&&T0===h&&bp<T0)){const s=[];
+        if(b.ueber)s.push(["überfällig seit "+tagNr(bp)+" "+uz(bu),"rot"]);
+        if(dop)s.push(["doppelt verplant","rot"]);
+        const of=v&&!b.vorbei&&v.status!=="zurück"?offenB(v):0;if(of>0)s.push([eur(of)+" noch offen","rot"]);
+        if(b.vorbei)s.push(["schon zurück","grau"]);
+        out.push({art:"r",s:bp+"T"+uz(bu),zt:uz(bu),anders:bp!==T0?wtKurz(ausISO(bp)):"",rot:!!b.ueber,b,st:s})}
+      if(b.von===T0)out.push({art:"u",s:T0+"T"+uz(b.vonU),zt:uz(b.vonU),b,st:dop?[["doppelt verplant","rot"]]:[]})});
+    wartende().forEach(a=>{if(a.von===T0)out.push({art:"u",s:T0+"T"+uz(wU(a,"vonU")),zt:uz(wU(a,"vonU")),w:a,st:[["wartet auf Anzahlung","gelb"]]})});
+    out.sort((x,y)=>x.s<y.s?-1:x.s>y.s?1:x.art===y.art?0:x.art==="r"?-1:1);return out}
+  const zeileT=(x,i)=>{const b=x.b,a=x.w,auto=b?b.fahrzeug:a.auto,name=b?(b.kunde||"Ohne Namen"):(a.name||a.nummer||"Ohne Namen");
+    return '<div class="knTz" role="button" tabindex="0" data-i="'+i+'"><div class="zt'+(x.rot?" rot":"")+'">'+e2(x.zt)+(x.anders?'<small>'+e2(x.anders)+'</small>':'')+'</div>'
+      +'<div class="mi"><div class="t1">'+e2(auto)+'</div><div class="su">'+(x.art==="r"?RK+"Rückgabe, ":UG+"Übergabe, ")+e2(name)+'</div>'
+      +(x.st.length?'<div class="st '+x.st[0][1]+'">'+e2(x.st.map(y=>y[0]).join(", "))+'</div>':'')+'</div>'+PF+'</div>'};
+  const kopfT=(wort,T0,l)=>{const r=l.filter(x=>x.art==="r").length,u=l.length-r,h=nachISO(heute),m=nachISO(plusTage(heute,1));
+    const z=!l.length?"nichts geplant":(r?r+" zurück":"keine Rückgabe")+", "+(u?u+(u===1?" Übergabe":" Übergaben"):"keine Übergabe");
+    return '<div class="knKopf knTk">'+(wort?'<span>'+wort+'</span>':'')+'<b>'+e2(tagNr(T0))+(T0===h?", heute":T0===m?", morgen":"")+'</b><span class="re">'+z+'</span></div>'};
+  let tageHtml=null,tageL=[];
+  function tageZeichnen(){if(typeof BUCHUNGEN==="undefined"||!tageBox)return;const v=$k("von").value,bi=$k("bis").value;let html="";const alle=[];
+    if(v&&bi&&bi>=v){(v===bi?[["",v]]:[["Von",v],["Bis",bi]]).forEach(([w,T0])=>{const l=eintraege(T0),o=alle.length;l.forEach(x=>{x.T=T0;alle.push(x)});
+        html+=kopfT(w,T0,l)+(l.length?'<div class="knKarte knTl">'+l.map((x,j)=>zeileT(x,o+j)).join("")+'</div>':'<p class="knTleer">An diesem Tag kommt kein Auto zurück und keins wird übergeben.</p>')});
+      if(alle.length)html+='<p class="knHinw">Zeile antippen öffnet die Buchung.</p>'}
+    tageL=alle;if(html!==tageHtml){tageHtml=html;tageBox.innerHTML=html}}
+  // Tipp auf eine Zeile öffnet die Buchung wie ein Tipp auf ihren Balken (dasselbe Blatt der Seite)
+  const tageOeffnen=sicher(e=>{const r=e.target&&e.target.closest?e.target.closest(".knTz"):null;if(!r)return;const x=tageL[+r.dataset.i];if(!x)return;
+    if(x.w){location.href=A0+"?buchung="+encodeURIComponent(x.w.id);return}
+    zelle(x.b.fahrzeug,x.art==="u"?x.b.von:x.T,x.b.id,true)});
+  tageBox.addEventListener("click",tageOeffnen);
+  tageBox.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tageOeffnen(e)}});
+  ["von","bis","vonU","bisU"].forEach(id=>{const f=$k(id);if(f){f.addEventListener("change",sicher(tageZeichnen));f.addEventListener("input",sicher(tageZeichnen))}});
   const fl=$k("freiListe");
   const kopf=(t,n,art)=>'<div class="knKopf '+art+'" data-nxzusatz>'+t+'<span class="knZahl">'+n+'</span></div>';
   // Die Liste zeichnet die Seite bei jeder Änderung neu (innerHTML). Danach ordnet die Schicht dieselben Zeilen in drei Bereiche, ohne sie zu ändern.
@@ -2567,7 +2750,7 @@ try{
     gr("F","",F,!F.length&&zl.length?'<p class="knLeer" data-nxzusatz>In dieser Zeit ist kein Auto frei.</p>':"");
     if(U.length)gr("U",kopf("Noch nicht zurück",U.length,"rot"),U,'<p class="knHinw" data-nxzusatz>Zählt nicht als frei. „Buchen“ fragt vorher nach: Das Auto ist noch nicht zurück.</p>');
     if(B.length)gr("B",kopf("Belegt in dieser Zeit",B.length,""),B);
-    $k("knZahlF").textContent=zl.length?String(F.length):""};
+    $k("knZahlF").textContent=zl.length?String(F.length):"";tageZeichnen()};
   undo.push(()=>{fl.querySelectorAll(":scope>.knGr").forEach(g=>{g.querySelectorAll(".fZeile").forEach(z=>fl.insertBefore(z,g));g.remove()});
     if(typeof freiListe==="function")freiListe()});   // die Seite zeichnet ihre Liste neu: Reihenfolge exakt wie ohne Schicht
   ordnen();
